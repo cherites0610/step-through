@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+/* 設計代幣：見 DESIGN.md（圖版 The Plate Section） */
+@theme {
+  --color-paper: #f5f4f6;
+  --color-paper-warm: #faf6f5;
+  --color-paper-green: #eef3ef;
+  --color-ink: #16181a;
+  --color-hairline: #c9c7c4;
+  --color-stamp: #dcddf3;
+  --font-sans: 'Noto Sans TC', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+  body {
+    font-weight: 400;
+    line-height: 1.65;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
