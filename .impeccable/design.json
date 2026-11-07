@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T21:20:00+08:00",
+  "title": "Design System: 步步看懂",
+  "extensions": {
+    "colorMeta": {
+      "plate-paper": {
+        "role": "neutral",
+        "displayName": "圖版近白",
+        "canonical": "#F5F4F6",
+        "tonalRamp": ["#16181A", "#3A3C3F", "#66686B", "#939497", "#C9C7C4", "#E3E2E4", "#F5F4F6", "#FBFAFB"]
+      },
+      "warm-edge-paper": {
+        "role": "neutral",
+        "displayName": "暖邊近白（尚未套用）",
+        "canonical": "#FAF6F5",
+        "tonalRamp": ["#3A3230", "#6B5F5C", "#9A8E8B", "#C9C0BE", "#E4DEDC", "#F2EDEB", "#FAF6F5", "#FDFBFA"]
+      },
+      "green-edge-paper": {
+        "role": "neutral",
+        "displayName": "綠邊近白（尚未套用）",
+        "canonical": "#EEF3EF",
+        "tonalRamp": ["#2A332D", "#55625A", "#85928A", "#B3BFB7", "#D3DCD6", "#E3EAE5", "#EEF3EF", "#F8FBF9"]
+      },
+      "plate-ink": {
+        "role": "neutral",
+        "displayName": "墨色",
+        "canonical": "#16181A",
+        "tonalRamp": ["#0B0C0D", "#16181A", "#2B2E31", "#45484C", "#62666A", "#85898D", "#AAADB0", "#D0D2D4"]
+      },
+      "hairline-grey": {
+        "role": "neutral",
+        "displayName": "髮絲灰",
+        "canonical": "#C9C7C4",
+        "tonalRamp": ["#5A5957", "#716F6D", "#898785", "#A3A19E", "#C9C7C4", "#D9D7D5", "#E8E7E5", "#F4F3F2"]
+      },
+      "cycle-periwinkle": {
+        "role": "primary",
+        "displayName": "印章週期藍紫",
+        "canonical": "#DCDDF3",
+        "tonalRamp": ["#2E3057", "#4A4D84", "#6B6FAE", "#9094CC", "#B5B8E3", "#DCDDF3", "#EBECF8", "#F6F6FC"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "首頁標題（36px 手機／56px 桌機）；主題頁標題為 44px。" },
+      "headline": { "displayName": "Headline", "purpose": "首頁區塊標題，如「主題目錄」。" },
+      "title": { "displayName": "Title", "purpose": "次要區塊標題與 MDX 二級標題。" },
+      "body": { "displayName": "Body", "purpose": "導言與每步白話說明，行寬 65 字元內。" },
+      "ui": { "displayName": "UI", "purpose": "介面文字與註腳。" },
+      "data": { "displayName": "Data", "purpose": "舞台數值與計數面板，等寬、tabular-nums。" },
+      "label": { "displayName": "Label", "purpose": "計數器與欄位、章節標籤；不放在標題上方。" },
+      "code": { "displayName": "Code", "purpose": "偽代碼與等寬按鈕文字。" }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "reduced-motion",
+        "value": "animation-duration: 0.01ms; transition-duration: 0.01ms",
+        "purpose": "prefers-reduced-motion 時停用所有過場；目前整站沒有裝飾性動畫，步驟切換為瞬間換格。"
+      }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "首頁的主要行動；畫面上只有一個實心主要控制。",
+      "html": "<a class=\"ds-btn-primary\" href=\"#index\">瀏覽主題目錄</a>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; background: #16181A; color: #F5F4F6; border: 1px solid #16181A; border-radius: 0; font: 400 15px 'Noto Sans TC', system-ui, sans-serif; text-decoration: none; } .ds-btn-primary:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Control Button",
+      "kind": "button",
+      "refersTo": "button-control",
+      "description": "播放器的上一步／下一步；停用時框與字轉髮絲灰並加劃線。",
+      "html": "<div style=\"display:flex;gap:8px\"><button class=\"ds-btn-control\">← 上一步</button><button class=\"ds-btn-control\" disabled>下一步 →</button></div>",
+      "css": ".ds-btn-control { height: 36px; padding: 0 12px; background: #F5F4F6; color: #16181A; border: 1px solid #16181A; border-radius: 0; font: 400 13px 'JetBrains Mono', ui-monospace, monospace; } .ds-btn-control:disabled { border-color: #C9C7C4; color: #C9C7C4; text-decoration: line-through; } .ds-btn-control:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Preset Chip",
+      "kind": "chip",
+      "refersTo": "chip-preset",
+      "description": "隨機／最佳情況／最差情況；立即動作，沒有選取態。",
+      "html": "<button class=\"ds-chip\">最差情況</button>",
+      "css": ".ds-chip { height: 36px; padding: 0 12px; background: #F5F4F6; color: #16181A; border: 1px solid #C9C7C4; border-radius: 0; font: 400 13px 'Noto Sans TC', system-ui, sans-serif; } .ds-chip:hover { border-color: #16181A; } .ds-chip:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Array Input",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "自訂陣列輸入，錯誤時以 ✕ 訊息顯示且不改動目前資料。",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">自訂陣列</span><input class=\"ds-input\" value=\"5, 2, 4, 6, 1, 3\" /></label>",
+      "css": ".ds-field { display: grid; gap: 4px; } .ds-field-label { font: 400 11px 'JetBrains Mono', ui-monospace, monospace; letter-spacing: 0.14em; text-transform: uppercase; color: #16181A; } .ds-input { height: 36px; padding: 0 12px; background: #F5F4F6; color: #16181A; border: 1px solid #16181A; border-radius: 0; font: 400 15px 'JetBrains Mono', ui-monospace, monospace; } .ds-input:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
+    },
+    {
+      "name": "Chapter Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item-current",
+      "description": "主題頁左側章節欄；目前項目為藍紫底加 1px 墨色外框。",
+      "html": "<ul class=\"ds-nav\"><li><a class=\"ds-nav-item\" aria-current=\"page\" href=\"#\">插入排序</a></li><li><a class=\"ds-nav-item\" href=\"#\">氣泡排序</a></li></ul>",
+      "css": ".ds-nav { list-style: none; margin: 0; padding: 0; width: 200px; } .ds-nav-item { display: block; padding: 6px 8px; font: 400 15px 'Noto Sans TC', system-ui, sans-serif; color: #16181A; text-decoration: none; } .ds-nav-item[aria-current='page'] { background: #DCDDF3; outline: 1px solid #16181A; }"
+    },
+    {
+      "name": "Roadmap Row",
+      "kind": "custom",
+      "refersTo": "roadmap-row-live-hover",
+      "description": "首頁主題目錄：已上線＝實心方框＋連結；即將推出＝虛線方框＋非連結，文字維持墨色。",
+      "html": "<ul class=\"ds-roadmap\"><li><a class=\"ds-row ds-row-live\" href=\"#\"><svg width=\"10\" height=\"10\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><rect width=\"10\" height=\"10\" fill=\"currentColor\"/></svg><span>插入排序</span></a></li><li><div class=\"ds-row ds-row-soon\"><svg width=\"10\" height=\"10\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><rect x=\"0.5\" y=\"0.5\" width=\"9\" height=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-dasharray=\"2 2\"/></svg><span>合併排序</span></div></li></ul>",
+      "css": ".ds-roadmap { list-style: none; margin: 0; padding: 0; width: 260px; } .ds-row { display: flex; align-items: center; gap: 12px; padding: 10px 8px; font: 400 17px 'Noto Sans TC', system-ui, sans-serif; color: #16181A; text-decoration: none; } .ds-row-live:hover { background: #DCDDF3; outline: 1px solid #16181A; } .ds-row-soon { opacity: 0.7; }"
+    },
+    {
+      "name": "Stage Plate",
+      "kind": "custom",
+      "refersTo": "stage",
+      "description": "招牌元件：網點底、四角套準十字；目前元素反白為實心墨色，已完成為藍紫底加細框，空位為虛線框。",
+      "html": "<div class=\"ds-plate\"><span class=\"ds-reg ds-tl\"></span><span class=\"ds-reg ds-tr\"></span><span class=\"ds-reg ds-bl\"></span><span class=\"ds-reg ds-br\"></span><div class=\"ds-cells\"><div class=\"ds-cell ds-done\">2</div><div class=\"ds-cell ds-hole\"></div><div class=\"ds-cell ds-now\">5</div><div class=\"ds-cell\">6</div></div></div>",
+      "css": ".ds-plate { position: relative; width: 360px; padding: 32px 16px; border: 1px solid #C9C7C4; background: #F5F4F6 radial-gradient(#C9C7C4 1px, transparent 1px) 0 0 / 16px 16px; } .ds-reg { position: absolute; width: 11px; height: 11px; background: linear-gradient(#16181A,#16181A) center / 100% 1px no-repeat, linear-gradient(#16181A,#16181A) center / 1px 100% no-repeat; } .ds-tl { top: 4px; left: 4px; } .ds-tr { top: 4px; right: 4px; } .ds-bl { bottom: 4px; left: 4px; } .ds-br { bottom: 4px; right: 4px; } .ds-cells { display: flex; gap: 12px; } .ds-cell { width: 64px; height: 64px; display: grid; place-items: center; border: 1px solid #C9C7C4; font: 500 26px 'JetBrains Mono', ui-monospace, monospace; color: #16181A; } .ds-done { background: #DCDDF3; border-color: #16181A; } .ds-now { background: #16181A; border-color: #16181A; color: #F5F4F6; } .ds-hole { border-style: dashed; }"
+    },
+    {
+      "name": "Stats Row",
+      "kind": "custom",
+      "refersTo": "stats",
+      "description": "計數面板：髮絲線表格，11px 等寬標籤加 28px 等寬數字。",
+      "html": "<dl class=\"ds-stats\"><div><dt>比較次數</dt><dd>2</dd></div><div><dt>位移次數</dt><dd>2</dd></div></dl>",
+      "css": ".ds-stats { display: grid; grid-template-columns: 1fr 1fr; width: 320px; margin: 0; border-top: 1px solid #C9C7C4; border-bottom: 1px solid #C9C7C4; } .ds-stats > div { padding: 12px 16px; border-right: 1px solid #C9C7C4; } .ds-stats > div:last-child { border-right: 0; } .ds-stats dt { font: 400 11px 'JetBrains Mono', ui-monospace, monospace; letter-spacing: 0.14em; text-transform: uppercase; } .ds-stats dd { margin: 0; font: 500 28px 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Pseudocode Line",
+      "kind": "custom",
+      "refersTo": "pseudocode-line-current",
+      "description": "偽代碼；目前行為藍紫底加 1px 墨色外框。",
+      "html": "<ol class=\"ds-code\"><li>while j >= 0 and A[j] > key</li><li class=\"ds-cur\">  A[j + 1] = A[j]</li><li>  j = j - 1</li></ol>",
+      "css": ".ds-code { list-style: none; margin: 0; padding: 0; font: 400 13px/1.9 'JetBrains Mono', ui-monospace, monospace; color: #16181A; } .ds-code li { padding: 0 8px; white-space: pre; } .ds-code .ds-cur { background: #DCDDF3; outline: 1px solid #16181A; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Plate Section",
+    "overview": "整個產品像設計年鑑裡的一頁圖版：紙面近白但不中性，讓墨色讀起來是「印出來的」而不是「渲染出來的」。除了資料本身，其餘都是套準記號、髮絲線與網點。演算法或資料結構是唯一的主角，介面退到它後面。",
+    "keyCharacteristics": [
+      "單一冷白紙面；不用漸層（網點背景除外）、陰影、發光。",
+      "一個很淡的週期藍紫作為「選取／已完成／目前行」，其餘全靠墨色與髮絲線。",
+      "招牌動作：舞台是一張被套準的圖版，四角有十字記號，底下鋪網點；正在動的元素反白成實心墨色。",
+      "狀態一律「顏色＋記號」，不只靠顏色。",
+      "兩種版面：主題頁是標準工具外殼；首頁是一張目錄圖版（路線圖）。"
+    ],
+    "rules": [
+      { "name": "The Never-Pure Rule", "body": "沒有 #000 與 #FFF；墨與紙都帶一點色相。（投影模式例外。）", "section": "colors" },
+      { "name": "The One Voice Rule", "body": "週期藍紫是全站唯一強調色，佔單一畫面面積不超過 15%；其稀有性就是重點。", "section": "colors" },
+      { "name": "The Mark-Not-Hue Rule", "body": "狀態不能只靠顏色：目前＝實心墨色、已完成＝藍紫底＋細框、操作停用＝髮絲灰＋劃線、尚未上線＝虛線方框＋螢幕閱讀器文字、已上線＝實心方框、焦點＝2px 墨色外框。", "section": "colors" },
+      { "name": "The Hairline-Is-Not-Text Rule", "body": "髮絲灰只畫線，不寫字；需要降低存在感的文字用墨色加透明度，仍須達到 4.5:1。", "section": "colors" },
+      { "name": "The Tabular Rule", "body": "所有計數、索引、時間軸數字一律等寬、對齊；數字跳動時版面不得位移。", "section": "typography" },
+      { "name": "The Two-Weights Rule", "body": "只用 400 與 500；階層靠尺寸、字體族與大小寫，不靠粗體。", "section": "typography" },
+      { "name": "The Straight-Quote Rule", "body": "英文文案使用直引號與直撇號；彎引號會落到 CJK 字體而產生異常字距。", "section": "typography" },
+      { "name": "The Flat-Paper Rule", "body": "紙面不會浮起來。互動回饋用反白、外框或記號表達，不用位移或陰影。", "section": "elevation" }
+    ],
+    "dos": [
+      "Do 讓資料與正在動的元素成為畫面上唯一有重量的東西：目前元素實心墨色，其餘空心或髮絲線。",
+      "Do 所有狀態同時用記號與顏色表達（實心／虛線方框、劃線、外框）。",
+      "Do 所有計數、索引、時間軸數字使用等寬字與 tabular-nums。",
+      "Do 讓首屏為靜態 HTML；互動元件按需載入（首頁零 JS）。",
+      "Do 在舞台標本與文案中使用真實的演算法軌跡與數字，不使用示意性的假資料。",
+      "Do 為瀏覽器預設樣式帶入設計：選取色為藍紫底墨色字、accent-color 為墨色、捲軸為髮絲灰、prefers-reduced-motion 時停用過場。"
+    ],
+    "donts": [
+      "Don't 使用陰影、模糊、發光、漸層文字或圓角卡片；紙面不會浮起來。",
+      "Don't 在標題上方加小標籤（eyebrow）；標題自己承載重量。",
+      "Don't 用髮絲灰寫需要閱讀的文字，也不要用 ●○ 這類字元充當狀態圖示；狀態記號是繪製的 SVG 方框。",
+      "Don't 引入第二個強調色，或讓藍紫佔畫面超過 15%、或用作文字色。",
+      "Don't 使用粗體（700）或斜體；階層靠尺寸、字體族與大小寫。",
+      "Don't 使用純黑 #000 與純白 #FFF（投影模式除外）。",
+      "Don't 用相同尺寸的圖示加標題加內文卡片排成頁面結構；用髮絲線分欄的列表與表格。"
+    ]
+  }
+}
