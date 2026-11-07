@@ -41,3 +41,30 @@ test('首頁有 WebSite 結構化資料', async ({ page }) => {
     .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? '{}')['@type']));
   expect(types).toEqual(['WebSite']);
 });
+
+test('頂列標籤：章節名加章內序號，且序號與首頁目錄順序一致', async ({ page }) => {
+  const expected: Record<string, string> = {
+    'insertion-sort': '排序 · 01',
+    'bubble-sort': '排序 · 02',
+    'selection-sort': '排序 · 03',
+  };
+  await page.setViewportSize({ width: 1280, height: 800 });
+
+  // 首頁目錄的實際順序
+  await page.goto('/zh-TW/');
+  const hrefs = await page.locator('#index a[href*="-sort/"]').evaluateAll((els) =>
+    els.map((e) => (e as HTMLAnchorElement).getAttribute('href')!.split('/').filter(Boolean).pop()!),
+  );
+  expect(hrefs).toEqual(['insertion-sort', 'bubble-sort', 'selection-sort']);
+  await expect(page.getByText('Plate 00')).toHaveCount(0);
+
+  for (const [i, slug] of hrefs.entries()) {
+    await page.goto(`/zh-TW/${slug}/`);
+    await expect(page.locator('header')).toContainText(expected[slug]);
+    // 序號 = 目錄中的位置
+    expect(expected[slug]).toBe(`排序 · ${String(i + 1).padStart(2, '0')}`);
+  }
+
+  await page.goto('/en/bubble-sort/');
+  await expect(page.locator('header')).toContainText('Sorting · 02');
+});

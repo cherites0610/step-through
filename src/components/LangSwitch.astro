@@ -37,3 +37,14 @@ const name: Record<Locale, string> = { 'zh-TW': '繁體中文', en: 'English' };
       ))
   }
 </nav>
+
+<script>
+  // 記住使用者明確選過的語言，根路徑 `/` 之後會依它跳轉
+  document.querySelectorAll<HTMLAnchorElement>('nav[aria-label="Language"] a[hreflang]').forEach((a) =>
+    a.addEventListener('click', () => {
+      try {
+        localStorage.setItem('step-through:lang', a.hreflang);
+      } catch {}
+    }),
+  );
+</script>

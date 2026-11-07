@@ -5,6 +5,7 @@ import LangSwitch from '../../components/LangSwitch.astro';
 import ProjectionToggle from '../../components/ProjectionToggle.astro';
 import SortViz from '../../components/viz/sorting/SortViz.svelte';
 import { t, type Locale } from '../../i18n';
+import { locateTopic, topicOrder } from '../../i18n/roadmap';
 
 export async function getStaticPaths() {
   const all = await getCollection('topics');
@@ -20,9 +21,15 @@ const text = t(lang);
 const d = entry.data;
 const { Content } = await render(entry);
 
+// 章節與序號都以路線圖為唯一來源；主題沒登記在路線圖時在建置階段就報錯
+const loc = locateTopic(d.topic);
+if (!loc) throw new Error(`主題 "${d.topic}" 沒有登記在 src/i18n/roadmap.ts`);
+const { chapter, index } = loc;
+const plateLabel = `${chapter.title[lang]} · ${String(index).padStart(2, '0')}`;
+
 const siblings = (await getCollection('topics'))
-  .filter((e) => e.data.lang === lang)
-  .sort((a, b) => a.data.order - b.data.order);
+  .filter((e) => e.data.lang === lang && locateTopic(e.data.topic)?.chapter.id === chapter.id)
+  .sort((a, b) => topicOrder.indexOf(a.data.topic) - topicOrder.indexOf(b.data.topic));
 const alternates = (await getCollection('topics'))
   .filter((e) => e.data.topic === d.topic)
   .map((e) => e.data.lang);
@@ -72,7 +79,7 @@ const rows: [string, string][] = [
   <header class="flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6">
     <a href={`/${lang}/`} class="shrink-0 font-medium">{text.siteName}</a>
     <span class="hidden font-mono text-[11px] uppercase tracking-[0.14em] md:inline"
-      >Plate {String(d.order).padStart(2, '0')}</span
+      >{plateLabel}</span
     >
     <span class="hidden text-[15px] md:inline">{d.title}</span>
     <div class="ml-auto flex shrink-0 items-center gap-2 md:gap-4">
@@ -86,7 +93,7 @@ const rows: [string, string][] = [
       class="chapter-rail border-b border-hairline px-4 py-4 md:border-b-0 md:border-r"
       aria-label={text.topics}
     >
-      <p class="mb-2 font-mono text-[11px] uppercase tracking-[0.14em]">{text.sorting}</p>
+      <p class="mb-2 font-mono text-[11px] uppercase tracking-[0.14em]">{chapter.title[lang]}</p>
       <ul class="flex gap-4 overflow-x-auto md:flex-col md:gap-0">
         {
           siblings.map((s) => (

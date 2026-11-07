@@ -10,7 +10,6 @@ const topics = defineCollection({
     /** 對應的視覺化元件 */
     kind: z.enum(['sorting']),
     algo: z.enum(['insertion', 'bubble', 'selection']),
-    order: z.number(),
     title: z.string(),
     /** 英文原文，首次出現時附上利於搜尋 */
     titleEn: z.string(),
