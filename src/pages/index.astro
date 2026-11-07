@@ -1,3 +1,46 @@
 ---
-return Astro.redirect('/zh-TW/');
+// 根路徑只負責把人送到對的語系：不顯示任何文字，腳本在 <head> 內同步執行，
+// 瀏覽器還沒繪製第一個畫面就已經跳轉。沒有 JS 時退回 meta refresh 與一個連結。
+const site = Astro.site!;
+const zh = new URL('/zh-TW/', site).href;
+const en = new URL('/en/', site).href;
 ---
+
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>步步看懂 Step Through</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={zh} />
+    <link rel="alternate" hreflang="zh-TW" href={zh} />
+    <link rel="alternate" hreflang="en" href={en} />
+    <link rel="alternate" hreflang="x-default" href={zh} />
+    <style is:inline>
+      html {
+        background: #f5f4f6;
+      }
+    </style>
+    <script is:inline>
+      (function () {
+        var to = 'zh-TW';
+        try {
+          var saved = localStorage.getItem('step-through:lang');
+          if (saved === 'en' || saved === 'zh-TW') to = saved;
+          else {
+            var l = (navigator.languages && navigator.languages[0]) || navigator.language || '';
+            if (/^en/i.test(l)) to = 'en';
+          }
+        } catch (e) {}
+        location.replace('/' + to + '/' + location.search + location.hash);
+      })();
+    </script>
+    <noscript><meta http-equiv="refresh" content="0;url=/zh-TW/" /></noscript>
+  </head>
+  <body>
+    <noscript>
+      <p><a href="/zh-TW/">繁體中文</a> · <a href="/en/">English</a></p>
+    </noscript>
+  </body>
+</html>
