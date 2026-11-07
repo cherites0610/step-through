@@ -6,16 +6,18 @@ interface Props {
 }
 const { lang } = Astro.props;
 const label = t(lang).projection;
+const short = t(lang).projectionShort;
 ---
 
 <!-- 純 HTML + 十幾行 vanilla JS，不需要載入框架 -->
 <button
   type="button"
-  class="projection-toggle h-9 border border-hairline px-3 font-mono text-[13px] hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-paper"
+  class="projection-toggle h-9 whitespace-nowrap border border-hairline px-2 font-mono md:px-3 text-[13px] hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-paper"
   aria-pressed="false"
-  data-label={label}
+  aria-label={label}
 >
-  {label}
+  <span class="hidden min-[400px]:inline">{label}</span>
+  <span class="min-[400px]:hidden">{short}</span>
 </button>
 
 <script>

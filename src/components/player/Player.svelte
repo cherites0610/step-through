@@ -71,7 +71,7 @@
   </div>
 
   <div
-    class="sticky bottom-0 z-10 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-hairline bg-paper px-4 py-3 md:h-[72px] md:flex-nowrap"
+    class="sticky bottom-0 z-10 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-hairline bg-paper px-4 py-3 lg:h-[72px] lg:flex-nowrap"
     role="group"
     aria-label="player"
   >
@@ -94,7 +94,7 @@
       </button>
     </div>
 
-    <label class="flex min-w-40 flex-1 items-center gap-3 max-md:order-last max-md:basis-full">
+    <label class="flex min-w-40 flex-1 items-center gap-3 max-lg:order-last max-lg:basis-full">
       <span class="font-mono text-[11px] uppercase tracking-[0.14em] tabular-nums whitespace-nowrap">
         {labels.step}
         {String(snap.index + 1).padStart(2, '0')} / {String(snap.length).padStart(2, '0')}
