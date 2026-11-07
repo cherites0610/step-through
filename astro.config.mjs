@@ -5,8 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  // TODO(部署)：換成 Cloudflare Pages 的正式網域
-  site: 'https://step-through.pages.dev',
+  site: 'https://step-through.cherites.org',
   integrations: [svelte(), mdx(), sitemap()],
   i18n: {
     defaultLocale: 'zh-TW',

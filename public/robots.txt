@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://step-through.pages.dev/sitemap-index.xml
+Sitemap: https://step-through.cherites.org/sitemap-index.xml
