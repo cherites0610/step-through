@@ -51,3 +51,15 @@
   .prose-plate li { margin-top: 0.4rem; font-size: 16px; line-height: 1.7; }
   .prose-plate strong { font-weight: 500; }
 }
+
+/* 瀏覽器預設樣式也要帶設計：選取、控制項強調色、捲軸 */
+@layer base {
+  ::selection {
+    background: var(--color-stamp);
+    color: var(--color-ink);
+  }
+  html {
+    accent-color: var(--color-ink);
+    scrollbar-color: var(--color-hairline) var(--color-paper);
+  }
+}

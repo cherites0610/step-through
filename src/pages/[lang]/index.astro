@@ -1,7 +1,11 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { locales, t, type Locale } from '../../i18n';
+import LangSwitch from '../../components/LangSwitch.astro';
+import ArrayView from '../../components/viz/sorting/ArrayView.svelte';
+import { insertionSort } from '../../core/sorting/insertion';
+import { explain, locales, t, type Locale } from '../../i18n';
+import { roadmap } from '../../i18n/roadmap';
 
 export function getStaticPaths() {
   return locales.map((lang) => ({ params: { lang } }));
@@ -9,38 +13,194 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as Locale;
 const text = t(lang);
-const topics = (await getCollection('topics'))
-  .filter((e) => e.data.lang === lang)
-  .sort((a, b) => a.data.order - b.data.order);
+const h = text.home;
+
+// 已上線的主題：以 content collection 為準
+const live = new Set(
+  (await getCollection('topics')).filter((e) => e.data.lang === lang).map((e) => e.data.topic),
+);
+
+// 首屏標本：插入排序真實軌跡中的一格（靜態輸出，不載入任何 JS）
+const example = [5, 2, 4, 6, 1, 3];
+const trace = insertionSort(example);
+const SPECIMEN = 6;
+const step = trace[SPECIMEN];
+const fill = (s: string) =>
+  s.replace('{step}', String(SPECIMEN + 1)).replace('{total}', String(trace.length));
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: text.siteName,
+    url: new URL(`/${lang}/`, Astro.site).href,
+    description: text.description,
+    inLanguage: lang,
+  },
+];
 ---
 
-<Base lang={lang} title={`${text.siteName}｜${text.tagline}`}>
-  <main class="mx-auto max-w-3xl px-6 py-16">
-    <p class="font-mono text-[11px] uppercase tracking-[0.14em]">Plate 00</p>
-    <h1 class="text-[44px] leading-[1.1] tracking-[-0.02em]">{text.siteName}</h1>
-    <p class="mt-4 max-w-[65ch]">{text.description}</p>
+<Base lang={lang} title={`${text.siteName}｜${text.tagline}`} jsonLd={jsonLd}>
+  <header class="flex h-14 items-center gap-6 border-b border-hairline px-4 lg:px-10">
+    <a href={`/${lang}/`} class="font-medium">{text.siteName}</a>
+    <span class="font-mono text-[11px] uppercase tracking-[0.14em]">Plate 00</span>
+    <div class="ml-auto"><LangSwitch lang={lang} /></div>
+  </header>
 
-    <h2 class="mt-12 font-mono text-[11px] uppercase tracking-[0.14em]">
-      {text.home.topicsHeading}
-    </h2>
-    {
-      topics.length === 0 ? (
-        <p class="mt-3">{text.home.empty}</p>
-      ) : (
-        <ul class="mt-3 border-t border-hairline">
-          {topics.map((s) => (
-            <li class="border-b border-hairline">
-              <a href={`/${lang}/${s.data.topic}/`} class="flex items-baseline gap-4 py-3 hover:bg-stamp">
-                <span class="font-mono text-[11px] uppercase tracking-[0.14em]">
-                  Plate {String(s.data.order).padStart(2, '0')}
-                </span>
-                <span class="text-[17px]">{s.data.title}</span>
-                <span class="font-mono text-[13px]">{s.data.titleEn}</span>
+  <main>
+    <section class="mx-auto grid max-w-[1280px] gap-12 px-4 py-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:items-center lg:gap-16 lg:px-10 lg:py-20">
+      <div>
+        <h1 class="text-balance text-[36px] leading-[1.15] tracking-[-0.02em] md:text-[56px] md:leading-[1.1]">
+          {h.headline.map((line) => <span class="block">{line}</span>)}
+        </h1>
+        <p class="mt-6 max-w-[34em] text-[17px] leading-[1.7]">{h.lead}</p>
+        <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
+          <a
+            href="#index"
+            class="inline-flex h-11 items-center border border-ink bg-ink px-5 text-[15px] text-paper"
+          >
+            {h.browse}
+          </a>
+          {
+            live.has('insertion-sort') && (
+              <a
+                href={`/${lang}/insertion-sort/`}
+                class="inline-flex h-11 items-center text-[15px] underline underline-offset-4"
+              >
+                {h.startWith} →
               </a>
-            </li>
-          ))}
-        </ul>
-      )
-    }
+            )
+          }
+        </div>
+      </div>
+
+      <figure class="min-w-0">
+        <div
+          class="relative border border-hairline px-4 py-6"
+          style="background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px); background-size: 16px 16px;"
+        >
+          <span class="reg tl" aria-hidden="true"></span>
+          <span class="reg tr" aria-hidden="true"></span>
+          <span class="reg bl" aria-hidden="true"></span>
+          <span class="reg br" aria-hidden="true"></span>
+          <ArrayView
+            state={step.state}
+            highlight={step.highlight}
+            keyLabel={text.input.key}
+            minLabel={text.input.min}
+            ariaLabel={fill(h.specimenAlt)}
+          />
+        </div>
+        <figcaption class="mt-4 grid gap-2">
+          <span class="font-mono text-[11px] uppercase tracking-[0.14em] tabular-nums">
+            {fill(h.specimenStep)}
+          </span>
+          <span class="max-w-[34em] text-[17px] leading-[1.7]">{explain(lang, step.explain)}</span>
+          <span class="max-w-[34em] text-[15px] leading-[1.7]">{h.specimenNote}</span>
+        </figcaption>
+      </figure>
+    </section>
+
+    <section id="index" class="scroll-mt-4 border-t border-hairline">
+      <div class="mx-auto max-w-[1280px] px-4 pt-12 lg:px-10">
+        <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+          <div>
+            <h2 class="text-[28px] leading-[1.2] tracking-[-0.01em]">{h.indexHeading}</h2>
+            <p class="mt-2 text-[15px]">{h.indexNote}</p>
+          </div>
+          <p class="flex items-center gap-5 font-mono text-[13px]" aria-hidden="true">
+            <span class="inline-flex items-center gap-2">
+              <svg width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" fill="currentColor" /></svg>
+              {h.live}
+            </span>
+            <span class="inline-flex items-center gap-2">
+              <svg width="10" height="10" viewBox="0 0 10 10">
+                <rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-dasharray="2 2" />
+              </svg>
+              {h.soon}
+            </span>
+          </p>
+        </div>
+      </div>
+
+      <div class="mx-auto mt-8 max-w-[1280px] px-4 pb-16 lg:px-10">
+        <div class="grid border-t border-ink lg:grid-cols-4">
+          {
+            roadmap.map((ch) => (
+              <div class="border-b border-hairline py-5 lg:border-b-0 lg:border-r lg:px-5 lg:first:pl-0 lg:last:border-r-0 lg:last:pr-0">
+                <h3 class="font-mono text-[11px] uppercase tracking-[0.14em]">{ch.title[lang]}</h3>
+                <ul class="mt-3">
+                  {ch.items.map((it) => {
+                    const isLive = !!it.topic && live.has(it.topic);
+                    return (
+                      <li>
+                        {isLive ? (
+                          <a
+                            href={`/${lang}/${it.topic}/`}
+                            class="-mx-2 flex items-baseline gap-3 px-2 py-2.5 hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink"
+                          >
+                            <svg class="shrink-0 self-center" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                              <rect width="10" height="10" fill="currentColor" />
+                            </svg>
+                            <span class="text-[17px]">{it.title[lang]}</span>
+                            <span class="sr-only">{h.live}</span>
+                          </a>
+                        ) : (
+                          <div class="-mx-2 flex items-baseline gap-3 px-2 py-2.5 text-ink/70">
+                            <svg class="shrink-0 self-center" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                              <rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-dasharray="2 2" />
+                            </svg>
+                            <span class="text-[17px]">{it.title[lang]}</span>
+                            <span class="sr-only">{h.soon}</span>
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="border-t border-hairline">
+      <div class="mx-auto max-w-[1280px] px-4 py-14 lg:px-10">
+        <h2 class="max-w-[28em] text-[22px] leading-[1.4]">{h.why}</h2>
+        <div class="mt-8 grid border-t border-ink md:grid-cols-3">
+          {
+            h.principles.map((p) => (
+              <div class="border-b border-hairline py-5 md:border-b-0 md:border-r md:px-6 md:first:pl-0 md:last:border-r-0 md:last:pr-0">
+                <h3 class="text-[17px] font-medium">{p.title}</h3>
+                <p class="mt-2 max-w-[28em] text-[15px] leading-[1.7]">{p.body}</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </section>
   </main>
+
+  <footer class="border-t border-hairline">
+    <div class="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-4 py-6 text-[13px] lg:px-10">
+      <p>{h.footer}</p>
+      <LangSwitch lang={lang} />
+    </div>
+  </footer>
 </Base>
+
+<style>
+  .reg {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    background:
+      linear-gradient(var(--color-ink), var(--color-ink)) center / 100% 1px no-repeat,
+      linear-gradient(var(--color-ink), var(--color-ink)) center / 1px 100% no-repeat;
+  }
+  .tl { top: 4px; left: 4px; }
+  .tr { top: 4px; right: 4px; }
+  .bl { bottom: 4px; left: 4px; }
+  .br { bottom: 4px; right: 4px; }
+</style>

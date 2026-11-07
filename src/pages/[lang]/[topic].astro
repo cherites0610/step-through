@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
+import LangSwitch from '../../components/LangSwitch.astro';
 import SortViz from '../../components/viz/sorting/SortViz.svelte';
 import { t, type Locale } from '../../i18n';
 
@@ -73,6 +74,7 @@ const rows: [string, string][] = [
       >Plate {String(d.order).padStart(2, '0')}</span
     >
     <span class="text-[15px]">{d.title}</span>
+    <div class="ml-auto"><LangSwitch lang={lang} path={`${d.topic}/`} available={alternates} /></div>
   </header>
 
   <div class="md:grid md:grid-cols-[220px_1fr]">
