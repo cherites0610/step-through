@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+.output/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Cloudflare
+.wrangler/
+.dev.vars
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Impeccable: keep surface briefs and design.json; ignore scratch and local state
+.impeccable/mocks/
+.impeccable/tmp/
+.impeccable/review/
+.impeccable/build/
+.impeccable/config.local.json
