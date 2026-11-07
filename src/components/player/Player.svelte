@@ -32,6 +32,7 @@
   };
 
   // 使用者換了輸入 → 換一條新軌跡，回到第一步
+  // 這裡讀的是 steps 這個 prop 本身：換資料、換基準會產生新的軌跡，即使長度剛好相同也會回到第一步
   $effect(() => {
     const len = steps.length;
     untrack(() => {
@@ -71,11 +72,11 @@
   </div>
 
   <div
-    class="sticky bottom-0 z-10 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-hairline bg-paper px-4 py-3 lg:h-[72px] lg:flex-nowrap"
+    class="sticky bottom-0 z-10 flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-hairline bg-paper px-4 py-3 max-lg:gap-y-1 lg:h-[72px] lg:flex-nowrap"
     role="group"
     aria-label="player"
   >
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-2 max-lg:basis-full">
       <button class={btn} disabled={snap.atStart} onclick={act(() => ctl.prev())}>
         ← {labels.prev}
       </button>
@@ -94,7 +95,7 @@
       </button>
     </div>
 
-    <label class="flex min-w-40 flex-1 items-center gap-3 max-lg:order-last max-lg:basis-full">
+    <label class="flex min-w-40 flex-1 items-center gap-3 max-lg:order-2 max-lg:min-w-0">
       <span class="font-mono text-[11px] uppercase tracking-[0.14em] tabular-nums whitespace-nowrap">
         {labels.step}
         {String(snap.index + 1).padStart(2, '0')} / {String(snap.length).padStart(2, '0')}
@@ -110,8 +111,8 @@
       />
     </label>
 
-    <label class="flex items-center gap-2 text-[13px]">
-      <span class="font-mono text-[11px] uppercase tracking-[0.14em]">{labels.speed}</span>
+    <label class="flex items-center gap-2 text-[13px] max-lg:order-3">
+      <span class="font-mono text-[11px] uppercase tracking-[0.14em] max-sm:sr-only">{labels.speed}</span>
       <select class="h-9 border border-ink bg-paper px-2 font-mono text-[13px]" bind:value={speed}>
         {#each SPEEDS as s}
           <option value={s}>{s}×</option>

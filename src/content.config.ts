@@ -9,7 +9,7 @@ const topics = defineCollection({
     lang: z.enum(['zh-TW', 'en']),
     /** 對應的視覺化元件 */
     kind: z.enum(['sorting']),
-    algo: z.enum(['insertion', 'bubble', 'selection']),
+    algo: z.enum(['insertion', 'bubble', 'selection', 'merge', 'quick']),
     title: z.string(),
     /** 英文原文，首次出現時附上利於搜尋 */
     titleEn: z.string(),

@@ -1,0 +1,45 @@
+---
+topic: merge-sort
+lang: en
+kind: sorting
+algo: merge
+title: Merge Sort
+titleEn: Merge Sort
+description: Learn merge sort step by step with an interactive visualization — a recursion tree shows every split and merge, with the merge in progress and the call stack, on data you enter yourself.
+example: [38, 27, 43, 3, 9, 82, 10]
+complexity:
+  best: O(n log n)
+  average: O(n log n)
+  worst: O(n log n)
+  space: O(n)
+  stable: true
+faq:
+  - q: Why is merge sort O(n log n) whatever the input looks like?
+    a: It always splits in the middle, giving log n levels, and at each level merging handles every number once, n in total. Sorted or reversed data takes almost the same number of steps.
+  - q: How much extra memory does merge sort need?
+    a: Merging needs temporary room for both halves, so O(n). That is its main trade-off against quick sort - you pay memory for stability and a guaranteed O(n log n).
+  - q: Is merge sort stable?
+    a: Yes. When the two fronts are equal it always takes the left one, so equal elements keep their relative order.
+  - q: When is merge sort a good choice?
+    a: When you need a stable sort, a guaranteed O(n log n) worst case, or data that is awkward to access randomly, such as linked lists or large files on disk.
+---
+
+## What merge sort does
+
+Merge sort is divide and conquer: split a big problem into small ones, solve them, and combine the answers.
+
+1. **Split**: cut the range in the middle into a left and a right half and recurse on each until a single number is left. A single number is always sorted.
+2. **Merge**: combine two sorted halves into one. Repeatedly compare the front numbers of the two halves and take the smaller into the result; when one half runs out, append what is left of the other.
+3. Go back up a level and keep merging until the whole array is merged.
+
+## How to read the picture
+
+- **The recursion tree on top**: one row per level, with columns aligned to the indices of the original array. A dashed box is a range that has been split, a pale blue box is a range that is sorted, and the heavy box is the range being handled now.
+- **The merge area below**: three rows - left half, right half and merged output. Numbers already taken are struck through, the one just taken is solid, and the two front numbers are boxed heavily: they are what this step compares.
+- **The call stack on the right**: recursive calls that have not returned yet, with the current one on top. It is only ⌈log₂ n⌉ + 1 deep, so it does not grow quickly with the data.
+
+## Why O(n log n)
+
+Seven numbers reach single elements after 3 levels of halving, so the number of levels is log n. At each level, merging compares and writes each number at most once, n in total. Levels times work per level is n log n.
+
+Try "Sorted" and "Random": the number of comparisons differs a little, but the number of writes is almost the same, because every number is written once per level.
