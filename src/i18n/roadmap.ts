@@ -54,3 +54,15 @@ export const roadmap: Chapter[] = [
     ],
   },
 ];
+
+/** 主題在路線圖中的位置：所屬章節與章內序號（1 起算）。順序以路線圖為唯一來源。 */
+export function locateTopic(topic: string) {
+  for (const chapter of roadmap) {
+    const i = chapter.items.findIndex((it) => it.topic === topic);
+    if (i >= 0) return { chapter, index: i + 1 };
+  }
+  return undefined;
+}
+
+/** 全站主題的先後順序（章節順序加章內順序），用來排序 collection 項目。 */
+export const topicOrder = roadmap.flatMap((c) => c.items.map((it) => it.topic));
