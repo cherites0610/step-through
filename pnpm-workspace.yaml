@@ -15,3 +15,6 @@ minimumReleaseAgeExclude:
   - '@tailwindcss/oxide@4.3.5'
   - '@tailwindcss/vite@4.3.5'
   - tailwindcss@4.3.5
+
+overrides:
+  '@emnapi/runtime': 1.11.3
