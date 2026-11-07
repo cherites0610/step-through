@@ -1,7 +1,14 @@
 import { expect, test } from '@playwright/test';
 
 const widths = [320, 390, 768, 1280];
-const pages = ['/zh-TW/', '/en/', '/zh-TW/insertion-sort/', '/en/insertion-sort/'];
+const pages = [
+  '/zh-TW/',
+  '/en/',
+  '/zh-TW/insertion-sort/',
+  '/en/insertion-sort/',
+  '/zh-TW/merge-sort/',
+  '/en/quick-sort/',
+];
 
 for (const width of widths) {
   for (const url of pages) {

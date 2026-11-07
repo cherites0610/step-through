@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-07T13:11:39.303Z",
+  "generatedAt": "2026-11-07T13:45:27.217Z",
   "title": "Design System: 步步看懂",
   "extensions": {
     "colorMeta": {
@@ -228,6 +228,22 @@
       "description": "偽代碼；目前行為藍紫底加 1px 墨色外框。",
       "html": "<ol class=\"ds-code\"><li>while j >= 0 and A[j] > key</li><li class=\"ds-cur\">  A[j + 1] = A[j]</li><li>  j = j - 1</li></ol>",
       "css": ".ds-code { list-style: none; margin: 0; padding: 0; font: 400 13px/1.9 'JetBrains Mono', ui-monospace, monospace; color: #16181A; } .ds-code li { padding: 0 8px; white-space: pre; } .ds-code .ds-cur { background: #DCDDF3; outline: 1px solid #16181A; }"
+    },
+    {
+      "name": "Call Stack",
+      "kind": "custom",
+      "refersTo": "pseudocode-line-current",
+      "description": "遞迴呼叫堆疊：固定 6 列高、頂端在最上面並以藍紫底加墨框標示。",
+      "html": "<ol class=\"ds-stack\"><li class=\"ds-top\">quickSort(2, 5)</li><li>quickSort(0, 5)</li><li>quickSort(0, 9)</li></ol>",
+      "css": ".ds-stack { list-style: none; margin: 0; padding: 0; width: 260px; height: 146px; overflow-y: auto; border: 1px solid #C9C7C4; font: 400 13px/24px 'JetBrains Mono', ui-monospace, monospace; color: #16181A; } .ds-stack li { padding: 0 8px; white-space: pre; } .ds-stack .ds-top { background: #DCDDF3; outline: 1px solid #16181A; }"
+    },
+    {
+      "name": "Pivot Radio Chips",
+      "kind": "chip",
+      "refersTo": "chip-preset",
+      "description": "基準選法的單選晶片；選取時反白為實心墨色。",
+      "html": "<div style=\"display:flex;gap:8px\"><label class=\"ds-radio\"><input type=\"radio\" name=\"p\" class=\"ds-sr\"/>首</label><label class=\"ds-radio ds-on\"><input type=\"radio\" name=\"p\" class=\"ds-sr\" checked/>尾</label><label class=\"ds-radio\"><input type=\"radio\" name=\"p\" class=\"ds-sr\"/>三數取中</label></div>",
+      "css": ".ds-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .ds-radio { display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border: 1px solid #C9C7C4; background: #F5F4F6; color: #16181A; font: 400 13px 'Noto Sans TC', system-ui, sans-serif; cursor: pointer; } .ds-radio:hover { border-color: #16181A; } .ds-on { background: #16181A; border-color: #16181A; color: #F5F4F6; }"
     }
   ],
   "narrative": {
@@ -290,7 +306,8 @@
       "Do 在舞台標本與文案中使用真實的演算法軌跡與數字，不使用示意性的假資料。",
       "Do 為瀏覽器預設樣式帶入設計：選取色為藍紫底墨色字、accent-color 為墨色、捲軸為髮絲灰、prefers-reduced-motion 時停用過場。",
       "Do 邊框寬度用 border、border-t 等標準工具類別（由 --hair 驅動），不要寫死 1px 的自訂邊框，否則投影模式的 2px 不會生效。",
-      "Do 投影模式的版面覆寫寫在 layer 之外，才贏得過 Tailwind 工具類別。"
+      "Do 投影模式的版面覆寫寫在 layer 之外，才贏得過 Tailwind 工具類別。",
+      "Do 讓一個舞台元素只有一種表達：目前＝實心墨色、基準＝粗框加標籤、已完成＝藍紫底加框；不要為了新演算法再引入新的顏色。"
     ],
     "donts": [
       "Don't 使用陰影、模糊、發光、漸層文字或圓角卡片；紙面不會浮起來。紙角漂移是漸層的唯一例外，不要再增加其他漸層。",

@@ -1,0 +1,49 @@
+---
+topic: quick-sort
+lang: en
+kind: sorting
+algo: quick
+title: Quick Sort
+titleEn: Quick Sort
+description: Learn quick sort step by step with an interactive visualization — choose the pivot rule (first, last, median of 3), watch the partitioning and the recursive call stack, and see the worst case.
+example: [10, 80, 30, 90, 40, 50, 70]
+complexity:
+  best: O(n log n)
+  average: O(n log n)
+  worst: O(n²)
+  space: O(log n)
+  stable: false
+faq:
+  - q: When is the worst case of quick sort?
+    a: When the pivot is always the smallest or largest number, one side of the split is empty and the other is only one smaller. For example, sorted data with a first or last pivot is O(n²) and recurses n levels deep.
+  - q: How can the worst case be avoided?
+    a: A common fix is median of 3 (the median of the first, middle and last numbers) or a random pivot. On this page you can switch the pivot rule and press "Sorted" to compare the comparison counts and recursion depth.
+  - q: Is quick sort faster than merge sort?
+    a: Often in practice, because it partitions in place, uses only O(log n) of recursion stack and is cache friendly. The price is an O(n²) worst case and no stability.
+  - q: Is quick sort stable?
+    a: No. Swapping the pivot or smaller numbers forward can change the relative order of equal values.
+  - q: Why move the pivot to the right end first?
+    a: So the scan never disturbs it; after the scan it is swapped once into its final position.
+---
+
+## What quick sort does
+
+Quick sort is also divide and conquer, but the hard work happens in the split:
+
+1. **Pick a pivot**: choose one number in the range and swap it to the right end.
+2. **Partition**: scan with j from left to right. A number smaller than the pivot is swapped with the number at i into the left "smaller than pivot" zone, and i moves forward; any other number stays on the right.
+3. **Place the pivot**: when the scan ends, swap the pivot into position i. Everything on its left is smaller and everything on its right is not, so it is already in its final place.
+4. **Recurse**: repeat on the ranges to the left and right of the pivot. A range with one number needs no more work.
+
+## The pivot rule matters a lot
+
+- **First** and **last**: the simplest, but sorted data is their worst case.
+- **Median of 3**: take the median of the first, middle and last numbers; even sorted data splits evenly.
+
+Switch between the three above and press "Sorted": with first or last, comparisons are n(n − 1) / 2 and the recursion is n deep; with median of 3 both are much smaller.
+
+## Why O(n²) at worst and O(n log n) on average
+
+In the worst case each round peels off a single number: n − 1 comparisons, then n − 2, and so on, n(n − 1) / 2 in total, with the call stack n levels deep.
+
+If every split lands in the middle, only log n levels are needed with about n comparisons per level, which is n log n. Press "Balanced" to see that best case: only 4 levels for 8 numbers (the worst case needs 8). Random data averages out close to it, which is where the O(n log n) average comes from.

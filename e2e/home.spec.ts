@@ -5,12 +5,12 @@ test('首頁（zh-TW）：路線圖只連結已上線主題，即將推出的不
   await expect(page.getByRole('heading', { level: 1 })).toContainText('看課本看不懂的');
 
   const index = page.locator('#index');
-  for (const name of ['插入排序', '氣泡排序', '選擇排序']) {
+  for (const name of ['插入排序', '氣泡排序', '選擇排序', '合併排序', '快速排序']) {
     await expect(index.getByRole('link', { name })).toBeVisible();
   }
   // 尚未上線的主題不應是連結，但螢幕閱讀器要讀得到狀態
-  await expect(index.getByRole('link', { name: /合併排序|快速排序|AVL/ })).toHaveCount(0);
-  await expect(index.getByText('合併排序')).toBeVisible();
+  await expect(index.getByRole('link', { name: /AVL|紅黑樹|Dijkstra/ })).toHaveCount(0);
+  await expect(index.getByText('AVL 樹插入')).toBeVisible();
   await expect(index.getByText('即將推出').first()).toBeAttached();
 });
 
@@ -47,6 +47,8 @@ test('頂列標籤：章節名加章內序號，且序號與首頁目錄順序�
     'insertion-sort': '排序 · 01',
     'bubble-sort': '排序 · 02',
     'selection-sort': '排序 · 03',
+    'merge-sort': '排序 · 04',
+    'quick-sort': '排序 · 05',
   };
   await page.setViewportSize({ width: 1280, height: 800 });
 
@@ -55,7 +57,7 @@ test('頂列標籤：章節名加章內序號，且序號與首頁目錄順序�
   const hrefs = await page.locator('#index a[href*="-sort/"]').evaluateAll((els) =>
     els.map((e) => (e as HTMLAnchorElement).getAttribute('href')!.split('/').filter(Boolean).pop()!),
   );
-  expect(hrefs).toEqual(['insertion-sort', 'bubble-sort', 'selection-sort']);
+  expect(hrefs).toEqual(['insertion-sort', 'bubble-sort', 'selection-sort', 'merge-sort', 'quick-sort']);
   await expect(page.getByText('Plate 00')).toHaveCount(0);
 
   for (const [i, slug] of hrefs.entries()) {
