@@ -83,8 +83,13 @@
     outline: 2px solid var(--color-ink);
     outline-offset: 2px;
   }
+  /*
+   * 減少動態：停用裝飾性的動畫與過場。例外是標了 data-step-motion 的元素——
+   * 步驟切換時節點、邊的移動本身就是資訊（旋轉怎麼發生的），所以保留，
+   * 由各元件自己縮短時間。
+   */
   @media (prefers-reduced-motion: reduce) {
-    *,
+    :where(*:not([data-step-motion])),
     *::before,
     *::after {
       animation-duration: 0.01ms !important;

@@ -98,6 +98,9 @@
             {levels}
             insertLabel={a.insertTag}
             emptyLabel={a.emptyTree}
+            rootLabel={a.rootSlot}
+            rootValue={values[0]}
+            rootHint={a.rootHint.replace('{v}', String(values[0]))}
             ariaLabel={`${a.treeLabel}${colon}${inorder(step.state.root)
               .map((n) => n.value)
               .join(', ')}`}

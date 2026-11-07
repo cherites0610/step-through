@@ -115,12 +115,118 @@ test.describe('AVL 樹插入', () => {
     await expect(page.getByRole('img', { name: /目前的樹（中序）：3, 5, 8/ })).toBeVisible();
   });
 
-  test('第一步與播放器：回到第一步時是空樹', async ({ page }) => {
+  test('空樹：虛線的根預留位置、「空樹」與「10 會成為根」，並對著刻度軸上的 10', async ({ page }) => {
     await page.goto('/zh-TW/avl-insert/');
     await toEnd(page);
     await slider(page, '步驟').fill('0');
-    await expect(page.getByRole('img', { name: /目前的樹/ })).toContainText('（空樹）');
+    const svg = page.getByRole('img', { name: /目前的樹/ });
+    await expect(svg).toContainText('空樹');
+    await expect(svg).toContainText('10 會成為根');
     await expect(page.getByText('尚未開始')).toBeVisible();
+
+    // 根的預留位置是虛線框，水平位置正好在刻度 10（最左）上方
+    const slot = await svg.locator('rect[stroke-dasharray="4 4"]').boundingBox();
+    const tick = await svg.locator('rect[width="6"]').first().boundingBox();
+    expect(Math.abs(slot!.x + slot!.width / 2 - (tick!.x + tick!.width / 2))).toBeLessThan(2);
+
+    // 下一步：根出現在同一個水平位置
+    await page.getByRole('button', { name: '下一步' }).click();
+    const root = await svg.locator('g.node rect').first().boundingBox();
+    expect(Math.abs(root!.x + root!.width / 2 - (tick!.x + tick!.width / 2))).toBeLessThan(2);
+    await expect(svg).not.toContainText('空樹');
+  });
+
+  for (const [label, seq] of [
+    ['根在最左', '10 20 30'],
+    ['根在最右', '90 10 50'],
+  ] as const) {
+    test(`空樹的說明文字在窄螢幕不會被截掉（${label}）`, async ({ page }) => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.goto('/en/avl-insert/');
+      await page.getByRole('textbox').fill(seq);
+      await page.getByRole('button', { name: 'Apply' }).click();
+      const svg = page.getByRole('img', { name: /Current tree/ });
+      await expect(svg).toContainText('Empty tree');
+      const box = (await svg.boundingBox())!;
+      const texts = svg.locator('text');
+      const n = await texts.count();
+      for (let i = 0; i < n; i++) {
+        const b = await texts.nth(i).boundingBox();
+        if (!b || !b.width) continue;
+        // 窄螢幕時 SVG 外層會橫向捲動，所以以 SVG 自身的範圍為準
+        expect(b.x).toBeGreaterThanOrEqual(box.x - 1);
+        expect(b.x + b.width).toBeLessThanOrEqual(box.x + box.width + 1);
+      }
+    });
+  }
+
+  test('大小順序刻度軸：依序標出所有數字，已插入＝實心、未插入＝空心', async ({ page }) => {
+    await page.goto('/zh-TW/avl-insert/'); // 10, 20, 30, 40, 50, 25
+    const svg = page.getByRole('img', { name: /目前的樹/ });
+    const ticks = svg.locator('rect[width="6"]');
+    await expect(ticks).toHaveCount(6);
+    const filled = () =>
+      ticks.evaluateAll((els) => els.filter((e) => (e.getAttribute('fill') ?? '').includes('ink')).length);
+    expect(await filled()).toBe(0);
+    await toEnd(page);
+    expect(await filled()).toBe(6);
+    // 刻度上的數字由小到大
+    const labels = await svg.locator('text').allTextContents();
+    const axis = labels.filter((t) => /^\d+$/.test(t)).slice(-6);
+    expect(axis).toEqual(['10', '20', '25', '30', '40', '50']);
+  });
+
+  test('減少動態：旋轉的移動動畫仍保留（縮短為 250ms），不是瞬移', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/zh-TW/avl-insert/');
+    const duration = () =>
+      page.evaluate(() => getComputedStyle(document.querySelector('svg g.node') ?? document.body).transitionDuration);
+
+    await page.getByRole('button', { name: 'RR 左旋' }).click();
+    await slider(page, '步驟').fill('3');
+    expect(await duration()).toBe('0.25s');
+
+    // 實際量測：旋轉那一步，80ms 後節點位置落在起點與終點之間
+    const s = slider(page, '步驟');
+    let unb = -1;
+    for (let i = 0; i < 30 && unb < 0; i++) {
+      await s.fill(String(i));
+      if (/失衡/.test(await explanation(page).innerText())) unb = i;
+    }
+    await page.waitForTimeout(500);
+    const y20 = () =>
+      page.evaluate(() => {
+        const g = [...document.querySelectorAll('svg g.node')].find((n) => n.querySelector('text')!.textContent === '20')!;
+        return Math.round(g.querySelector('rect')!.getBoundingClientRect().y);
+      });
+    const before = await y20();
+    await s.fill(String(unb + 1));
+    await page.waitForTimeout(60);
+    const mid = await y20();
+    await page.waitForTimeout(500);
+    const after = await y20();
+    expect(after).toBeLessThan(before);
+    expect(mid).toBeLessThan(before);
+    expect(mid).toBeGreaterThan(after);
+  });
+
+  test('一般偏好：旋轉動畫 450ms', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/zh-TW/avl-insert/');
+    await page.getByRole('button', { name: 'RR 左旋' }).click();
+    await slider(page, '步驟').fill('3');
+    expect(
+      await page.evaluate(() => getComputedStyle(document.querySelector('svg g.node')!).transitionDuration),
+    ).toBe('0.45s');
+  });
+
+  test('其他裝飾性過場在減少動態時仍然停用', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/zh-TW/avl-insert/');
+    const d = await page.evaluate(() => getComputedStyle(document.querySelector('h1')!).transitionDuration);
+    expect(parseFloat(d)).toBeLessThan(0.001);
+    const btn = await page.evaluate(() => getComputedStyle(document.querySelector('.projection-toggle')!).transitionDuration);
+    expect(parseFloat(btn)).toBeLessThan(0.001);
   });
 
   test('英文版：文案、標籤與旋轉說明', async ({ page }) => {
