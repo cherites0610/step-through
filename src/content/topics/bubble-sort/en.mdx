@@ -1,0 +1,39 @@
+---
+topic: bubble-sort
+lang: en
+kind: sorting
+algo: bubble
+order: 2
+title: Bubble Sort
+titleEn: Bubble Sort
+description: Learn bubble sort step by step with an interactive visualization — enter your own array, watch adjacent comparisons and swaps, and count them.
+example: [5, 1, 4, 2, 8]
+complexity:
+  best: O(n)
+  average: O(n²)
+  worst: O(n²)
+  space: O(1)
+  stable: true
+faq:
+  - q: Why is it called bubble sort?
+    a: Each pass carries the current largest value all the way to the right, like a bubble rising to the surface.
+  - q: Is the best case really O(n)?
+    a: Only with the optimisation that stops when a pass makes no swaps. Without it the algorithm is O(n²) on any input. The animation here includes that optimisation.
+  - q: Is bubble sort stable?
+    a: Yes. It swaps only when the left value is strictly greater than the right one, so equal values never trade places.
+---
+
+## What bubble sort does
+
+Bubble sort repeatedly compares **adjacent** numbers and swaps them if the left one is larger.
+
+1. Start at the left and compare each adjacent pair, swapping when out of order.
+2. After one pass the largest remaining number has been carried to the right end, and that position is fixed.
+3. The next pass only needs to cover the part that is not yet fixed.
+4. If a pass makes no swaps at all, the array is sorted and we can stop early.
+
+## Why it is O(n²)
+
+n numbers need at most n − 1 passes of at most n − 1 comparisons each: n(n − 1) / 2 comparisons in total. On a reversed array every comparison swaps, so swaps are also n(n − 1) / 2 — the numbers shown by the “Worst case” button above.
+
+On sorted data the first pass makes no swaps and ends after n − 1 comparisons.

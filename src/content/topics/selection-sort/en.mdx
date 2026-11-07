@@ -1,0 +1,37 @@
+---
+topic: selection-sort
+lang: en
+kind: sorting
+algo: selection
+order: 3
+title: Selection Sort
+titleEn: Selection Sort
+description: Learn selection sort step by step with an interactive visualization — watch the scan for the minimum and the growing sorted region, with comparison and swap counts.
+example: [64, 25, 12, 22, 11]
+complexity:
+  best: O(n²)
+  average: O(n²)
+  worst: O(n²)
+  space: O(1)
+  stable: false
+faq:
+  - q: Why is the best case of selection sort still O(n²)?
+    a: Every round must scan all remaining numbers to be sure of the minimum, so it always makes n(n − 1) / 2 comparisons regardless of the input.
+  - q: What is selection sort good for?
+    a: It performs at most n − 1 swaps. When writing is much more expensive than comparing, it can beat other O(n²) sorts.
+  - q: Is selection sort stable?
+    a: No. Swapping the minimum to the front can change the relative order of equal values.
+---
+
+## What selection sort does
+
+Each round, selection sort **selects the minimum** of the unsorted range and puts it at the front of that range.
+
+1. Assume the first number of the range is the minimum.
+2. Scan the rest from left to right, updating the minimum whenever a smaller value appears.
+3. When the scan ends, swap the minimum with the first number of the range.
+4. Shrink the range by one (the left cell is now sorted) and repeat until one number is left.
+
+## How it differs from insertion and bubble sort
+
+Selection sort always makes the same number of comparisons whatever the data, but very few swaps. Switch between the preset inputs and you will see comparisons stay at n(n − 1) / 2 while swaps never exceed n − 1.

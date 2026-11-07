@@ -1,8 +1,7 @@
 ---
+import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import Player from '../../components/player/Player.svelte';
 import { locales, t, type Locale } from '../../i18n';
-import type { Trace } from '../../core/trace';
 
 export function getStaticPaths() {
   return locales.map((lang) => ({ params: { lang } }));
@@ -10,14 +9,9 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as Locale;
 const text = t(lang);
-
-// M0 示範用軌跡：倒數。之後由各主題的 trace 函式取代。
-const demo: Trace<number> = [3, 2, 1, 0].map((n) => ({
-  state: n,
-  highlight: [],
-  line: 0,
-  explain: { key: 'demo.countdown', params: { n } },
-}));
+const topics = (await getCollection('topics'))
+  .filter((e) => e.data.lang === lang)
+  .sort((a, b) => a.data.order - b.data.order);
 ---
 
 <Base lang={lang} title={`${text.siteName}｜${text.tagline}`}>
@@ -25,6 +19,28 @@ const demo: Trace<number> = [3, 2, 1, 0].map((n) => ({
     <p class="font-mono text-[11px] uppercase tracking-[0.14em]">Plate 00</p>
     <h1 class="text-[44px] leading-[1.1] tracking-[-0.02em]">{text.siteName}</h1>
     <p class="mt-4 max-w-[65ch]">{text.description}</p>
-    <Player client:load steps={demo} labels={text} />
+
+    <h2 class="mt-12 font-mono text-[11px] uppercase tracking-[0.14em]">
+      {text.home.topicsHeading}
+    </h2>
+    {
+      topics.length === 0 ? (
+        <p class="mt-3">{text.home.empty}</p>
+      ) : (
+        <ul class="mt-3 border-t border-hairline">
+          {topics.map((s) => (
+            <li class="border-b border-hairline">
+              <a href={`/${lang}/${s.data.topic}/`} class="flex items-baseline gap-4 py-3 hover:bg-stamp">
+                <span class="font-mono text-[11px] uppercase tracking-[0.14em]">
+                  Plate {String(s.data.order).padStart(2, '0')}
+                </span>
+                <span class="text-[17px]">{s.data.title}</span>
+                <span class="font-mono text-[13px]">{s.data.titleEn}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
   </main>
 </Base>

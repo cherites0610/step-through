@@ -7,8 +7,11 @@ interface Props {
   title: string;
   description?: string;
   path?: string;
+  /** 此頁實際存在的語系（hreflang 只列出這些） */
+  alternates?: readonly Locale[];
+  jsonLd?: object[];
 }
-const { lang, title, description, path = '' } = Astro.props;
+const { lang, title, description, path = '', alternates = locales, jsonLd = [] } = Astro.props;
 const desc = description ?? t(lang).description;
 const canonical = new URL(`/${lang}/${path}`, Astro.site);
 ---
@@ -22,14 +25,20 @@ const canonical = new URL(`/${lang}/${path}`, Astro.site);
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
     {
-      locales.map((l) => (
+      alternates.map((l) => (
         <link rel="alternate" hreflang={l} href={new URL(`/${l}/${path}`, Astro.site)} />
       ))
     }
     <meta property="og:title" content={title} />
     <meta property="og:description" content={desc} />
     <meta property="og:locale" content={lang} />
+    <meta property="og:url" content={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {
+      jsonLd.map((d) => (
+        <script is:inline type="application/ld+json" set:html={JSON.stringify(d)} />
+      ))
+    }
   </head>
   <body class="min-h-screen">
     <slot />
