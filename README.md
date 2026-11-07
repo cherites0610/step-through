@@ -5,12 +5,12 @@
 ## 開發
 
 ```sh
-npm install
-npm run dev        # 開發伺服器
-npm run check      # 型別檢查
-npm test           # Vitest（核心邏輯）
-npm run build      # 靜態輸出至 dist/
-npm run test:e2e   # Playwright（SEO meta 與互動）
+pnpm install
+pnpm dev        # 開發伺服器
+pnpm check      # 型別檢查
+pnpm test       # Vitest（核心邏輯）
+pnpm build      # 靜態輸出至 dist/
+pnpm test:e2e   # Playwright（SEO meta 與互動）
 ```
 
 技術棧：Astro + Svelte 5 + Tailwind CSS v4 + TypeScript，部署於 Cloudflare Pages。
