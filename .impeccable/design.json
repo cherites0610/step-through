@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-07T21:20:00+08:00",
+  "generatedAt": "2026-11-07T13:11:39.303Z",
   "title": "Design System: 步步看懂",
   "extensions": {
     "colorMeta": {
@@ -8,60 +8,144 @@
         "role": "neutral",
         "displayName": "圖版近白",
         "canonical": "#F5F4F6",
-        "tonalRamp": ["#16181A", "#3A3C3F", "#66686B", "#939497", "#C9C7C4", "#E3E2E4", "#F5F4F6", "#FBFAFB"]
+        "tonalRamp": [
+          "#16181A",
+          "#3A3C3F",
+          "#66686B",
+          "#939497",
+          "#C9C7C4",
+          "#E3E2E4",
+          "#F5F4F6",
+          "#FBFAFB"
+        ]
       },
       "warm-edge-paper": {
         "role": "neutral",
-        "displayName": "暖邊近白（尚未套用）",
+        "displayName": "暖邊近白（左上紙角）",
         "canonical": "#FAF6F5",
-        "tonalRamp": ["#3A3230", "#6B5F5C", "#9A8E8B", "#C9C0BE", "#E4DEDC", "#F2EDEB", "#FAF6F5", "#FDFBFA"]
+        "tonalRamp": [
+          "#3A3230",
+          "#6B5F5C",
+          "#9A8E8B",
+          "#C9C0BE",
+          "#E4DEDC",
+          "#F2EDEB",
+          "#FAF6F5",
+          "#FDFBFA"
+        ]
       },
       "green-edge-paper": {
         "role": "neutral",
-        "displayName": "綠邊近白（尚未套用）",
+        "displayName": "綠邊近白（右下紙角）",
         "canonical": "#EEF3EF",
-        "tonalRamp": ["#2A332D", "#55625A", "#85928A", "#B3BFB7", "#D3DCD6", "#E3EAE5", "#EEF3EF", "#F8FBF9"]
+        "tonalRamp": [
+          "#2A332D",
+          "#55625A",
+          "#85928A",
+          "#B3BFB7",
+          "#D3DCD6",
+          "#E3EAE5",
+          "#EEF3EF",
+          "#F8FBF9"
+        ]
       },
       "plate-ink": {
         "role": "neutral",
         "displayName": "墨色",
         "canonical": "#16181A",
-        "tonalRamp": ["#0B0C0D", "#16181A", "#2B2E31", "#45484C", "#62666A", "#85898D", "#AAADB0", "#D0D2D4"]
+        "tonalRamp": [
+          "#0B0C0D",
+          "#16181A",
+          "#2B2E31",
+          "#45484C",
+          "#62666A",
+          "#85898D",
+          "#AAADB0",
+          "#D0D2D4"
+        ]
       },
       "hairline-grey": {
         "role": "neutral",
         "displayName": "髮絲灰",
         "canonical": "#C9C7C4",
-        "tonalRamp": ["#5A5957", "#716F6D", "#898785", "#A3A19E", "#C9C7C4", "#D9D7D5", "#E8E7E5", "#F4F3F2"]
+        "tonalRamp": [
+          "#5A5957",
+          "#716F6D",
+          "#898785",
+          "#A3A19E",
+          "#C9C7C4",
+          "#D9D7D5",
+          "#E8E7E5",
+          "#F4F3F2"
+        ]
       },
       "cycle-periwinkle": {
         "role": "primary",
         "displayName": "印章週期藍紫",
         "canonical": "#DCDDF3",
-        "tonalRamp": ["#2E3057", "#4A4D84", "#6B6FAE", "#9094CC", "#B5B8E3", "#DCDDF3", "#EBECF8", "#F6F6FC"]
+        "tonalRamp": [
+          "#2E3057",
+          "#4A4D84",
+          "#6B6FAE",
+          "#9094CC",
+          "#B5B8E3",
+          "#DCDDF3",
+          "#EBECF8",
+          "#F6F6FC"
+        ]
       }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "首頁標題（36px 手機／56px 桌機）；主題頁標題為 44px。" },
-      "headline": { "displayName": "Headline", "purpose": "首頁區塊標題，如「主題目錄」。" },
-      "title": { "displayName": "Title", "purpose": "次要區塊標題與 MDX 二級標題。" },
-      "body": { "displayName": "Body", "purpose": "導言與每步白話說明，行寬 65 字元內。" },
-      "ui": { "displayName": "UI", "purpose": "介面文字與註腳。" },
-      "data": { "displayName": "Data", "purpose": "舞台數值與計數面板，等寬、tabular-nums。" },
-      "label": { "displayName": "Label", "purpose": "計數器與欄位、章節標籤；不放在標題上方。" },
-      "code": { "displayName": "Code", "purpose": "偽代碼與等寬按鈕文字。" }
+      "display": {
+        "displayName": "Display",
+        "purpose": "首頁標題（36px 手機／56px 桌機）；主題頁標題為 44px。"
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "首頁區塊標題，如「主題目錄」。"
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "次要區塊標題與 MDX 二級標題。"
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "導言與每步白話說明，行寬 65 字元內。"
+      },
+      "ui": {
+        "displayName": "UI",
+        "purpose": "介面文字與註腳。"
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "舞台數值與計數面板，等寬、tabular-nums。"
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "計數器與欄位、章節標籤；不放在標題上方。"
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "偽代碼與等寬按鈕文字。"
+      }
     },
     "shadows": [],
     "motion": [
       {
         "name": "reduced-motion",
         "value": "animation-duration: 0.01ms; transition-duration: 0.01ms",
-        "purpose": "prefers-reduced-motion 時停用所有過場；目前整站沒有裝飾性動畫，步驟切換為瞬間換格。"
+        "purpose": "prefers-reduced-motion 時停用所有過場；目前整站沒有裝飾性動畫，步驟切換為瞬間換格，投影模式切換也是瞬間。"
       }
     ],
     "breakpoints": [
-      { "name": "md", "value": "768px" },
-      { "name": "lg", "value": "1024px" }
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
     ]
   },
   "components": [
@@ -106,6 +190,14 @@
       "css": ".ds-nav { list-style: none; margin: 0; padding: 0; width: 200px; } .ds-nav-item { display: block; padding: 6px 8px; font: 400 15px 'Noto Sans TC', system-ui, sans-serif; color: #16181A; text-decoration: none; } .ds-nav-item[aria-current='page'] { background: #DCDDF3; outline: 1px solid #16181A; }"
     },
     {
+      "name": "Projection Toggle",
+      "kind": "button",
+      "refersTo": "chip-preset",
+      "description": "頂列的投影模式切換；啟用時反白為實心墨色。",
+      "html": "<div style=\"display:flex;gap:12px\"><button class=\"ds-proj\" aria-pressed=\"false\">投影模式</button><button class=\"ds-proj\" aria-pressed=\"true\">投影模式</button></div>",
+      "css": ".ds-proj { height: 36px; padding: 0 12px; background: #F5F4F6; color: #16181A; border: 1px solid #C9C7C4; border-radius: 0; font: 400 13px 'JetBrains Mono', ui-monospace, monospace; } .ds-proj:hover { border-color: #16181A; } .ds-proj[aria-pressed='true'] { background: #16181A; border-color: #16181A; color: #F5F4F6; } .ds-proj:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
+    },
+    {
       "name": "Roadmap Row",
       "kind": "custom",
       "refersTo": "roadmap-row-live-hover",
@@ -142,21 +234,53 @@
     "northStar": "The Plate Section",
     "overview": "整個產品像設計年鑑裡的一頁圖版：紙面近白但不中性，讓墨色讀起來是「印出來的」而不是「渲染出來的」。除了資料本身，其餘都是套準記號、髮絲線與網點。演算法或資料結構是唯一的主角，介面退到它後面。",
     "keyCharacteristics": [
-      "單一冷白紙面；不用漸層（網點背景除外）、陰影、發光。",
+      "近白紙面，紙角帶極淡的暖／綠漂移；不用陰影、發光，漸層只有紙角漂移與網點。",
       "一個很淡的週期藍紫作為「選取／已完成／目前行」，其餘全靠墨色與髮絲線。",
       "招牌動作：舞台是一張被套準的圖版，四角有十字記號，底下鋪網點；正在動的元素反白成實心墨色。",
       "狀態一律「顏色＋記號」，不只靠顏色。",
       "兩種版面：主題頁是標準工具外殼；首頁是一張目錄圖版（路線圖）。"
     ],
     "rules": [
-      { "name": "The Never-Pure Rule", "body": "沒有 #000 與 #FFF；墨與紙都帶一點色相。（投影模式例外。）", "section": "colors" },
-      { "name": "The One Voice Rule", "body": "週期藍紫是全站唯一強調色，佔單一畫面面積不超過 15%；其稀有性就是重點。", "section": "colors" },
-      { "name": "The Mark-Not-Hue Rule", "body": "狀態不能只靠顏色：目前＝實心墨色、已完成＝藍紫底＋細框、操作停用＝髮絲灰＋劃線、尚未上線＝虛線方框＋螢幕閱讀器文字、已上線＝實心方框、焦點＝2px 墨色外框。", "section": "colors" },
-      { "name": "The Hairline-Is-Not-Text Rule", "body": "髮絲灰只畫線，不寫字；需要降低存在感的文字用墨色加透明度，仍須達到 4.5:1。", "section": "colors" },
-      { "name": "The Tabular Rule", "body": "所有計數、索引、時間軸數字一律等寬、對齊；數字跳動時版面不得位移。", "section": "typography" },
-      { "name": "The Two-Weights Rule", "body": "只用 400 與 500；階層靠尺寸、字體族與大小寫，不靠粗體。", "section": "typography" },
-      { "name": "The Straight-Quote Rule", "body": "英文文案使用直引號與直撇號；彎引號會落到 CJK 字體而產生異常字距。", "section": "typography" },
-      { "name": "The Flat-Paper Rule", "body": "紙面不會浮起來。互動回饋用反白、外框或記號表達，不用位移或陰影。", "section": "elevation" }
+      {
+        "name": "The Never-Pure Rule",
+        "body": "沒有 #000 與 #FFF；墨與紙都帶一點色相。（投影模式例外。）",
+        "section": "colors"
+      },
+      {
+        "name": "The One Voice Rule",
+        "body": "週期藍紫是全站唯一強調色，佔單一畫面面積不超過 15%；其稀有性就是重點。",
+        "section": "colors"
+      },
+      {
+        "name": "The Mark-Not-Hue Rule",
+        "body": "狀態不能只靠顏色：目前＝實心墨色、已完成＝藍紫底＋細框、操作停用＝髮絲灰＋劃線、尚未上線＝虛線方框＋螢幕閱讀器文字、已上線＝實心方框、焦點＝2px 墨色外框。",
+        "section": "colors"
+      },
+      {
+        "name": "The Hairline-Is-Not-Text Rule",
+        "body": "髮絲灰只畫線，不寫字；需要降低存在感的文字用墨色加透明度，仍須達到 4.5:1。",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "所有計數、索引、時間軸數字一律等寬、對齊；數字跳動時版面不得位移。",
+        "section": "typography"
+      },
+      {
+        "name": "The Two-Weights Rule",
+        "body": "只用 400 與 500；階層靠尺寸、字體族與大小寫，不靠粗體。",
+        "section": "typography"
+      },
+      {
+        "name": "The Straight-Quote Rule",
+        "body": "英文文案使用直引號與直撇號；彎引號會落到 CJK 字體而產生異常字距。",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-Paper Rule",
+        "body": "紙面不會浮起來。互動回饋用反白、外框或記號表達，不用位移或陰影。",
+        "section": "elevation"
+      }
     ],
     "dos": [
       "Do 讓資料與正在動的元素成為畫面上唯一有重量的東西：目前元素實心墨色，其餘空心或髮絲線。",
@@ -164,16 +288,19 @@
       "Do 所有計數、索引、時間軸數字使用等寬字與 tabular-nums。",
       "Do 讓首屏為靜態 HTML；互動元件按需載入（首頁零 JS）。",
       "Do 在舞台標本與文案中使用真實的演算法軌跡與數字，不使用示意性的假資料。",
-      "Do 為瀏覽器預設樣式帶入設計：選取色為藍紫底墨色字、accent-color 為墨色、捲軸為髮絲灰、prefers-reduced-motion 時停用過場。"
+      "Do 為瀏覽器預設樣式帶入設計：選取色為藍紫底墨色字、accent-color 為墨色、捲軸為髮絲灰、prefers-reduced-motion 時停用過場。",
+      "Do 邊框寬度用 border、border-t 等標準工具類別（由 --hair 驅動），不要寫死 1px 的自訂邊框，否則投影模式的 2px 不會生效。",
+      "Do 投影模式的版面覆寫寫在 layer 之外，才贏得過 Tailwind 工具類別。"
     ],
     "donts": [
-      "Don't 使用陰影、模糊、發光、漸層文字或圓角卡片；紙面不會浮起來。",
+      "Don't 使用陰影、模糊、發光、漸層文字或圓角卡片；紙面不會浮起來。紙角漂移是漸層的唯一例外，不要再增加其他漸層。",
       "Don't 在標題上方加小標籤（eyebrow）；標題自己承載重量。",
       "Don't 用髮絲灰寫需要閱讀的文字，也不要用 ●○ 這類字元充當狀態圖示；狀態記號是繪製的 SVG 方框。",
       "Don't 引入第二個強調色，或讓藍紫佔畫面超過 15%、或用作文字色。",
       "Don't 使用粗體（700）或斜體；階層靠尺寸、字體族與大小寫。",
       "Don't 使用純黑 #000 與純白 #FFF（投影模式除外）。",
-      "Don't 用相同尺寸的圖示加標題加內文卡片排成頁面結構；用髮絲線分欄的列表與表格。"
+      "Don't 用相同尺寸的圖示加標題加內文卡片排成頁面結構；用髮絲線分欄的列表與表格。",
+      "Don't 在會落在紙角的固定元件上放不同於紙色的實心底色而造成接縫；底部播放列只在播放器區塊內 sticky，正是為了避開右下角的綠漂移。"
     ]
   }
 }

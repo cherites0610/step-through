@@ -21,6 +21,13 @@ const canonical = new URL(`/${lang}/${path}`, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 投影模式要在首次繪製前套用，避免閃一下一般模式 -->
+    <script is:inline>
+      try {
+        if (localStorage.getItem('step-through:mode') === 'projection')
+          document.documentElement.dataset.mode = 'projection';
+      } catch (e) {}
+    </script>
     <title>{title}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
@@ -40,7 +47,7 @@ const canonical = new URL(`/${lang}/${path}`, Astro.site);
       ))
     }
   </head>
-  <body class="min-h-screen">
+  <body>
     <slot />
   </body>
 </html>

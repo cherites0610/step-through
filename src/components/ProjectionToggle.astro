@@ -1,0 +1,43 @@
+---
+import { t, type Locale } from '../i18n';
+
+interface Props {
+  lang: Locale;
+}
+const { lang } = Astro.props;
+const label = t(lang).projection;
+---
+
+<!-- 純 HTML + 十幾行 vanilla JS，不需要載入框架 -->
+<button
+  type="button"
+  class="projection-toggle h-9 border border-hairline px-3 font-mono text-[13px] hover:border-ink aria-pressed:border-ink aria-pressed:bg-ink aria-pressed:text-paper"
+  aria-pressed="false"
+  data-label={label}
+>
+  {label}
+</button>
+
+<script>
+  const KEY = 'step-through:mode';
+  const root = document.documentElement;
+  const sync = () => {
+    const on = root.dataset.mode === 'projection';
+    document.querySelectorAll<HTMLButtonElement>('.projection-toggle').forEach((b) => {
+      b.setAttribute('aria-pressed', String(on));
+    });
+  };
+  sync();
+  document.querySelectorAll('.projection-toggle').forEach((b) =>
+    b.addEventListener('click', () => {
+      const on = root.dataset.mode !== 'projection';
+      if (on) root.dataset.mode = 'projection';
+      else delete root.dataset.mode;
+      try {
+        if (on) localStorage.setItem(KEY, 'projection');
+        else localStorage.removeItem(KEY);
+      } catch {}
+      sync();
+    }),
+  );
+</script>

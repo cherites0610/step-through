@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import LangSwitch from '../../components/LangSwitch.astro';
+import ProjectionToggle from '../../components/ProjectionToggle.astro';
 import SortViz from '../../components/viz/sorting/SortViz.svelte';
 import { t, type Locale } from '../../i18n';
 
@@ -74,12 +75,15 @@ const rows: [string, string][] = [
       >Plate {String(d.order).padStart(2, '0')}</span
     >
     <span class="text-[15px]">{d.title}</span>
-    <div class="ml-auto"><LangSwitch lang={lang} path={`${d.topic}/`} available={alternates} /></div>
+    <div class="ml-auto flex items-center gap-4">
+      <ProjectionToggle lang={lang} />
+      <LangSwitch lang={lang} path={`${d.topic}/`} available={alternates} />
+    </div>
   </header>
 
-  <div class="md:grid md:grid-cols-[220px_1fr]">
+  <div class="topic-shell md:grid md:grid-cols-[220px_1fr]">
     <nav
-      class="border-b border-hairline px-4 py-4 md:min-h-[calc(100vh-3.5rem)] md:border-b-0 md:border-r"
+      class="chapter-rail border-b border-hairline px-4 py-4 md:border-b-0 md:border-r"
       aria-label={text.topics}
     >
       <p class="mb-2 font-mono text-[11px] uppercase tracking-[0.14em]">{text.sorting}</p>

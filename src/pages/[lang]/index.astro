@@ -2,6 +2,7 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import LangSwitch from '../../components/LangSwitch.astro';
+import ProjectionToggle from '../../components/ProjectionToggle.astro';
 import ArrayView from '../../components/viz/sorting/ArrayView.svelte';
 import { insertionSort } from '../../core/sorting/insertion';
 import { explain, locales, t, type Locale } from '../../i18n';
@@ -44,11 +45,14 @@ const jsonLd = [
   <header class="flex h-14 items-center gap-6 border-b border-hairline px-4 lg:px-10">
     <a href={`/${lang}/`} class="font-medium">{text.siteName}</a>
     <span class="font-mono text-[11px] uppercase tracking-[0.14em]">Plate 00</span>
-    <div class="ml-auto"><LangSwitch lang={lang} /></div>
+    <div class="ml-auto flex items-center gap-4">
+      <ProjectionToggle lang={lang} />
+      <LangSwitch lang={lang} />
+    </div>
   </header>
 
   <main>
-    <section class="mx-auto grid max-w-[1280px] gap-12 px-4 py-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:items-center lg:gap-16 lg:px-10 lg:py-20">
+    <section class="home-hero mx-auto grid max-w-[1280px] gap-12 px-4 py-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:items-center lg:gap-16 lg:px-10 lg:py-20">
       <div>
         <h1 class="text-balance text-[36px] leading-[1.15] tracking-[-0.02em] md:text-[56px] md:leading-[1.1]">
           {h.headline.map((line) => <span class="block">{line}</span>)}
