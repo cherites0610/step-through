@@ -1,0 +1,39 @@
+---
+import { locales, type Locale } from '../i18n';
+
+interface Props {
+  lang: Locale;
+  /** 該頁在各語系下的相對路徑（不含語系前綴），例如 `insertion-sort/` */
+  path?: string;
+  /** 此頁實際存在的語系；缺的語系不顯示連結 */
+  available?: readonly Locale[];
+}
+const { lang, path = '', available = locales } = Astro.props;
+const label: Record<Locale, string> = { 'zh-TW': '繁中', en: 'EN' };
+const name: Record<Locale, string> = { 'zh-TW': '繁體中文', en: 'English' };
+---
+
+<nav aria-label="Language" class="flex items-center whitespace-nowrap font-mono text-[13px]">
+  {
+    locales
+      .filter((l) => available.includes(l))
+      .map((l, i) => (
+        <>
+          {i > 0 && <span aria-hidden="true" class="mx-2 h-3 w-px bg-hairline" />}
+          <a
+            href={`/${l}/${path}`}
+            lang={l}
+            hreflang={l}
+            title={name[l]}
+            aria-current={l === lang ? 'true' : undefined}
+            class:list={[
+              'px-1 py-1 underline-offset-4',
+              l === lang ? 'underline decoration-1' : 'hover:underline',
+            ]}
+          >
+            {label[l]}
+          </a>
+        </>
+      ))
+  }
+</nav>

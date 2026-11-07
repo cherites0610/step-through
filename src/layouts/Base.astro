@@ -7,8 +7,11 @@ interface Props {
   title: string;
   description?: string;
   path?: string;
+  /** 此頁實際存在的語系（hreflang 只列出這些） */
+  alternates?: readonly Locale[];
+  jsonLd?: object[];
 }
-const { lang, title, description, path = '' } = Astro.props;
+const { lang, title, description, path = '', alternates = locales, jsonLd = [] } = Astro.props;
 const desc = description ?? t(lang).description;
 const canonical = new URL(`/${lang}/${path}`, Astro.site);
 ---
@@ -18,20 +21,33 @@ const canonical = new URL(`/${lang}/${path}`, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- 投影模式要在首次繪製前套用，避免閃一下一般模式 -->
+    <script is:inline>
+      try {
+        if (localStorage.getItem('step-through:mode') === 'projection')
+          document.documentElement.dataset.mode = 'projection';
+      } catch (e) {}
+    </script>
     <title>{title}</title>
     <meta name="description" content={desc} />
     <link rel="canonical" href={canonical} />
     {
-      locales.map((l) => (
+      alternates.map((l) => (
         <link rel="alternate" hreflang={l} href={new URL(`/${l}/${path}`, Astro.site)} />
       ))
     }
     <meta property="og:title" content={title} />
     <meta property="og:description" content={desc} />
     <meta property="og:locale" content={lang} />
+    <meta property="og:url" content={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {
+      jsonLd.map((d) => (
+        <script is:inline type="application/ld+json" set:html={JSON.stringify(d)} />
+      ))
+    }
   </head>
-  <body class="min-h-screen">
+  <body>
     <slot />
   </body>
 </html>

@@ -1,0 +1,40 @@
+---
+topic: insertion-sort
+lang: en
+kind: sorting
+algo: insertion
+order: 1
+title: Insertion Sort
+titleEn: Insertion Sort
+description: Learn insertion sort step by step with an interactive visualization — enter your own array, watch every comparison and shift, and compare best and worst cases.
+example: [5, 2, 4, 6, 1, 3]
+complexity:
+  best: O(n)
+  average: O(n²)
+  worst: O(n²)
+  space: O(1)
+  stable: true
+faq:
+  - q: Is insertion sort faster than bubble sort?
+    a: Both are O(n²) on average and in the worst case, but insertion sort is usually faster because it shifts elements instead of repeatedly swapping them, and it approaches O(n) on nearly sorted data.
+  - q: When is insertion sort a good choice?
+    a: When the input is small or already nearly sorted. Many standard libraries switch to insertion sort for small sub-ranges.
+  - q: Is insertion sort stable?
+    a: Yes. It never moves an element past an equal one, so equal elements keep their relative order.
+---
+
+## What insertion sort does
+
+Think of sorting playing cards in your hand: you take a new card, look left through the sorted cards, slide every larger card one place to the right, and drop the new card into the gap.
+
+1. Treat the left part of the array as sorted; at first it holds only the first number.
+2. Take the next number as the **key** and leave a hole where it was.
+3. Compare leftwards: every number larger than the key **shifts one place right**, and the hole moves left.
+4. Stop at a number that is not larger than the key (or at the left edge) and put the key into the hole.
+5. Repeat until every number has been placed.
+
+## Why the best case is only O(n)
+
+If the data is already sorted, each key is compared with just one neighbour and stops immediately, with no shifts. Try the “Best case” button above: n − 1 comparisons and 0 shifts.
+
+The “Worst case” is a fully reversed array: every key travels all the way to the left, giving n(n − 1) / 2 comparisons and shifts.
