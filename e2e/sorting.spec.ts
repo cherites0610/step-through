@@ -1,6 +1,6 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
-const slugs = ['insertion-sort', 'bubble-sort', 'selection-sort', 'merge-sort', 'quick-sort'];
+const slugs = ['insertion-sort', 'bubble-sort', 'selection-sort', 'merge-sort', 'quick-sort', 'avl-insert'];
 
 for (const lang of ['zh-TW', 'en']) {
   for (const slug of slugs) {

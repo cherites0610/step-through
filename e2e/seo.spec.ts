@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test('首頁有 title、description、canonical 與 hreflang', async ({ page }) => {
   await page.goto('/zh-TW/');

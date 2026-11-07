@@ -8,8 +8,8 @@ const topics = defineCollection({
     topic: z.string(),
     lang: z.enum(['zh-TW', 'en']),
     /** 對應的視覺化元件 */
-    kind: z.enum(['sorting']),
-    algo: z.enum(['insertion', 'bubble', 'selection', 'merge', 'quick']),
+    kind: z.enum(['sorting', 'tree']),
+    algo: z.enum(['insertion', 'bubble', 'selection', 'merge', 'quick', 'avl']),
     title: z.string(),
     /** 英文原文，首次出現時附上利於搜尋 */
     titleEn: z.string(),
@@ -20,7 +20,8 @@ const topics = defineCollection({
       average: z.string(),
       worst: z.string(),
       space: z.string(),
-      stable: z.boolean(),
+      /** 排序才有「穩定」的概念；其他主題省略這一列 */
+      stable: z.boolean().optional(),
     }),
     faq: z.array(z.object({ q: z.string(), a: z.string() })),
   }),

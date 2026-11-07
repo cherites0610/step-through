@@ -1,0 +1,60 @@
+---
+topic: avl-insert
+lang: en
+kind: tree
+algo: avl
+title: AVL Tree Insertion
+titleEn: AVL Tree Insertion
+description: Learn AVL tree insertion step by step with an interactive visualization - enter your own numbers, watch the balance factors change, and see the LL, RR, LR and RL imbalances and their rotations.
+example: [10, 20, 30, 40, 50, 25]
+complexity:
+  best: O(log n)
+  average: O(log n)
+  worst: O(log n)
+  space: O(1) (excluding the tree itself)
+faq:
+  - q: Why does a binary search tree need to be balanced?
+    a: If a plain binary search tree receives ascending numbers it degenerates into a line and a search takes n steps. An AVL tree keeps the height difference of every node's subtrees within 1, so its height is always O(log n) and search and insertion are guaranteed O(log n).
+  - q: Does a rotation break the ordering of the search tree?
+    a: No. A rotation only changes who is whose parent; the left-to-right (in-order) sequence stays exactly the same. That is why nodes in the animation only move up and down, never sideways.
+  - q: Why is a double rotation sometimes needed?
+    a: In the LR and RL cases the new node lies on the "bent" side, and a single rotation would just move the problem to the other side. So the bend is first straightened into LL or RR, and then one more rotation fixes it.
+  - q: How many rotations does one insertion need at most?
+    a: It repairs at most one imbalance - one action for a single rotation, two for a double rotation. Afterwards the subtree has the same height as before the insertion, so nothing higher up becomes unbalanced.
+  - q: How is an AVL tree different from a red-black tree?
+    a: AVL trees are balanced more strictly, so lookups are usually a little faster; red-black trees are looser and need fewer rotations on insertion and deletion. Both are O(log n).
+---
+
+## What an AVL tree does
+
+An AVL tree is a binary search tree that keeps itself balanced. Besides "smaller on the left, larger on the right" it has one more rule:
+
+> The **balance factor** of every node (left subtree height − right subtree height) must be −1, 0 or +1.
+
+After inserting a node we walk back up the path; as soon as a node's balance factor becomes ±2 we repair it with a **rotation**.
+
+## How to read the picture
+
+- The number is inside the box and the `BF` below it is the node's balance factor, updated at every step.
+- **Solid ink** is the node being handled in this step; **pale blue** is the path this insertion walked; a **small solid tag in the corner** marks the unbalanced node and says which case it is.
+- Horizontal positions are fixed by the size order of the numbers, so rotations only move nodes up and down, which shows that the order does not change.
+- A number that is not in the tree yet appears at the top left as "INSERT".
+
+## The four imbalance cases
+
+| Case | The new node is on | Fix |
+|---|---|---|
+| LL | the left side of the left child | rotate right at the unbalanced node |
+| RR | the right side of the right child | rotate left at the unbalanced node |
+| LR | the right side of the left child | rotate left at the left child, then right at the unbalanced node |
+| RL | the left side of the right child | rotate right at the right child, then left at the unbalanced node |
+
+Press the LL, RR, LR and RL buttons above to watch each rotation once.
+
+## Why one repair per insertion is enough
+
+A new node can only make the heights of its ancestors grow by 1. The unbalanced node is the nearest ancestor whose balance factor became ±2; after the rotation the height of that subtree is exactly what it was before the insertion, so the nodes above still see the same height and cannot become unbalanced. That is why the walk up can stop once the rotation is done.
+
+## Try it
+
+Press "Ascending": 10, 20, 30 ... 70 are inserted in order. A plain binary search tree would become a line leaning right, while the AVL tree rotates whenever it gets unbalanced and ends up as a perfectly balanced tree of height 3.

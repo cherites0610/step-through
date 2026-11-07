@@ -1,4 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from './fixtures';
+import type { Page } from '@playwright/test';
 
 const stat = (page: Page, label: string) =>
   page.locator('dt', { hasText: label }).locator('xpath=following-sibling::dd');

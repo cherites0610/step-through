@@ -101,6 +101,10 @@
   .prose-plate ol { margin-top: 0.75rem; padding-left: 1.5rem; list-style: decimal; }
   .prose-plate li { margin-top: 0.4rem; font-size: 16px; line-height: 1.7; }
   .prose-plate strong { font-weight: 500; }
+  .prose-plate table { width: 100%; margin-top: 0.75rem; border-top: var(--hair) solid var(--color-ink); border-bottom: var(--hair) solid var(--color-hairline); font-size: 15px; line-height: 1.6; }
+  .prose-plate th, .prose-plate td { padding: 0.5rem 0.75rem 0.5rem 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-hairline); }
+  .prose-plate th { font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; }
+  .prose-plate tr:last-child td { border-bottom: 0; }
 }
 
 /* 瀏覽器預設樣式也要帶設計：選取、控制項強調色、捲軸 */

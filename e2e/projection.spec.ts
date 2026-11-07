@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 const root = (page: import('@playwright/test').Page) => page.locator('html');
 const cssVar = (page: import('@playwright/test').Page, name: string) =>

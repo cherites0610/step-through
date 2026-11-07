@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 test('首頁（zh-TW）：路線圖只連結已上線主題，即將推出的不是連結', async ({ page }) => {
   await page.goto('/zh-TW/');
@@ -9,8 +9,9 @@ test('首頁（zh-TW）：路線圖只連結已上線主題，即將推出的不
     await expect(index.getByRole('link', { name })).toBeVisible();
   }
   // 尚未上線的主題不應是連結，但螢幕閱讀器要讀得到狀態
-  await expect(index.getByRole('link', { name: /AVL|紅黑樹|Dijkstra/ })).toHaveCount(0);
-  await expect(index.getByText('AVL 樹插入')).toBeVisible();
+  await expect(index.getByRole('link', { name: 'AVL 樹插入' })).toBeVisible();
+  await expect(index.getByRole('link', { name: /紅黑樹|Dijkstra|二元搜尋樹/ })).toHaveCount(0);
+  await expect(index.getByText('紅黑樹')).toBeVisible();
   await expect(index.getByText('即將推出').first()).toBeAttached();
 });
 
