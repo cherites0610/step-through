@@ -1,0 +1,17 @@
+# Cloudflare Pages 的自訂回應標頭（https://developers.cloudflare.com/pages/configuration/headers/）
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+# 建置產物的檔名含內容雜湊，可以快取一年
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# OG 圖與 favicon 檔名固定，快取一天
+/og/*
+  Cache-Control: public, max-age=86400
+/favicon.svg
+  Cache-Control: public, max-age=86400

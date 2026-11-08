@@ -37,6 +37,16 @@ const alternates = (await getCollection('topics'))
 
 const displayName = lang === 'en' ? d.title : `${d.title}（${d.titleEn}）`;
 const url = new URL(`/${lang}/${d.topic}/`, Astro.site).href;
+const ogImagePath = `/og/${lang}/${d.topic}.png`;
+const ogImageUrl = new URL(ogImagePath, Astro.site).href;
+
+// 上一個／下一個主題：依路線圖順序，只含這個語系已上線的
+const ordered = (await getCollection('topics'))
+  .filter((e) => e.data.lang === lang)
+  .sort((a, b) => topicOrder.indexOf(a.data.topic) - topicOrder.indexOf(b.data.topic));
+const at = ordered.findIndex((e) => e.data.topic === d.topic);
+const prev = at > 0 ? ordered[at - 1] : undefined;
+const next = at < ordered.length - 1 ? ordered[at + 1] : undefined;
 const jsonLd = [
   {
     '@context': 'https://schema.org',
@@ -48,6 +58,18 @@ const jsonLd = [
     learningResourceType: 'Interactive visualization',
     interactivityType: 'active',
     teaches: d.titleEn,
+    image: ogImageUrl,
+    isAccessibleForFree: true,
+    audience: { '@type': 'EducationalAudience', educationalRole: 'student' },
+    isPartOf: { '@type': 'WebSite', name: text.siteName, url: new URL(`/${lang}/`, Astro.site).href },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: text.siteName, item: new URL(`/${lang}/`, Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: d.title, item: url },
+    ],
   },
   {
     '@context': 'https://schema.org',
@@ -78,6 +100,8 @@ const rows: [string, string][] = [
   path={`${d.topic}/`}
   alternates={alternates}
   jsonLd={jsonLd}
+  image={ogImagePath}
+  type="article"
 >
   <header class="flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6">
     <a href={`/${lang}/`} class="shrink-0 font-medium">{text.siteName}</a>
@@ -167,6 +191,30 @@ const rows: [string, string][] = [
             ))
           }
         </dl>
+
+        <!-- 上一個／下一個主題：內部連結，也讓讀者可以直接往下學 -->
+        <nav class="mt-14 grid max-w-[65ch] border-t border-ink sm:grid-cols-2" aria-label={text.topicNav.label}>
+          <div class="border-b border-hairline py-4 sm:border-b-0 sm:border-r sm:pr-4">
+            {
+              prev && (
+                <a href={`/${lang}/${prev.data.topic}/`} class="block hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink">
+                  <span class="block font-mono text-[11px] uppercase tracking-[0.14em]">← {text.topicNav.prev}</span>
+                  <span class="mt-1 block text-[17px]">{prev.data.title}</span>
+                </a>
+              )
+            }
+          </div>
+          <div class="py-4 sm:pl-4 sm:text-right">
+            {
+              next && (
+                <a href={`/${lang}/${next.data.topic}/`} class="block hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink">
+                  <span class="block font-mono text-[11px] uppercase tracking-[0.14em]">{text.topicNav.next} →</span>
+                  <span class="mt-1 block text-[17px]">{next.data.title}</span>
+                </a>
+              )
+            }
+          </div>
+        </nav>
       </article>
     </main>
   </div>

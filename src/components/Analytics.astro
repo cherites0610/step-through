@@ -1,0 +1,20 @@
+---
+// 分析腳本只在設定了環境變數時才輸出；沒設定（本機開發、預覽、測試）時什麼都不載入。
+//   PUBLIC_CF_WEB_ANALYTICS_TOKEN   Cloudflare Web Analytics 的 token（初期）
+//   PUBLIC_UMAMI_SRC / PUBLIC_UMAMI_WEBSITE_ID   Umami（後期，支援自訂事件，見 src/lib/analytics.ts）
+const cf = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
+const umamiSrc = import.meta.env.PUBLIC_UMAMI_SRC;
+const umamiId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID;
+---
+
+{
+  cf && (
+    <script
+      is:inline
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={JSON.stringify({ token: cf })}
+    />
+  )
+}
+{umamiSrc && umamiId && <script is:inline defer src={umamiSrc} data-website-id={umamiId} />}

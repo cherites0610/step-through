@@ -6,6 +6,7 @@
   import { depthOf, inorder } from '../../../core/avl/types';
   import { parseInput } from '../../../core/sorting/input';
   import { explain, t, type Locale } from '../../../i18n';
+  import { track } from '../../../lib/analytics';
 
   let { lang, initial }: { lang: Locale; initial: number[] } = $props();
 
@@ -29,8 +30,12 @@
   function apply(e: SubmitEvent) {
     e.preventDefault();
     const r = parseInput(draft);
-    if (r.ok) setValues(r.values);
-    else error = text.input.errors[r.error];
+    if (r.ok) {
+      setValues(r.values);
+      track('custom_input', { topic: 'avl-insert', count: r.values.length });
+    } else {
+      error = text.input.errors[r.error];
+    }
   }
 
   const chip = 'h-9 border border-hairline px-3 text-[13px] hover:border-ink';

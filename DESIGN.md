@@ -10,52 +10,52 @@ colors:
   cycle-periwinkle: "#DCDDF3"
 typography:
   display:
-    fontFamily: "Noto Sans TC, system-ui, sans-serif"
+    fontFamily: "Noto Sans TC, PingFang TC, Microsoft JhengHei, Noto Sans CJK TC, system-ui, sans-serif"
     fontSize: "56px"
     fontWeight: 400
     lineHeight: 1.1
     letterSpacing: "-0.02em"
   display-mobile:
-    fontFamily: "Noto Sans TC, system-ui, sans-serif"
+    fontFamily: "Noto Sans TC, PingFang TC, Microsoft JhengHei, Noto Sans CJK TC, system-ui, sans-serif"
     fontSize: "36px"
     fontWeight: 400
     lineHeight: 1.15
     letterSpacing: "-0.02em"
   prose:
-    fontFamily: "Noto Sans TC, system-ui, sans-serif"
+    fontFamily: "Noto Sans TC, PingFang TC, Microsoft JhengHei, Noto Sans CJK TC, system-ui, sans-serif"
     fontSize: "16px"
     fontWeight: 400
     lineHeight: 1.7
   display-topic:
-    fontFamily: "Noto Sans TC, system-ui, sans-serif"
+    fontFamily: "Noto Sans TC, PingFang TC, Microsoft JhengHei, Noto Sans CJK TC, system-ui, sans-serif"
     fontSize: "44px"
     fontWeight: 400
     lineHeight: 1.1
     letterSpacing: "-0.02em"
   display-topic-mobile:
-    fontFamily: "Noto Sans TC, system-ui, sans-serif"
+    fontFamily: "Noto Sans TC, PingFang TC, Microsoft JhengHei, Noto Sans CJK TC, system-ui, sans-serif"
     fontSize: "32px"
     fontWeight: 400
     lineHeight: 1.1
     letterSpacing: "-0.02em"
   headline:
-    fontFamily: "Noto Sans TC, system-ui, sans-serif"
+    fontFamily: "Noto Sans TC, PingFang TC, Microsoft JhengHei, Noto Sans CJK TC, system-ui, sans-serif"
     fontSize: "28px"
     fontWeight: 400
     lineHeight: 1.2
     letterSpacing: "-0.01em"
   title:
-    fontFamily: "Noto Sans TC, system-ui, sans-serif"
+    fontFamily: "Noto Sans TC, PingFang TC, Microsoft JhengHei, Noto Sans CJK TC, system-ui, sans-serif"
     fontSize: "22px"
     fontWeight: 400
     lineHeight: 1.4
   body:
-    fontFamily: "Noto Sans TC, system-ui, sans-serif"
+    fontFamily: "Noto Sans TC, PingFang TC, Microsoft JhengHei, Noto Sans CJK TC, system-ui, sans-serif"
     fontSize: "17px"
     fontWeight: 400
     lineHeight: 1.7
   ui:
-    fontFamily: "Noto Sans TC, system-ui, sans-serif"
+    fontFamily: "Noto Sans TC, PingFang TC, Microsoft JhengHei, Noto Sans CJK TC, system-ui, sans-serif"
     fontSize: "15px"
     fontWeight: 400
     lineHeight: 1.7
@@ -165,7 +165,7 @@ components:
 
 ## Typography
 
-**Display／Body Font:** Noto Sans TC（備援：system-ui, sans-serif），以 @fontsource 自架，只載入 400 與 500，依 unicode-range 分段下載。
+**Display／Body Font:** 拉丁字母與數字用 Noto Sans TC（@fontsource 自架，只載入 latin 子集的 400 與 500，約 27 KB）；**中文內文走系統的繁體中文字體**——依序 PingFang TC（macOS／iOS）、Microsoft JhengHei（Windows）、Noto Sans CJK TC（Android／Linux），最後 system-ui。中文不載入網頁字體。
 **Label／Mono Font:** JetBrains Mono（備援：ui-monospace, monospace），只載入拉丁字元的 400 與 500。
 
 **Character:** 一款中性的無襯線字體貫穿全站，字重只用 400 與 500；數字、索引、偽代碼與標籤改用等寬字，欄位才對得齊。不用斜體。
@@ -179,6 +179,11 @@ components:
 - **Data** (500, 26–28px, 等寬)：舞台中的數值、計數面板。
 - **Label** (400, 11px, 0.14em, 全大寫等寬)：計數器與欄位標籤，如 `Step 07 / 26`、章節名；用於資料與量測，不放在標題上方當小標。
 - **Code** (400, 13px, 1.9, 等寬)：偽代碼與等寬按鈕文字，目前行以印章藍紫底加 1px 墨色外框標示。
+
+### 為什麼中文不用網頁字體
+Noto Sans TC 的中文切片很重：網站用到約 1000 個不同的中文字，一頁要下載 25 個、約 800 KB 的字體檔。實測同一頁（Lighthouse 行動版、模擬慢速 4G）：中文＋拉丁網頁字體效能 63／LCP 6.2s，只載入 400 字重 76／4.2s，**中文用系統字體 99／1.8s**。產品目標是效能 ≥ 95，所以選了最後一個。代價是中文字形依平台而異；數字、索引、偽代碼與標籤仍是 JetBrains Mono，圖版的主要視覺不受影響。
+
+字體 CSS 由 `pnpm fonts` 產生（`scripts/subset-fonts.mjs`），只含用到的拉丁字母與等寬字切片；測試會確認它沒有過期、沒有誤加回中文切片。
 
 ### Named Rules
 **The Tabular Rule.** 所有計數、索引、時間軸數字一律等寬、對齊；數字跳動時版面不得位移。

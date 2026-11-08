@@ -15,7 +15,7 @@
     ariaLabel: string;
   } = $props();
 
-  const LABEL_W = 56; // 左側標籤欄
+  const LABEL_W = 76; // 左側標籤欄（要放得下英文的 MERGED）
   const PITCH = 62; // 一欄寬；每一欄對應原陣列的一個索引
   const CELL_H = 38;
   const ROW_T = 46; // 遞迴樹每層的高
