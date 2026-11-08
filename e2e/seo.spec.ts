@@ -139,3 +139,9 @@ test.describe('上一個／下一個主題', () => {
     await expect(last.getByRole('link', { name: /Quick Sort/ })).toHaveAttribute('href', '/en/quick-sort/');
   });
 });
+
+test('Google Search Console 驗證檔：根目錄可取得，內容與檔名一致', async ({ request }) => {
+  const res = await request.get('/google61a314138f530891.html');
+  expect(res.status()).toBe(200);
+  expect((await res.text()).trim()).toBe('google-site-verification: google61a314138f530891.html');
+});
