@@ -89,6 +89,7 @@ const ui = {
       bfBody: '= 左子樹高 − 右子樹高。−1、0、+1 是平衡的；出現 ±2 就失衡，需要旋轉。',
     },
     toc: { complexity: '複雜度', faq: '常見問題' },
+    topicNav: { label: '上一個與下一個主題', prev: '上一個主題', next: '下一個主題' },
     complexityRows: { best: '最佳', average: '平均', worst: '最差', space: '額外空間', stable: '穩定', yes: '是', no: '否' },
   },
   en: {
@@ -178,6 +179,7 @@ const ui = {
       bfBody: '= height of left subtree − height of right subtree. −1, 0 and +1 are balanced; ±2 is unbalanced and needs a rotation.',
     },
     toc: { complexity: 'Complexity', faq: 'FAQ' },
+    topicNav: { label: 'Previous and next topic', prev: 'Previous topic', next: 'Next topic' },
     complexityRows: { best: 'Best', average: 'Average', worst: 'Worst', space: 'Extra space', stable: 'Stable', yes: 'Yes', no: 'No' },
   },
 } as const;

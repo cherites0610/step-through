@@ -12,7 +12,7 @@ test('預設不是投影模式：紙色為 #F5F4F6，且有極淡的邊緣漂移
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundImage);
   expect(bg).toContain('radial-gradient');
   await expect(page.getByRole('button', { name: '投影模式' })).toHaveAttribute('aria-pressed', 'false');
-  await expect(page.getByRole('navigation', { name: '主題' })).toBeVisible();
+  await expect(page.getByRole('navigation', { name: '主題', exact: true })).toBeVisible();
 });
 
 test('投影模式：純白紙面、2px 髮絲線、放大、隱藏章節欄、無漂移，並於重新整理後保留', async ({ page }) => {
@@ -24,7 +24,7 @@ test('投影模式：純白紙面、2px 髮絲線、放大、隱藏章節欄、�
   expect(await cssVar(page, '--hair')).toBe('2px');
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).zoom)).toBe('1.25');
   expect(await page.evaluate(() => getComputedStyle(document.body).backgroundImage)).toBe('none');
-  await expect(page.getByRole('navigation', { name: '主題' })).toBeHidden();
+  await expect(page.getByRole('navigation', { name: '主題', exact: true })).toBeHidden();
   await expect(page.getByRole('button', { name: '投影模式' })).toHaveAttribute('aria-pressed', 'true');
 
   // 主內容沒有被擠壓：舞台仍有足夠寬度

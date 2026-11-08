@@ -12,12 +12,17 @@ for (const lang of ['zh-TW', 'en']) {
         'href',
         `https://step-through.cherites.org/${lang}/${slug}/`,
       );
-      await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(2);
+      // zh-TW、en 與 x-default
+      await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(3);
+      await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute(
+        'href',
+        `https://step-through.cherites.org/zh-TW/${slug}/`,
+      );
 
       const types = await page
         .locator('script[type="application/ld+json"]')
         .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? '{}')['@type']));
-      expect(types).toEqual(['LearningResource', 'FAQPage']);
+      expect(types).toEqual(['LearningResource', 'BreadcrumbList', 'FAQPage']);
     });
   }
 }

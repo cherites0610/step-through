@@ -37,6 +37,7 @@ const jsonLd = [
     url: new URL(`/${lang}/`, Astro.site).href,
     description: text.description,
     inLanguage: lang,
+    image: new URL(`/og/${lang}/home.png`, Astro.site).href,
   },
 ];
 ---

@@ -11,6 +11,7 @@
   import { parseInput, presetsFor } from '../../../core/sorting/input';
   import type { PivotStrategy, SortAlgorithm } from '../../../core/sorting/types';
   import { explain, t, type Locale } from '../../../i18n';
+  import { track } from '../../../lib/analytics';
 
   type Algo = 'insertion' | 'bubble' | 'selection' | 'merge' | 'quick';
 
@@ -47,8 +48,12 @@
   function apply(e: SubmitEvent) {
     e.preventDefault();
     const r = parseInput(draft);
-    if (r.ok) setValues(r.values);
-    else error = text.input.errors[r.error];
+    if (r.ok) {
+      setValues(r.values);
+      track('custom_input', { topic: algo, count: r.values.length });
+    } else {
+      error = text.input.errors[r.error];
+    }
   }
 
   const chip = 'h-9 border border-hairline px-3 text-[13px] hover:border-ink';
