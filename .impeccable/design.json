@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-07T18:33:51.824Z",
+  "generatedAt": "2026-11-08T05:22:57.188Z",
   "title": "Design System: 步步看懂",
   "extensions": {
     "colorMeta": {
@@ -160,7 +160,7 @@
       "refersTo": "button-primary",
       "description": "首頁的主要行動；畫面上只有一個實心主要控制。",
       "html": "<a class=\"ds-btn-primary\" href=\"#index\">瀏覽主題目錄</a>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; background: #16181A; color: #F5F4F6; border: 1px solid #16181A; border-radius: 0; font: 400 15px 'Noto Sans TC', system-ui, sans-serif; text-decoration: none; } .ds-btn-primary:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; background: #16181A; color: #F5F4F6; border: 1px solid #16181A; border-radius: 0; font: 400 15px 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif; text-decoration: none; } .ds-btn-primary:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
     },
     {
       "name": "Control Button",
@@ -176,7 +176,7 @@
       "refersTo": "chip-preset",
       "description": "隨機／最佳情況／最差情況；立即動作，沒有選取態。",
       "html": "<button class=\"ds-chip\">最差情況</button>",
-      "css": ".ds-chip { height: 36px; padding: 0 12px; background: #F5F4F6; color: #16181A; border: 1px solid #C9C7C4; border-radius: 0; font: 400 13px 'Noto Sans TC', system-ui, sans-serif; } .ds-chip:hover { border-color: #16181A; } .ds-chip:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
+      "css": ".ds-chip { height: 36px; padding: 0 12px; background: #F5F4F6; color: #16181A; border: 1px solid #C9C7C4; border-radius: 0; font: 400 13px 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif; } .ds-chip:hover { border-color: #16181A; } .ds-chip:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
     },
     {
       "name": "Array Input",
@@ -192,7 +192,7 @@
       "refersTo": "nav-item-current",
       "description": "主題頁左側章節欄；目前項目為藍紫底加 1px 墨色外框。",
       "html": "<ul class=\"ds-nav\"><li><a class=\"ds-nav-item\" aria-current=\"page\" href=\"#\">插入排序</a></li><li><a class=\"ds-nav-item\" href=\"#\">氣泡排序</a></li></ul>",
-      "css": ".ds-nav { list-style: none; margin: 0; padding: 0; width: 200px; } .ds-nav-item { display: block; padding: 6px 8px; font: 400 15px 'Noto Sans TC', system-ui, sans-serif; color: #16181A; text-decoration: none; } .ds-nav-item[aria-current='page'] { background: #DCDDF3; outline: 1px solid #16181A; }"
+      "css": ".ds-nav { list-style: none; margin: 0; padding: 0; width: 200px; } .ds-nav-item { display: block; padding: 6px 8px; font: 400 15px 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif; color: #16181A; text-decoration: none; } .ds-nav-item[aria-current='page'] { background: #DCDDF3; outline: 1px solid #16181A; }"
     },
     {
       "name": "Projection Toggle",
@@ -208,7 +208,7 @@
       "refersTo": "roadmap-row-live-hover",
       "description": "首頁主題目錄：已上線＝實心方框＋連結；即將推出＝虛線方框＋非連結，文字維持墨色。",
       "html": "<ul class=\"ds-roadmap\"><li><a class=\"ds-row ds-row-live\" href=\"#\"><svg width=\"10\" height=\"10\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><rect width=\"10\" height=\"10\" fill=\"currentColor\"/></svg><span>插入排序</span></a></li><li><div class=\"ds-row ds-row-soon\"><svg width=\"10\" height=\"10\" viewBox=\"0 0 10 10\" aria-hidden=\"true\"><rect x=\"0.5\" y=\"0.5\" width=\"9\" height=\"9\" fill=\"none\" stroke=\"currentColor\" stroke-dasharray=\"2 2\"/></svg><span>合併排序</span></div></li></ul>",
-      "css": ".ds-roadmap { list-style: none; margin: 0; padding: 0; width: 260px; } .ds-row { display: flex; align-items: center; gap: 12px; padding: 10px 8px; font: 400 17px 'Noto Sans TC', system-ui, sans-serif; color: #16181A; text-decoration: none; } .ds-row-live:hover { background: #DCDDF3; outline: 1px solid #16181A; } .ds-row-soon { opacity: 0.7; }"
+      "css": ".ds-roadmap { list-style: none; margin: 0; padding: 0; width: 260px; } .ds-row { display: flex; align-items: center; gap: 12px; padding: 10px 8px; font: 400 17px 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif; color: #16181A; text-decoration: none; } .ds-row-live:hover { background: #DCDDF3; outline: 1px solid #16181A; } .ds-row-soon { opacity: 0.7; }"
     },
     {
       "name": "Stage Plate",
@@ -248,7 +248,7 @@
       "refersTo": "chip-preset",
       "description": "基準選法的單選晶片；選取時反白為實心墨色。",
       "html": "<div style=\"display:flex;gap:8px\"><label class=\"ds-radio\"><input type=\"radio\" name=\"p\" class=\"ds-sr\"/>首</label><label class=\"ds-radio ds-on\"><input type=\"radio\" name=\"p\" class=\"ds-sr\" checked/>尾</label><label class=\"ds-radio\"><input type=\"radio\" name=\"p\" class=\"ds-sr\"/>三數取中</label></div>",
-      "css": ".ds-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .ds-radio { display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border: 1px solid #C9C7C4; background: #F5F4F6; color: #16181A; font: 400 13px 'Noto Sans TC', system-ui, sans-serif; cursor: pointer; } .ds-radio:hover { border-color: #16181A; } .ds-on { background: #16181A; border-color: #16181A; color: #F5F4F6; }"
+      "css": ".ds-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .ds-radio { display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border: 1px solid #C9C7C4; background: #F5F4F6; color: #16181A; font: 400 13px 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif; cursor: pointer; } .ds-radio:hover { border-color: #16181A; } .ds-on { background: #16181A; border-color: #16181A; color: #F5F4F6; }"
     },
     {
       "name": "AVL Tree Node",

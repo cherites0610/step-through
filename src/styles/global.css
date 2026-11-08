@@ -1,10 +1,7 @@
 @import 'tailwindcss';
 
-/* 自架字體（只用 400 / 500）；Noto Sans TC 依 unicode-range 分段，只下載頁面用到的字 */
-@import '@fontsource/noto-sans-tc/400.css';
-@import '@fontsource/noto-sans-tc/500.css';
-@import '@fontsource/jetbrains-mono/latin-400.css';
-@import '@fontsource/jetbrains-mono/latin-500.css';
+/* 自架字體的 @font-face（由 pnpm fonts 產生，只含拉丁字母／數字與等寬字，約 1.4 KB） */
+@import './fonts.css';
 
 /* 設計代幣：見 DESIGN.md（圖版 The Plate Section） */
 @theme {
@@ -14,7 +11,8 @@
   --color-ink: #16181a;
   --color-hairline: #c9c7c4;
   --color-stamp: #dcddf3;
-  --font-sans: 'Noto Sans TC', system-ui, sans-serif;
+  /* Noto Sans TC 只載入拉丁字母／數字；中文內文走系統的繁體中文字體，不下載約 800 KB 的中文字體檔 */
+  --font-sans: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
