@@ -115,7 +115,7 @@ test.describe('AVL 樹插入', () => {
     await expect(page.getByRole('img', { name: /目前的樹（中序）：3, 5, 8/ })).toBeVisible();
   });
 
-  test('空樹：虛線的根預留位置、「空樹」與「10 會成為根」，並對著刻度軸上的 10', async ({ page }) => {
+  test('空樹：整組內容置中——虛線根預留框、「空樹」標題與「10 會成為根」', async ({ page }) => {
     await page.goto('/zh-TW/avl-insert/');
     await toEnd(page);
     await slider(page, '步驟').fill('0');
@@ -124,16 +124,44 @@ test.describe('AVL 樹插入', () => {
     await expect(svg).toContainText('10 會成為根');
     await expect(page.getByText('尚未開始')).toBeVisible();
 
-    // 根的預留位置是虛線框，水平位置正好在刻度 10（最左）上方
-    const slot = await svg.locator('rect[stroke-dasharray="4 4"]').boundingBox();
-    const tick = await svg.locator('rect[width="6"]').first().boundingBox();
-    expect(Math.abs(slot!.x + slot!.width / 2 - (tick!.x + tick!.width / 2))).toBeLessThan(2);
+    const box = (await svg.boundingBox())!;
+    const slot = (await svg.locator('rect[stroke-dasharray="6 5"]').boundingBox())!;
+    const title = (await svg.getByText('空樹', { exact: true }).boundingBox())!;
+    const mid = box.x + box.width / 2;
+    // 預留框與標題都在舞台水平正中央
+    expect(Math.abs(slot.x + slot.width / 2 - mid)).toBeLessThan(2);
+    expect(Math.abs(title.x + title.width / 2 - mid)).toBeLessThan(2);
+    // 整組內容在垂直方向也大致置中（上下留白差不多）
+    const hint = (await svg.getByText('10 會成為根').boundingBox())!;
+    const above = slot.y - box.y;
+    const below = box.y + box.height - (hint.y + hint.height);
+    expect(above).toBeGreaterThan(20);
+    expect(below).toBeGreaterThan(20);
 
-    // 下一步：根出現在同一個水平位置
+    // 下一步：根出現，空狀態消失，根的位置對著它在刻度軸上的刻度
     await page.getByRole('button', { name: '下一步' }).click();
-    const root = await svg.locator('g.node rect').first().boundingBox();
-    expect(Math.abs(root!.x + root!.width / 2 - (tick!.x + tick!.width / 2))).toBeLessThan(2);
     await expect(svg).not.toContainText('空樹');
+    const tick = (await svg.locator('rect[width="6"]').first().boundingBox())!;
+    const root = (await svg.locator('g.node rect').first().boundingBox())!;
+    expect(Math.abs(root.x + root.width / 2 - (tick.x + tick.width / 2))).toBeLessThan(2);
+  });
+
+  test('只有一個數字時：空狀態不擠在一起，文字都在舞台內，樹也置中', async ({ page }) => {
+    await page.goto('/zh-TW/avl-insert/');
+    await page.getByRole('textbox').fill('7');
+    await page.getByRole('button', { name: '套用' }).click();
+    const svg = page.getByRole('img', { name: /目前的樹/ });
+    await expect(svg).toContainText('7 會成為根');
+    const box = (await svg.boundingBox())!;
+    // 舞台有足夠高度：說明文字不壓到下方的刻度軸
+    const hint = (await svg.getByText('7 會成為根').boundingBox())!;
+    const axisTick = (await svg.locator('rect[width="6"]').first().boundingBox())!;
+    expect(hint.y + hint.height).toBeLessThan(axisTick.y - 8);
+    expect(box.height).toBeGreaterThanOrEqual(250);
+
+    await slider(page, '步驟').fill('1');
+    const node = (await svg.locator('g.node rect').first().boundingBox())!;
+    expect(Math.abs(node.x + node.width / 2 - (box.x + box.width / 2))).toBeLessThan(2); // 唯一的節點在正中央
   });
 
   for (const [label, seq] of [

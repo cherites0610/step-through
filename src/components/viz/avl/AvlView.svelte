@@ -9,7 +9,6 @@
     insertLabel,
     emptyLabel,
     rootLabel,
-    rootValue,
     rootHint,
     ariaLabel,
   }: {
@@ -23,8 +22,6 @@
     emptyLabel: string;
     /** 空樹時，根節點預留位置裡的標籤 */
     rootLabel: string;
-    /** 第一個要插入的數字：它會成為根，用來決定預留位置的水平位置 */
-    rootValue: number | undefined;
     /** 空樹時的提示，例如「10 會成為根」 */
     rootHint: string;
     ariaLabel: string;
@@ -47,8 +44,14 @@
   };
 
   const rank = $derived(new Map(keys.map((k, i) => [k, i])));
-  const width = $derived(keys.length * PITCH + PADX * 2);
-  const H = $derived(TOP + levels * LEVEL);
+  // 數字很少時樹會很窄：舞台設最小寬度，樹與空狀態都置中，說明文字也放得下
+  const MIN_W = 300;
+  const contentW = $derived(keys.length * PITCH + PADX * 2);
+  const width = $derived(Math.max(contentW, MIN_W));
+  const ox = $derived((width - contentW) / 2);
+  // 最小高度：只有 1～2 層的樹也要放得下空狀態的整組內容與刻度軸
+  const MIN_H = 260;
+  const H = $derived(Math.max(TOP + levels * LEVEL, MIN_H));
 
   const nodes = $derived.by(() => {
     const out: Laid[] = [];
@@ -57,7 +60,7 @@
       out.push({
         id: n.id,
         value: n.value,
-        x: PADX + (rank.get(n.value) ?? 0) * PITCH,
+        x: ox + PADX + (rank.get(n.value) ?? 0) * PITCH + (PITCH - NODE_W) / 2,
         y: TOP + depth * LEVEL,
         bf: balanceFactor(n),
         parent,
@@ -149,9 +152,9 @@
 
     <!-- 大小順序刻度軸：整條軌跡所有數字由小到大。節點的水平位置就是它在這條軸上的位置。
          已掛進樹＝實心刻度，還沒插入＝空心刻度（不只靠顏色）。 -->
-    <line x1={PADX} x2={width - PADX} y1={AXIS_Y} y2={AXIS_Y} stroke="var(--color-hairline)" />
+    <line x1={ox + PADX} x2={ox + contentW - PADX} y1={AXIS_Y} y2={AXIS_Y} stroke="var(--color-hairline)" />
     {#each keys as k, i (k)}
-      {@const cx = PADX + i * PITCH + NODE_W / 2}
+      {@const cx = ox + PADX + i * PITCH + PITCH / 2}
       <rect
         x={cx - 3}
         y={AXIS_Y - 3}
@@ -193,46 +196,46 @@
     {/if}
 
     {#if !state.root}
-      <!-- 空樹：在根節點之後會出現的位置畫一個虛線方框（同陣列視圖的「空位」），下方標示空樹 -->
-      {@const rx = PADX + (rank.get(rootValue ?? keys[0]) ?? 0) * PITCH}
-      <!-- 說明文字比方框寬：靠近左邊就靠左對齊、靠近右邊就靠右對齊，避免被畫面邊緣截掉 -->
-      {@const cx = rx + NODE_W / 2}
-      {@const HALF_TEXT = 76}
-      {@const anchor = cx - HALF_TEXT < 4 ? 'start' : cx + HALF_TEXT > width - 4 ? 'end' : 'middle'}
-      {@const tx = anchor === 'start' ? rx : anchor === 'end' ? rx + NODE_W : cx}
+      <!-- 空樹：整組內容在舞台中央——虛線的「根」預留框（同陣列視圖的「空位」）、
+           「空樹」標題、一行「{v} 會成為根」。第一個數字掛上去後就切換成正常的樹。 -->
+      {@const SLOT = 72}
+      {@const BLOCK_H = SLOT + 34 + 26}
+      {@const y0 = (AXIS_Y - 12 - BLOCK_H) / 2}
+      {@const cxm = width / 2}
       <rect
-        x={rx + 1}
-        y={TOP + 1}
-        width={NODE_W - 2}
-        height={NODE_H - 2}
+        x={cxm - SLOT / 2 + 0.5}
+        y={y0 + 0.5}
+        width={SLOT - 1}
+        height={SLOT - 1}
         fill="none"
         stroke="var(--color-hairline)"
-        stroke-width="1"
-        stroke-dasharray="4 4"
+        stroke-width="1.5"
+        stroke-dasharray="6 5"
       />
       <text
-        x={rx + NODE_W / 2}
-        y={TOP + NODE_H / 2 + 4}
+        x={cxm}
+        y={y0 + SLOT / 2 + 4}
         text-anchor="middle"
         font-family="var(--font-mono)"
-        font-size="11"
+        font-size="12"
         letter-spacing="1.5"
         fill="var(--color-ink)">{rootLabel}</text
       >
       <text
-        x={tx}
-        y={TOP + NODE_H + 24}
-        text-anchor={anchor}
-        font-family="var(--font-mono)"
-        font-size="12"
+        x={cxm}
+        y={y0 + SLOT + 34}
+        text-anchor="middle"
+        font-family="var(--font-sans)"
+        font-size="20"
+        font-weight="500"
         fill="var(--color-ink)">{emptyLabel}</text
       >
       <text
-        x={tx}
-        y={TOP + NODE_H + 44}
-        text-anchor={anchor}
-        font-family="var(--font-mono)"
-        font-size="12"
+        x={cxm}
+        y={y0 + SLOT + 34 + 26}
+        text-anchor="middle"
+        font-family="var(--font-sans)"
+        font-size="15"
         fill="var(--color-ink)">{rootHint}</text
       >
     {/if}
