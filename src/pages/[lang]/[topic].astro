@@ -4,6 +4,7 @@ import Base from '../../layouts/Base.astro';
 import LangSwitch from '../../components/LangSwitch.astro';
 import ProjectionToggle from '../../components/ProjectionToggle.astro';
 import SortViz from '../../components/viz/sorting/SortViz.svelte';
+import AvlViz from '../../components/viz/avl/AvlViz.svelte';
 import { t, type Locale } from '../../i18n';
 import { locateTopic, topicOrder } from '../../i18n/roadmap';
 
@@ -64,7 +65,9 @@ const rows: [string, string][] = [
   [cr.average, d.complexity.average],
   [cr.worst, d.complexity.worst],
   [cr.space, d.complexity.space],
-  [cr.stable, d.complexity.stable ? cr.yes : cr.no],
+  ...(d.complexity.stable === undefined
+    ? []
+    : [[cr.stable, d.complexity.stable ? cr.yes : cr.no] as [string, string]]),
 ];
 ---
 
@@ -121,7 +124,18 @@ const rows: [string, string][] = [
         <p class="mt-3 max-w-[65ch] text-[15px]">{d.description}</p>
       </div>
 
-      <SortViz client:load lang={lang} algo={d.algo} initial={d.example} />
+      {
+        d.kind === 'tree' ? (
+          <AvlViz client:load lang={lang} initial={d.example} />
+        ) : (
+          <SortViz
+            client:load
+            lang={lang}
+            algo={d.algo as 'insertion' | 'bubble' | 'selection' | 'merge' | 'quick'}
+            initial={d.example}
+          />
+        )
+      }
 
       <article class="border-t border-hairline px-4 py-10 lg:px-8">
         <div class="prose-plate max-w-[65ch]">

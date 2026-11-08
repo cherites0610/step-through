@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 const widths = [320, 390, 768, 1280];
 const pages = [
@@ -8,6 +8,8 @@ const pages = [
   '/en/insertion-sort/',
   '/zh-TW/merge-sort/',
   '/en/quick-sort/',
+  '/zh-TW/avl-insert/',
+  '/en/avl-insert/',
 ];
 
 for (const width of widths) {

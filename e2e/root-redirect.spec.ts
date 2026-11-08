@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures';
 
 // 預設模擬繁體中文瀏覽器（Playwright 預設是 en-US，會被正確地導向 /en/）
 test.use({ locale: 'zh-TW' });
