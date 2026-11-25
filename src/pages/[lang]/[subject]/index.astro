@@ -1,0 +1,173 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import SubjectMap from '../../../components/map/SubjectMap.astro';
+import { locales, t, type Locale } from '../../../i18n';
+import { isOpen, pad2, subjects, type Subject } from '../../../data/subjects';
+
+export function getStaticPaths() {
+  return locales.flatMap((lang) =>
+    subjects.filter(isOpen).map((subject) => ({ params: { lang, subject: subject.id }, props: { subject } })),
+  );
+}
+
+const { subject } = Astro.props as { subject: Subject };
+const lang = Astro.params.lang as Locale;
+const text = t(lang);
+const s = text.subject;
+const h = text.home;
+
+// 已上線的主題：以 content collection 為準
+const live = new Set(
+  (await getCollection('topics')).filter((e) => e.data.lang === lang).map((e) => e.data.topic),
+);
+
+const chapters = [...subject.chapters].sort((a, b) => a.no - b.no);
+const byId = new Map(chapters.map((c) => [c.id, c]));
+const unitCount = chapters.reduce((n, c) => n + c.units.length, 0);
+const liveCount = chapters.reduce((n, c) => n + c.units.filter((u) => u.topic && live.has(u.topic)).length, 0);
+const fill = (tpl: string, vars: Record<string, string | number>) =>
+  tpl.replace(/\{(\w+)\}/g, (_, k: string) => String(vars[k] ?? `{${k}}`));
+
+const url = new URL(`/${lang}/${subject.id}/`, Astro.site).href;
+const title = `${subject.title}學習地圖｜${text.siteName}`;
+const description = `${subject.title}的章節先修關係與學習順序：${subject.scope}適用${subject.exams.join('、')}考試準備。`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: subject.title,
+    description,
+    inLanguage: lang,
+    url,
+    isAccessibleForFree: true,
+    provider: { '@type': 'Organization', name: text.siteName, url: new URL(`/${lang}/`, Astro.site).href },
+    hasPart: chapters.map((c) => ({ '@type': 'Course', name: `${pad2(c.no)} ${c.title}`, url: `${url}#ch-${c.id}` })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: text.siteName, item: new URL(`/${lang}/`, Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: subject.title, item: url },
+    ],
+  },
+];
+---
+
+<Base lang={lang} title={title} description={description} path={`${subject.id}/`} jsonLd={jsonLd}>
+  <header class="flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6 lg:px-10">
+    <a href={`/${lang}/`} class="shrink-0 font-medium">{text.siteName}</a>
+    <span class="text-[15px]">{subject.title}</span>
+  </header>
+
+  <main class="mx-auto max-w-[1280px] px-4 lg:px-10">
+    <div class="pt-10">
+      <h1 class="text-[44px] leading-[1.1] tracking-[-0.02em] max-md:text-[32px]">{subject.title}</h1>
+      <p class="mt-3 max-w-[65ch] text-[17px] leading-[1.7]">{subject.scope}</p>
+      <p class="mt-3 font-mono text-[13px] tabular-nums">
+        {fill(s.summary, { chapters: chapters.length, units: unitCount, live: liveCount })}
+        <span class="mx-2" aria-hidden="true">·</span>
+        {fill(s.exams, { exams: subject.exams.join('、') })}
+      </p>
+    </div>
+
+    <section class="mt-10 border-t border-ink pt-6" aria-labelledby="map-heading">
+      <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
+        <div>
+          <h2 id="map-heading" class="text-[28px] leading-[1.2] tracking-[-0.01em]">{s.mapHeading}</h2>
+          <p class="mt-2 max-w-[60ch] text-[15px]">{s.mapNote}</p>
+        </div>
+        <p class="flex items-center gap-5 font-mono text-[13px]" aria-hidden="true">
+          <span class="inline-flex items-center gap-2">
+            <svg width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" fill="currentColor" /></svg>
+            {h.live}
+          </span>
+          <span class="inline-flex items-center gap-2">
+            <svg width="10" height="10" viewBox="0 0 10 10">
+              <rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-dasharray="2 2" />
+            </svg>
+            {h.soon}
+          </span>
+        </p>
+      </div>
+      <div class="mt-6">
+        <SubjectMap
+          subject={subject}
+          live={live}
+          labels={{ live: h.live, soon: h.soon, units: s.units, mapLabel: fill(s.mapLabel, { subject: subject.title }) }}
+        />
+      </div>
+    </section>
+
+    <section class="mt-14 pb-16" aria-labelledby="list-heading">
+      <h2 id="list-heading" class="text-[28px] leading-[1.2] tracking-[-0.01em]">{s.listHeading}</h2>
+      <ol class="mt-6 border-t border-ink">
+        {
+          chapters.map((c) => (
+            <li id={`ch-${c.id}`} class="grid scroll-mt-4 gap-x-8 gap-y-3 border-b border-hairline py-6 md:grid-cols-[minmax(0,280px)_1fr]">
+              <div>
+                <h3 class="flex items-baseline gap-3">
+                  <span class="font-mono text-[13px] tabular-nums">{pad2(c.no)}</span>
+                  <span class="text-[22px] leading-[1.3]">{c.title}</span>
+                </h3>
+                <p class="mt-2 text-[15px]">
+                  {c.prereqs.length ? (
+                    <>
+                      {s.prereqs}：
+                      {c.prereqs.map((id, i) => {
+                        const p = byId.get(id)!;
+                        return (
+                          <>
+                            {i > 0 && '、'}
+                            <a href={`#ch-${p.id}`} class="underline underline-offset-4">
+                              {pad2(p.no)} {p.title}
+                            </a>
+                          </>
+                        );
+                      })}
+                    </>
+                  ) : (
+                    s.noPrereqs
+                  )}
+                </p>
+              </div>
+              <ul class="grid gap-x-6 sm:grid-cols-2">
+                {c.units.map((u) =>
+                  u.topic && live.has(u.topic) ? (
+                    <li>
+                      <a
+                        href={`/${lang}/${u.topic}/`}
+                        class="-mx-2 flex items-baseline gap-3 px-2 py-2 hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink"
+                      >
+                        <svg class="shrink-0 self-center" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                          <rect width="10" height="10" fill="currentColor" />
+                        </svg>
+                        <span class="text-[17px]">{u.title}</span>
+                        <span class="sr-only">{h.live}</span>
+                      </a>
+                    </li>
+                  ) : (
+                    <li class="-mx-2 flex items-baseline gap-3 px-2 py-2 text-ink/70">
+                      <svg class="shrink-0 self-center" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                        <rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-dasharray="2 2" />
+                      </svg>
+                      <span class="text-[17px]">{u.title}</span>
+                      <span class="sr-only">{h.soon}</span>
+                    </li>
+                  ),
+                )}
+              </ul>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </main>
+
+  <footer class="border-t border-hairline">
+    <div class="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-4 py-6 text-[13px] lg:px-10">
+      <p>{h.footer}</p>
+    </div>
+  </footer>
+</Base>

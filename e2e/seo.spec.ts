@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 
 const SITE = 'https://step-through.cherites.org';
 const topics = ['insertion-sort', 'bubble-sort', 'selection-sort', 'merge-sort', 'quick-sort', 'avl-insert'];
+const subjects = ['data-structures'];
 
 const meta = (page: Page, sel: string) => page.locator(sel).first().getAttribute('content');
 const ldTypes = (page: Page) =>
@@ -61,8 +62,9 @@ test('首頁有 title、description、canonical，沒有 hreflang', async ({ pag
       expect(lr.url).toBe(`${SITE}/${lang}/${slug}/`);
 
       const bc = await page.locator('script[type="application/ld+json"]').nth(1).evaluate((e) => JSON.parse(e.textContent!));
-      expect(bc.itemListElement.map((i: { position: number }) => i.position)).toEqual([1, 2]);
-      expect(bc.itemListElement[1].item).toBe(`${SITE}/${lang}/${slug}/`);
+      expect(bc.itemListElement.map((i: { position: number }) => i.position)).toEqual([1, 2, 3]);
+      expect(bc.itemListElement[1].item).toBe(`${SITE}/${lang}/data-structures/`);
+      expect(bc.itemListElement[2].item).toBe(`${SITE}/${lang}/${slug}/`);
     });
   }
 }
@@ -80,11 +82,11 @@ test('sitemap：只有 zh-TW 網址，不含根路徑、404 與英文頁', async
   const xml = await (await request.get('/sitemap-0.xml')).text();
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 
-  expect(locs).toHaveLength(topics.length + 1);
+  expect(locs).toHaveLength(topics.length + subjects.length + 1);
   expect(locs).not.toContain(`${SITE}/`);
   expect(locs.some((l) => l.includes('404'))).toBe(false);
   expect(locs).toContain(`${SITE}/zh-TW/`);
-  for (const t of topics) expect(locs).toContain(`${SITE}/zh-TW/${t}/`);
+  for (const t of [...topics, ...subjects]) expect(locs).toContain(`${SITE}/zh-TW/${t}/`);
   expect(xml).not.toContain('/en/');
   expect(xml).not.toContain('hreflang');
 });
@@ -127,21 +129,19 @@ test('根路徑 / 是 noindex 的跳轉頁，canonical 指向 zh-TW', async ({ r
 });
 
 test.describe('上一個／下一個主題', () => {
-  test('依路線圖順序，頭尾各缺一邊', async ({ page }) => {
+  test('依章節編號與章內順序（08 平衡搜尋樹在 10 排序之前），頭尾各缺一邊', async ({ page }) => {
+    const nav = () => page.getByRole('navigation', { name: '上一個與下一個主題' });
+    await page.goto('/zh-TW/avl-insert/');
+    await expect(nav().getByRole('link')).toHaveCount(1);
+    await expect(nav().getByRole('link', { name: /插入排序/ })).toHaveAttribute('href', '/zh-TW/insertion-sort/');
+
     await page.goto('/zh-TW/insertion-sort/');
-    const nav = page.getByRole('navigation', { name: '上一個與下一個主題' });
-    await expect(nav.getByRole('link')).toHaveCount(1);
-    await expect(nav.getByRole('link', { name: /氣泡排序/ })).toHaveAttribute('href', '/zh-TW/bubble-sort/');
+    await expect(nav().getByRole('link', { name: /AVL 樹插入/ })).toHaveAttribute('href', '/zh-TW/avl-insert/');
+    await expect(nav().getByRole('link', { name: /氣泡排序/ })).toHaveAttribute('href', '/zh-TW/bubble-sort/');
 
     await page.goto('/zh-TW/quick-sort/');
-    const mid = page.getByRole('navigation', { name: '上一個與下一個主題' });
-    await expect(mid.getByRole('link', { name: /合併排序/ })).toHaveAttribute('href', '/zh-TW/merge-sort/');
-    await expect(mid.getByRole('link', { name: /AVL 樹插入/ })).toHaveAttribute('href', '/zh-TW/avl-insert/');
-
-    await page.goto('/zh-TW/avl-insert/');
-    const last = page.getByRole('navigation', { name: '上一個與下一個主題' });
-    await expect(last.getByRole('link')).toHaveCount(1);
-    await expect(last.getByRole('link', { name: /快速排序/ })).toHaveAttribute('href', '/zh-TW/quick-sort/');
+    await expect(nav().getByRole('link')).toHaveCount(1);
+    await expect(nav().getByRole('link', { name: /合併排序/ })).toHaveAttribute('href', '/zh-TW/merge-sort/');
   });
 });
 

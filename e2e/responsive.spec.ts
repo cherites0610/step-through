@@ -3,6 +3,7 @@ import { expect, test } from './fixtures';
 const widths = [320, 390, 768, 1280];
 const pages = [
   '/zh-TW/',
+  '/zh-TW/data-structures/',
   '/zh-TW/insertion-sort/',
   '/zh-TW/merge-sort/',
   '/zh-TW/quick-sort/',

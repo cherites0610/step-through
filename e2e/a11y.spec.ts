@@ -28,6 +28,11 @@ for (const slug of topics) {
   });
 }
 
+test('科目頁（資料結構學習地圖）沒有無障礙違規', async ({ page }) => {
+  await page.goto('/zh-TW/data-structures/');
+  await scan(page);
+});
+
 test('404 頁沒有無障礙違規', async ({ page }) => {
   await page.goto('/404.html');
   await scan(page);
