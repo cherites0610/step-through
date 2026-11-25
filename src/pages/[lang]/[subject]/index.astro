@@ -56,9 +56,11 @@ const jsonLd = [
 ---
 
 <Base lang={lang} title={title} description={description} path={`${subject.id}/`} jsonLd={jsonLd}>
-  <header class="flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6 lg:px-10">
-    <a href={`/${lang}/`} class="shrink-0 font-medium">{text.siteName}</a>
-    <span class="text-[15px]">{subject.title}</span>
+  <header class="sticky top-0 z-20 bg-paper flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6 lg:px-10">
+    <a href={`/${lang}/`} class="shrink-0 font-medium max-md:hidden">{text.siteName}</a>
+    <!-- 手機：明確的返回連結 -->
+    <a href={`/${lang}/#index`} class="shrink-0 text-[15px] underline underline-offset-4 md:hidden">← {h.indexHeading}</a>
+    <span class="min-w-0 truncate text-[15px]">{subject.title}</span>
   </header>
 
   <main class="mx-auto max-w-[1280px] px-4 lg:px-10">
@@ -105,7 +107,7 @@ const jsonLd = [
       <ol class="mt-6 border-t border-ink">
         {
           chapters.map((c) => (
-            <li id={`ch-${c.id}`} class="grid scroll-mt-4 gap-x-8 gap-y-3 border-b border-hairline py-6 md:grid-cols-[minmax(0,280px)_1fr]">
+            <li id={`ch-${c.id}`} class="grid scroll-mt-14 gap-x-8 gap-y-3 border-b border-hairline py-6 md:grid-cols-[minmax(0,280px)_1fr]">
               <div>
                 <h3 class="flex items-baseline gap-3">
                   <span class="font-mono text-[13px] tabular-nums">{pad2(c.no)}</span>

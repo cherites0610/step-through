@@ -69,5 +69,23 @@ const siteName = t(lang).siteName;
   </head>
   <body>
     <slot />
+    <script>
+      // 同一頁內的錨點連結（地圖節點、建議先讀、瀏覽科目）不新增瀏覽紀錄：
+      // 否則手機的「上一頁」會先在頁內的錨點之間來回，回不到上一頁。
+      document.addEventListener('click', (e) => {
+        if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        const a = (e.target as Element | null)?.closest('a');
+        const href = a?.getAttribute('href') ?? '';
+        if (href.length < 2 || !href.startsWith('#')) return;
+        const target = document.getElementById(decodeURIComponent(href.slice(1)));
+        if (!target) return;
+        e.preventDefault();
+        history.replaceState(history.state, '', href);
+        target.scrollIntoView();
+        // 讓鍵盤與螢幕閱讀器的位置也跟著移過去
+        if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
+      });
+    </script>
   </body>
 </html>
