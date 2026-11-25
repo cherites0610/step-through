@@ -130,7 +130,8 @@ export function layoutMap(nodes: MapNodeInput[], options: Partial<LayoutOptions>
   const minX = Math.min(...slots.flatMap((row) => row.map((s) => cx.get(s.key)! - width(s) / 2)));
   const maxX = Math.max(...slots.flatMap((row) => row.map((s) => cx.get(s.key)! + width(s) / 2)));
   const top = (l: number) => l * (o.nodeHeight + o.gapY);
-  const X = (key: string) => cx.get(key)! - minX;
+  // 取整數像素：避免浮點誤差，SVG 線條也比較銳利
+  const X = (key: string) => Math.round(cx.get(key)! - minX);
 
   const placed: PlacedNode[] = nodes.map((n) => ({
     id: n.id,
@@ -163,7 +164,7 @@ export function layoutMap(nodes: MapNodeInput[], options: Partial<LayoutOptions>
   });
 
   return {
-    width: maxX - minX,
+    width: Math.round(maxX - minX),
     height: top(depth - 1) + o.nodeHeight,
     layers: slots.map((row) => row.filter((s) => s.real).map((s) => s.key)),
     nodes: placed,

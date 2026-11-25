@@ -3,7 +3,16 @@ import type { Page } from '@playwright/test';
 
 const SITE = 'https://step-through.cherites.org';
 const topics = ['insertion-sort', 'bubble-sort', 'selection-sort', 'merge-sort', 'quick-sort', 'avl-insert'];
-const subjects = ['data-structures'];
+const subjects = [
+  'data-structures',
+  'algorithms',
+  'operating-systems',
+  'computer-organization',
+  'discrete-math',
+  'linear-algebra',
+  'databases',
+  'intro-cs',
+];
 
 const meta = (page: Page, sel: string) => page.locator(sel).first().getAttribute('content');
 const ldTypes = (page: Page) =>

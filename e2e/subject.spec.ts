@@ -23,13 +23,13 @@ test.describe('科目頁：資料結構學習地圖', () => {
     // 先修共 12 條（鏈結串列 → 圖、樹與二元樹 → 圖 等）
     await expect(map.locator('g[aria-hidden="true"] > g')).toHaveCount(12);
     await expect(map.locator('a.is-live')).toHaveCount(2);
-    await expect(map.getByRole('link', { name: /^10 排序，已上線 5／8/ })).toBeVisible();
-    await expect(map.getByRole('link', { name: /^08 平衡搜尋樹，已上線 1／6/ })).toBeVisible();
-    await expect(map.getByRole('link', { name: /^09 圖，即將推出/ })).toBeVisible();
+    await expect(map.getByRole('link', { name: /^10\s*排序\s*已上線 5／8/ })).toBeVisible();
+    await expect(map.getByRole('link', { name: /^08\s*平衡搜尋樹\s*已上線 1／6/ })).toBeVisible();
+    await expect(map.getByRole('link', { name: /^09\s*圖\s*即將推出/ })).toBeVisible();
   });
 
   test('點地圖節點跳到章節清單的那一章', async ({ page }) => {
-    await page.getByRole('link', { name: /^10 排序/ }).click();
+    await page.getByRole('link', { name: /^10\s*排序/ }).click();
     await expect(page).toHaveURL(/#ch-sorting$/);
     await expect(page.locator('#ch-sorting')).toBeInViewport();
   });
@@ -53,6 +53,24 @@ test.describe('科目頁：資料結構學習地圖', () => {
   });
 });
 
-test('沒有開放的科目沒有頁面', async ({ request }) => {
-  expect((await request.get('/zh-TW/algorithms/')).status()).toBe(404);
-});
+const others: [string, string, number][] = [
+  ['algorithms', '演算法', 11],
+  ['operating-systems', '作業系統', 9],
+  ['computer-organization', '計算機組織', 9],
+  ['discrete-math', '離散數學', 9],
+  ['linear-algebra', '線性代數', 9],
+  ['databases', '資料庫', 10],
+  ['intro-cs', '計算機概論', 10],
+];
+for (const [id, title, chapters] of others) {
+  test(`${title}：學習地圖與章節清單`, async ({ page }) => {
+    await page.goto(`/zh-TW/${id}/`);
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
+    const map = page.getByRole('group', { name: `${title}的章節先修關係圖` });
+    await expect(map.getByRole('link')).toHaveCount(chapters);
+    // 還沒有單元頁：全部是即將推出
+    await expect(map.locator('a.is-soon')).toHaveCount(chapters);
+    await expect(page.locator('main ol > li')).toHaveCount(chapters);
+    await expect(page.locator('main')).toContainText('0 個互動單元已上線');
+  });
+}
