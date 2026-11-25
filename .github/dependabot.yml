@@ -1,0 +1,23 @@
+# 每月一次，同類更新合成一個 PR；CI 通過即可合併
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    # 新版發布滿 7 天才提，避開剛發布就被撤回或被植入惡意程式的版本
+    cooldown:
+      default-days: 7
+    groups:
+      # minor 與 patch 合成一個 PR；major 各自一個 PR，方便個別檢查
+      dependencies:
+        update-types: [minor, patch]
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
