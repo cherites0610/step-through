@@ -5,6 +5,7 @@ import ArrayView from '../../components/viz/sorting/ArrayView.svelte';
 import { insertionSort } from '../../core/sorting/insertion';
 import { explain, locales, t, type Locale } from '../../i18n';
 import { isOpen, subjects } from '../../data/subjects';
+import ChapterData from '../../components/progress/ChapterData.astro';
 
 export function getStaticPaths() {
   return locales.map((lang) => ({ params: { lang } }));
@@ -129,6 +130,7 @@ const jsonLd = [
       </div>
 
       <div class="mx-auto mt-8 max-w-[1280px] px-4 pb-16 lg:px-10">
+        {subjects.filter(isOpen).map((sub) => <ChapterData subject={sub} />)}
         <ul class="border-t border-ink">
           {
             subjects.map((sub) => {
@@ -153,6 +155,7 @@ const jsonLd = [
                         {sub.chapters.length} {h.chapters} · {liveUnits(sub)} {h.liveUnits}
                       </span>
                     )}
+                    {open && <span class="block" data-mastered-of={sub.id} hidden />}
                   </span>
                   <span class="sr-only">{open ? h.live : h.soon}</span>
                 </>

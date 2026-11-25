@@ -1,15 +1,20 @@
 ---
-// 科目地圖：先修關係圖，建置時算好座標輸出成靜態 SVG（不載入 JS）。
+// 科目地圖：先修關係圖，建置時算好座標輸出成靜態 SVG。
 // 節點連到該章的章節頁；連結名稱直接取自節點裡的文字（編號、章名、狀態）。
+// 框線表示內容（實線＝有已上線的單元、虛線＝即將推出），左上角記號表示本機的學習狀態。
+// 手機（md 以下）改為依層排列的縱向地圖。
 import { layoutMap, defaultLayoutOptions as o } from '../../core/map/layout';
-import { chapterPath, pad2, type Subject } from '../../data/subjects';
+import { chapterPath, initialStates, pad2, type Subject } from '../../data/subjects';
+import { stateLabels } from '../../lib/progress';
+import StateMark from '../progress/StateMark.astro';
+import StateLabel from '../progress/StateLabel.astro';
 
 interface Props {
   subject: Subject;
   /** 已上線的主題（有主題頁） */
   live: Set<string>;
   lang: string;
-  labels: { live: string; soon: string; units: string; mapLabel: string };
+  labels: { live: string; soon: string; units: string; mapLabel: string; layer: string; parallel: string; prereqs: string };
 }
 const { subject, live, lang, labels } = Astro.props;
 
@@ -18,20 +23,25 @@ const layout = layoutMap(subject.chapters);
 const W = layout.width + PAD * 2;
 const H = layout.height + PAD * 2;
 const pos = new Map(layout.nodes.map((n) => [n.id, n]));
+const byId = new Map(subject.chapters.map((c) => [c.id, c]));
+const states = initialStates(subject);
 
 const liveCount = (c: Subject['chapters'][number]) => c.units.filter((u) => u.topic && live.has(u.topic)).length;
+const stats = (c: Subject['chapters'][number]) => {
+  const k = liveCount(c);
+  return k > 0 ? `${labels.live} ${k}／${c.units.length} ${labels.units}` : `${labels.soon} · ${c.units.length} ${labels.units}`;
+};
 const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x + PAD} ${y + PAD}`).join(' ');
 ---
 
 <div
-  class="relative border border-hairline"
+  class="relative border border-hairline max-md:hidden"
   style="background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px); background-size: 16px 16px;"
 >
   <span class="reg tl" aria-hidden="true"></span>
   <span class="reg tr" aria-hidden="true"></span>
   <span class="reg bl" aria-hidden="true"></span>
   <span class="reg br" aria-hidden="true"></span>
-  <!-- 窄螢幕時在框內橫向捲動，不縮小文字 -->
   <div class="overflow-x-auto py-2">
     <svg
       class="subject-map mx-auto block"
@@ -46,9 +56,9 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
           layout.edges.map((e) => {
             const [x, y] = e.points.at(-1)!;
             return (
-              <g>
-                <path d={path(e.points)} fill="none" stroke="var(--color-ink)" stroke-width="1" />
-                <path d={`M${x + PAD - 4} ${y + PAD - 7} L${x + PAD + 4} ${y + PAD - 7} L${x + PAD} ${y + PAD} Z`} fill="var(--color-ink)" />
+              <g class="edge" data-from={e.from} data-to={e.to}>
+                <path d={path(e.points)} fill="none" stroke-width="1" />
+                <path class="head" d={`M${x + PAD - 4} ${y + PAD - 7} L${x + PAD + 4} ${y + PAD - 7} L${x + PAD} ${y + PAD} Z`} />
               </g>
             );
           })
@@ -59,11 +69,17 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
           const n = pos.get(c.id)!;
           const x = n.x + PAD;
           const y = n.y + PAD;
-          const k = liveCount(c);
-          const isLive = k > 0;
-          const stats = isLive ? `${labels.live} ${k}／${c.units.length} ${labels.units}` : `${labels.soon} · ${c.units.length} ${labels.units}`;
+          const isLive = liveCount(c) > 0;
           return (
-            <a href={chapterPath(lang, subject, c)} class:list={['node', isLive ? 'is-live' : 'is-soon']}>
+            <a
+              href={chapterPath(lang, subject, c)}
+              class:list={['node', isLive ? 'is-live' : 'is-soon']}
+              data-id={c.id}
+              data-prereqs={c.prereqs.join(' ')}
+              data-state-for={`${subject.id}/${c.id}`}
+              data-state={states[c.id]}
+            >
+              <rect class="ring" x={x - 4.5} y={y - 4.5} width={o.nodeWidth + 8} height={o.nodeHeight + 8} />
               <rect
                 class="frame"
                 x={x + 0.5}
@@ -72,14 +88,14 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
                 height={o.nodeHeight - 1}
                 stroke-dasharray={isLive ? undefined : '2 2'}
               />
-              {isLive ? (
-                <rect x={x + 10} y={y + 10} width="10" height="10" fill="var(--color-ink)" />
-              ) : (
-                <rect x={x + 10.5} y={y + 10.5} width="9" height="9" fill="none" stroke="var(--color-ink)" stroke-dasharray="2 2" />
-              )}
+              <g class="state-mark">
+                <rect class="box" x={x + 10.5} y={y + 10.5} width="9" height="9" />
+                <rect class="half" x={x + 10.5} y={y + 10.5} width="4.5" height="9" />
+              </g>
               <text x={x + 28} y={y + 19.5} class="no">{pad2(c.no)}</text>
               <text x={x + 10} y={y + 41} class="title">{c.title}</text>
-              <text x={x + 10} y={y + 56} class="stats">{stats}</text>
+              <text x={x + 10} y={y + 56} class="stats">{stats(c)}</text>
+              <text x={x + 10} y={y + 56} class="state-text" data-state-label>{stateLabels[states[c.id]]}</text>
             </a>
           );
         })
@@ -88,20 +104,152 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
   </div>
 </div>
 
+<!-- 手機：依層由上往下排，同一層的章節可以平行讀 -->
+<ol class="md:hidden" aria-label={labels.mapLabel}>
+  {
+    layout.layers.map((ids, l) => (
+      <li class:list={[l > 0 && 'mt-1']}>
+        {l > 0 && <p class="pb-1 text-center" aria-hidden="true">↓</p>}
+        <p class="font-mono text-[11px] uppercase tracking-[0.14em]">
+          {labels.layer.replace('{n}', String(l + 1))}
+          {ids.length > 1 && <span class="ml-2">· {labels.parallel}</span>}
+        </p>
+        <ul class="mt-1 grid gap-2 border-l border-ink pl-3">
+          {ids
+            .map((id) => byId.get(id)!)
+            .sort((a, b) => a.no - b.no)
+            .map((c) => (
+              <li>
+                <a
+                  href={chapterPath(lang, subject, c)}
+                  class:list={['m-node block px-3 py-2', liveCount(c) > 0 ? 'border border-ink' : 'border border-dashed border-ink text-ink/70']}
+                  data-state-for={`${subject.id}/${c.id}`}
+                  data-state={states[c.id]}
+                >
+                  <span class="flex items-center gap-2">
+                    <StateMark />
+                    <span class="font-mono text-[11px] tabular-nums">{pad2(c.no)}</span>
+                    <span class="text-[17px]">{c.title}</span>
+                  </span>
+                  <span class="mt-1 block font-mono text-[11px]">
+                    {stats(c)}
+                    {c.prereqs.length > 0 && (
+                      <>
+                        {' · '}
+                        {labels.prereqs} {c.prereqs.map((p) => pad2(byId.get(p)!.no)).join('、')}
+                      </>
+                    )}
+                  </span>
+                  <StateLabel state={states[c.id]} />
+                </a>
+              </li>
+            ))}
+        </ul>
+      </li>
+    ))
+  }
+</ol>
+
+<script>
+  // 滑鼠移到節點上或鍵盤聚焦時，高亮它所有的先修與後續（遞移），其餘淡出
+  for (const svg of document.querySelectorAll<SVGSVGElement>('svg.subject-map')) {
+    const nodes = [...svg.querySelectorAll<SVGAElement>('a.node')];
+    const edges = [...svg.querySelectorAll<SVGGElement>('g.edge')];
+    const prereqs = new Map(nodes.map((n) => [n.dataset.id!, (n.dataset.prereqs ?? '').split(' ').filter(Boolean)]));
+    const dependents = new Map<string, string[]>();
+    for (const [id, ps] of prereqs) for (const p of ps) dependents.set(p, [...(dependents.get(p) ?? []), id]);
+    const reach = (start: string, next: Map<string, string[]>) => {
+      const seen = new Set<string>();
+      const stack = [start];
+      while (stack.length) {
+        for (const n of next.get(stack.pop()!) ?? []) {
+          if (!seen.has(n)) {
+            seen.add(n);
+            stack.push(n);
+          }
+        }
+      }
+      return seen;
+    };
+    const focus = (id: string | null) => {
+      if (!id) {
+        delete svg.dataset.hl;
+        nodes.forEach((n) => n.classList.remove('on'));
+        edges.forEach((e) => e.classList.remove('on'));
+        return;
+      }
+      const up = new Set([id, ...reach(id, prereqs)]);
+      const down = new Set([id, ...reach(id, dependents)]);
+      svg.dataset.hl = id;
+      nodes.forEach((n) => n.classList.toggle('on', up.has(n.dataset.id!) || down.has(n.dataset.id!)));
+      // 只高亮先修鏈與後續鏈上的邊，不含兩端剛好都被高亮、但不在鏈上的邊
+      edges.forEach((e) => {
+        const f = e.dataset.from!;
+        const t = e.dataset.to!;
+        e.classList.toggle('on', (up.has(f) && up.has(t)) || (down.has(f) && down.has(t)));
+      });
+    };
+    for (const n of nodes) {
+      n.addEventListener('pointerenter', () => focus(n.dataset.id!));
+      n.addEventListener('focus', () => focus(n.dataset.id!));
+      n.addEventListener('pointerleave', () => focus(null));
+      n.addEventListener('blur', () => focus(null));
+    }
+  }
+</script>
+
 <style>
+  .subject-map .edge path {
+    stroke: var(--color-ink);
+  }
+  .subject-map .edge .head {
+    fill: var(--color-ink);
+    stroke: none;
+  }
   .subject-map .frame {
     fill: var(--color-paper);
     stroke: var(--color-ink);
     stroke-width: 1;
   }
+  .subject-map .node[data-state='mastered'] .frame,
   .subject-map .node:hover .frame {
     fill: var(--color-stamp);
+  }
+  /* 建議下一章：外移 4px 的虛線外框（不另用顏色） */
+  .subject-map .ring {
+    display: none;
+    fill: none;
+    stroke: var(--color-ink);
+    stroke-dasharray: 3 3;
+  }
+  .subject-map .node[data-suggested] .ring {
+    display: inline;
   }
   .subject-map .node:focus-visible {
     outline: none;
   }
   .subject-map .node:focus-visible .frame {
     stroke-width: 2;
+  }
+  /* 高亮先修鏈與後續鏈，其餘淡出 */
+  .subject-map[data-hl] .edge path {
+    stroke: var(--color-hairline);
+  }
+  .subject-map[data-hl] .edge .head {
+    fill: var(--color-hairline);
+  }
+  .subject-map[data-hl] .edge.on path {
+    stroke: var(--color-ink);
+    stroke-width: 2;
+  }
+  .subject-map[data-hl] .edge.on .head {
+    fill: var(--color-ink);
+  }
+  .subject-map[data-hl] .node:not(.on) {
+    opacity: 0.35;
+  }
+  .subject-map .node {
+    transition: opacity 150ms;
   }
   .subject-map text {
     fill: var(--color-ink);
@@ -117,6 +265,14 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
   }
   .subject-map .title {
     font-size: 17px;
+  }
+  /* 狀態文字只給螢幕閱讀器（連結名稱的一部分），畫面上由記號表達 */
+  .subject-map .state-text {
+    font-size: 1px;
+    fill-opacity: 0;
+  }
+  .m-node[data-state='mastered'] {
+    background: var(--color-stamp);
   }
   .reg {
     position: absolute;

@@ -2,10 +2,14 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../../../layouts/Base.astro';
 import Solution from '../../../../components/chapter/Solution.astro';
+import ChapterData from '../../../../components/progress/ChapterData.astro';
+import StateMark from '../../../../components/progress/StateMark.astro';
+import StateLabel from '../../../../components/progress/StateLabel.astro';
 import { locales, t, type Locale } from '../../../../i18n';
 import {
   chapterPath,
   dependentsOf,
+  initialStates,
   isOpen,
   pad2,
   subjectPath,
@@ -60,6 +64,10 @@ const at = ordered.indexOf(chapter);
 const prev = ordered[at - 1];
 const next = ordered[at + 1];
 const name = (x: Chapter) => `${pad2(x.no)} ${x.title}`;
+const states = initialStates(subject);
+const key = (x: Chapter) => `${subject.id}/${x.id}`;
+const chip =
+  'inline-flex h-9 cursor-pointer items-center border border-hairline px-3 text-[13px] hover:border-ink has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-paper has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ink';
 
 const path = chapterPath(lang, subject, chapter);
 const url = new URL(path, Astro.site).href;
@@ -114,14 +122,18 @@ const jsonLd = [
               <a
                 href={chapterPath(lang, subject, x)}
                 aria-current={x === chapter ? 'page' : undefined}
+                data-state-for={key(x)}
+                data-state={states[x.id]}
                 class:list={[
                   'flex items-baseline gap-2 whitespace-nowrap px-2 py-1.5 text-[15px]',
                   x === chapter && 'bg-stamp outline outline-1 outline-ink',
                   !hasLive(x) && x !== chapter && 'text-ink/70',
                 ]}
               >
+                <StateMark />
                 <span class="font-mono text-[11px] tabular-nums">{pad2(x.no)}</span>
                 {x.title}
+                <StateLabel state={states[x.id]} />
               </a>
             </li>
           ))
@@ -129,7 +141,8 @@ const jsonLd = [
       </ol>
     </nav>
 
-    <main class="min-w-0 px-4 pb-16 pt-8 lg:px-8">
+    <main class="min-w-0 px-4 pb-16 pt-8 lg:px-8" data-visit={key(chapter)}>
+      <ChapterData subject={subject} />
       <p class="font-mono text-[11px] uppercase tracking-[0.14em]">{subject.title} · {pad2(chapter.no)}</p>
       <h1 class="text-[44px] leading-[1.1] tracking-[-0.02em] max-md:text-[32px]">{chapter.title}</h1>
       <p class="mt-3 max-w-[65ch] text-[15px]">
@@ -217,6 +230,22 @@ const jsonLd = [
                   <div class="prose-plate mt-3 text-[17px]">
                     <Content components={{ Solution }} />
                   </div>
+                  <fieldset class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <legend class="sr-only">Q{pad2(i + 1)} {c.markLegend}</legend>
+                    <span class="font-mono text-[11px] uppercase tracking-[0.14em]" aria-hidden="true">{c.markLegend}</span>
+                    {(['right', 'wrong', 'review'] as const).map((m) => (
+                      <label class={chip}>
+                        <input
+                          type="radio"
+                          class="sr-only"
+                          name={`q-${q.order}`}
+                          value={m}
+                          data-question={`${key(chapter)}/${q.order}`}
+                        />
+                        {c.marks[m]}
+                      </label>
+                    ))}
+                  </fieldset>
                 </li>
               ))}
             </ol>
@@ -232,11 +261,34 @@ const jsonLd = [
           chapter.checklist?.length ? (
             <>
               <p class="mt-2 text-[15px]">{c.checklistNote}</p>
+              <p class="mt-4 border border-ink bg-stamp px-3 py-2 text-[15px]" data-done-for={key(chapter)} hidden>
+                {c.checklistDone}
+              </p>
               <ul class="mt-4 max-w-[65ch] border-t border-hairline">
-                {chapter.checklist.map((item) => (
-                  <li class="border-b border-hairline py-3 text-[17px]">{item}</li>
+                {chapter.checklist.map((item, i) => (
+                  <li class="border-b border-hairline py-3">
+                    <fieldset>
+                      <legend class="text-[17px]">{item}</legend>
+                      <div class="mt-2 flex flex-wrap gap-2">
+                        {(['unsure', 'partial', 'mastered'] as const).map((r) => (
+                          <label class={chip}>
+                            <input
+                              type="radio"
+                              class="sr-only"
+                              name={`check-${i}`}
+                              value={r}
+                              data-check={key(chapter)}
+                              data-index={i}
+                            />
+                            {c.ratings[r]}
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                  </li>
                 ))}
               </ul>
+              <p class="mt-3 text-[13px]">{c.progressNote}</p>
             </>
           ) : (
             <p class="mt-3 text-[15px] text-ink/70">{c.checklistSoon}</p>
@@ -277,9 +329,16 @@ const jsonLd = [
             prereqs.length ? (
               prereqs.map((p) => (
                 <li>
-                  <a href={chapterPath(lang, subject, p)} class="block border border-ink px-3 py-2 text-[15px] hover:bg-stamp">
-                    <span class="mr-2 font-mono text-[11px] tabular-nums">{pad2(p.no)}</span>
+                  <a
+                    href={chapterPath(lang, subject, p)}
+                    class="flex items-center gap-2 border border-ink px-3 py-2 text-[15px] hover:bg-stamp"
+                    data-state-for={key(p)}
+                    data-state={states[p.id]}
+                  >
+                    <StateMark />
+                    <span class="font-mono text-[11px] tabular-nums">{pad2(p.no)}</span>
                     {p.title}
+                    <StateLabel state={states[p.id]} />
                   </a>
                 </li>
               ))
@@ -300,9 +359,16 @@ const jsonLd = [
             dependents.length ? (
               dependents.map((p) => (
                 <li>
-                  <a href={chapterPath(lang, subject, p)} class="block border border-ink px-3 py-2 text-[15px] hover:bg-stamp">
-                    <span class="mr-2 font-mono text-[11px] tabular-nums">{pad2(p.no)}</span>
+                  <a
+                    href={chapterPath(lang, subject, p)}
+                    class="flex items-center gap-2 border border-ink px-3 py-2 text-[15px] hover:bg-stamp"
+                    data-state-for={key(p)}
+                    data-state={states[p.id]}
+                  >
+                    <StateMark />
+                    <span class="font-mono text-[11px] tabular-nums">{pad2(p.no)}</span>
                     {p.title}
+                    <StateLabel state={states[p.id]} />
                   </a>
                 </li>
               ))

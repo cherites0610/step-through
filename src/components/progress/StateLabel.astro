@@ -1,0 +1,11 @@
+---
+// 學習狀態的文字，只給螢幕閱讀器（畫面上由 StateMark 表達）。放在連結的最後：
+// 連結名稱讀作「09 圖 可以開始」。腳本執行前讀到的是沒有進度時的預設狀態。
+import { stateLabels, type ChapterState } from '../../lib/progress';
+
+interface Props {
+  state: ChapterState;
+}
+---
+
+<span class="sr-only" data-state-label>{stateLabels[Astro.props.state]}</span>

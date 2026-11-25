@@ -47,14 +47,6 @@ test.describe('科目頁：資料結構學習地圖', () => {
     await page.locator('#ch-sorting').getByRole('link', { name: /快速排序/ }).click();
     await expect(page).toHaveURL(/\/zh-TW\/data-structures\/sorting\/quick-sort\/$/);
   });
-
-  test('窄螢幕：地圖在框內橫向捲動，頁面本身不溢出', async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.reload();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
-    const svg = await page.locator('svg.subject-map').boundingBox();
-    expect(svg!.width).toBeGreaterThan(390);
-  });
 });
 
 const others: [string, string, number][] = [
@@ -74,7 +66,7 @@ for (const [id, title, chapters] of others) {
     await expect(map.getByRole('link')).toHaveCount(chapters);
     // 還沒有單元頁：全部是即將推出
     await expect(map.locator('a.is-soon')).toHaveCount(chapters);
-    await expect(page.locator('main ol > li')).toHaveCount(chapters);
+    await expect(page.locator('section[aria-labelledby="list-heading"] ol > li')).toHaveCount(chapters);
     await expect(page.locator('main')).toContainText('0 個互動單元已上線');
   });
 }

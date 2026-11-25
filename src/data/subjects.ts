@@ -1,3 +1,5 @@
+import { chapterStates, emptyProgress, type ChapterInfo } from '../lib/progress';
+
 /**
  * 科目 → 章節 → 單元。章節的先修關係構成科目地圖（見 PRODUCT.md §5）。
  * 單元有 topic 時對應一個主題頁；content collection 有這個 topic 才算已上線。
@@ -382,6 +384,13 @@ export function topicPath(lang: string, topic: string) {
   if (!loc) throw new Error(`主題 "${topic}" 沒有登記在 src/data/subjects.ts`);
   return unitPath(lang, loc.subject, loc.chapter, topic);
 }
+
+/** 進度計算需要的章節資料 */
+export const chapterInfos = (s: Subject): ChapterInfo[] =>
+  s.chapters.map((c) => ({ id: c.id, no: c.no, prereqs: c.prereqs, checks: c.checklist?.length ?? 0 }));
+
+/** 沒有任何進度時的章節狀態（靜態輸出用；載入後由 progress-dom.ts 依本機進度更新） */
+export const initialStates = (s: Subject) => chapterStates(s.id, chapterInfos(s), emptyProgress());
 
 /** 依先修關係反查：哪些章節把這一章列為先修 */
 export const dependentsOf = (s: Subject, c: Chapter) => s.chapters.filter((x) => x.prereqs.includes(c.id));

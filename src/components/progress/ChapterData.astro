@@ -1,0 +1,11 @@
+---
+// 給 progress-dom.ts 用的章節資料（先修與檢核項目數），一個科目一份
+import { chapterInfos, type Subject } from '../../data/subjects';
+
+interface Props {
+  subject: Subject;
+}
+const { subject } = Astro.props;
+---
+
+<script type="application/json" data-chapters={subject.id} set:html={JSON.stringify(chapterInfos(subject))} />
