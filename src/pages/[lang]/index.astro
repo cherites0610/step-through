@@ -1,7 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import LangSwitch from '../../components/LangSwitch.astro';
 import ProjectionToggle from '../../components/ProjectionToggle.astro';
 import ArrayView from '../../components/viz/sorting/ArrayView.svelte';
 import { insertionSort } from '../../core/sorting/insertion';
@@ -47,7 +46,6 @@ const jsonLd = [
     <a href={`/${lang}/`} class="shrink-0 font-medium">{text.siteName}</a>
     <div class="ml-auto flex shrink-0 items-center gap-2 md:gap-4">
       <ProjectionToggle lang={lang} />
-      <LangSwitch lang={lang} />
     </div>
   </header>
 
@@ -189,7 +187,6 @@ const jsonLd = [
   <footer class="border-t border-hairline">
     <div class="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-4 py-6 text-[13px] lg:px-10">
       <p>{h.footer}</p>
-      <LangSwitch lang={lang} />
     </div>
   </footer>
 </Base>

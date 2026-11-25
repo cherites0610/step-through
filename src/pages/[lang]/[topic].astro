@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import LangSwitch from '../../components/LangSwitch.astro';
 import ProjectionToggle from '../../components/ProjectionToggle.astro';
 import SortViz from '../../components/viz/sorting/SortViz.svelte';
 import AvlViz from '../../components/viz/avl/AvlViz.svelte';
@@ -31,11 +30,8 @@ const plateLabel = `${chapter.title[lang]} · ${String(index).padStart(2, '0')}`
 const siblings = (await getCollection('topics'))
   .filter((e) => e.data.lang === lang && locateTopic(e.data.topic)?.chapter.id === chapter.id)
   .sort((a, b) => topicOrder.indexOf(a.data.topic) - topicOrder.indexOf(b.data.topic));
-const alternates = (await getCollection('topics'))
-  .filter((e) => e.data.topic === d.topic)
-  .map((e) => e.data.lang);
 
-const displayName = lang === 'en' ? d.title : `${d.title}（${d.titleEn}）`;
+const displayName = `${d.title}（${d.titleEn}）`;
 const url = new URL(`/${lang}/${d.topic}/`, Astro.site).href;
 const ogImagePath = `/og/${lang}/${d.topic}.png`;
 const ogImageUrl = new URL(ogImagePath, Astro.site).href;
@@ -98,7 +94,6 @@ const rows: [string, string][] = [
   title={`${displayName} ${text.interactive}｜${text.siteName}`}
   description={d.description}
   path={`${d.topic}/`}
-  alternates={alternates}
   jsonLd={jsonLd}
   image={ogImagePath}
   type="article"
@@ -111,7 +106,6 @@ const rows: [string, string][] = [
     <span class="hidden text-[15px] md:inline">{d.title}</span>
     <div class="ml-auto flex shrink-0 items-center gap-2 md:gap-4">
       <ProjectionToggle lang={lang} />
-      <LangSwitch lang={lang} path={`${d.topic}/`} available={alternates} />
     </div>
   </header>
 

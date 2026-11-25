@@ -5,11 +5,11 @@ primary_target: "topic-page"
 related_targets: []
 ---
 
-# Surface brief: topic page (visualizer shell)
+# Surface brief: unit page (visualizer shell; formerly "topic page")
 
-Scope: every topic page (sorting x5, AVL insert). Mode: Operate (the visualizer); the explanatory content below it is Read, inheriting the same world.
+Scope: every unit page with an interactive visualizer (sorting x5, AVL insert so far), reached from a chapter page. v2 adds a "← 回到章節" link at the top of the left rail, which now lists the units of the current chapter. Mode: Operate (the visualizer); the explanatory content below it is Read, inheriting the same world.
 
-Audience/job: Taiwanese CS students self-studying and teachers projecting. Task: enter data, step forward/back, understand why each step happens. Constraints: zh-TW, SVG stage, Tailwind, 50KB JS budget, projector-legible, no colour-only state.
+Audience/job: exam takers practising hand-tracing (often arriving from a question's "open in the interactive unit" link with data preloaded) and teachers projecting. Task: enter data, step forward/back, understand why each step happens. Constraints: zh-TW, SVG stage, Tailwind, 50KB JS budget, projector-legible, no colour-only state.
 
 ## Direction contract
 

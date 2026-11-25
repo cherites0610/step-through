@@ -6,7 +6,7 @@ const topics = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/topics' }),
   schema: z.object({
     topic: z.string(),
-    lang: z.enum(['zh-TW', 'en']),
+    lang: z.enum(['zh-TW']),
     /** 對應的視覺化元件 */
     kind: z.enum(['sorting', 'tree']),
     algo: z.enum(['insertion', 'bubble', 'selection', 'merge', 'quick', 'avl']),

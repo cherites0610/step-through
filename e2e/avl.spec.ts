@@ -170,11 +170,11 @@ test.describe('AVL 樹插入', () => {
   ] as const) {
     test(`空樹的說明文字在窄螢幕不會被截掉（${label}）`, async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
-      await page.goto('/en/avl-insert/');
+      await page.goto('/zh-TW/avl-insert/');
       await page.getByRole('textbox').fill(seq);
-      await page.getByRole('button', { name: 'Apply' }).click();
-      const svg = page.getByRole('img', { name: /Current tree/ });
-      await expect(svg).toContainText('Empty tree');
+      await page.getByRole('button', { name: '套用' }).click();
+      const svg = page.getByRole('img', { name: /目前的樹/ });
+      await expect(svg).toContainText('空樹');
       const box = (await svg.boundingBox())!;
       const texts = svg.locator('text');
       const n = await texts.count();
@@ -255,22 +255,6 @@ test.describe('AVL 樹插入', () => {
     expect(parseFloat(d)).toBeLessThan(0.001);
     const btn = await page.evaluate(() => getComputedStyle(document.querySelector('.projection-toggle')!).transitionDuration);
     expect(parseFloat(btn)).toBeLessThan(0.001);
-  });
-
-  test('英文版：文案、標籤與旋轉說明', async ({ page }) => {
-    await page.goto('/en/avl-insert/');
-    await expect(page.getByRole('button', { name: 'LR double' })).toBeVisible();
-    await page.getByRole('button', { name: 'LL right' }).click();
-    const s = slider(page, 'Step');
-    let found = false;
-    for (let i = 0; i < 30 && !found; i++) {
-      await s.fill(String(i));
-      found = /unbalanced/.test(await explanation(page).innerText());
-    }
-    expect(found).toBe(true);
-    await expect(explanation(page)).toContainText('LL case');
-    await expect(page.getByRole('img', { name: /Current tree \(in order\): 10, 20, 30/ })).toBeVisible();
-    await expect(page.getByText('Balance factor BF')).toBeVisible();
   });
 
   test('投影模式下樹仍完整可見', async ({ page }) => {

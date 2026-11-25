@@ -1,0 +1,8 @@
+# Cloudflare Pages 轉址（https://developers.cloudflare.com/pages/configuration/redirects/）
+
+# 只有繁體中文；根路徑直接送到 /zh-TW/
+/  /zh-TW/  301
+
+# 英文版已移除：舊的 /en/ 網址轉到對應的中文頁
+/en  /zh-TW/  301
+/en/*  /zh-TW/:splat  301

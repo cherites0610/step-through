@@ -1,0 +1,33 @@
+name: Smoke
+on:
+  # master 更新後，Cloudflare Pages 會自己建置部署；這裡等正式站換成這個 commit 再檢查
+  push:
+    branches: [master]
+  # 手動檢查任一網址（例如 PR 的預覽站）
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 要檢查的網址（留空＝正式站）
+        required: false
+
+# 連續合併時只需要檢查最新的那次
+concurrency:
+  group: smoke
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      # 腳本只用 Node 內建模組，不需要安裝依賴
+      - if: github.event_name == 'push'
+        run: node scripts/smoke.mjs --expect-sha "$GITHUB_SHA" --wait 600
+      - if: github.event_name == 'workflow_dispatch'
+        run: node scripts/smoke.mjs "${URL:-https://step-through.cherites.org}"
+        env:
+          URL: ${{ inputs.url }}

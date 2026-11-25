@@ -53,11 +53,6 @@ test('投影模式在首頁也可用，且標題兩行不折行', async ({ page 
   expect(lines).toEqual([1, 1]);
 });
 
-test('en 版投影切換文字', async ({ page }) => {
-  await page.goto('/en/');
-  await expect(page.getByRole('button', { name: 'Projector mode' })).toBeVisible();
-});
-
 test('投影模式首頁：1440 寬時標題不折行，並維持兩欄', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/zh-TW/');

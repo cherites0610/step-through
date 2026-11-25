@@ -47,7 +47,6 @@
     { label: a.rl, values: () => avlPresets.RL },
     { label: a.ascending, values: () => avlPresets.ascending },
   ]);
-  const colon = $derived(lang === 'en' ? ': ' : '：');
 </script>
 
 <Player {steps} labels={text}>
@@ -105,7 +104,7 @@
             emptyLabel={a.emptyTree}
             rootLabel={a.rootSlot}
             rootHint={a.rootHint.replace('{v}', String(values[0]))}
-            ariaLabel={`${a.treeLabel}${colon}${inorder(step.state.root)
+            ariaLabel={`${a.treeLabel}：${inorder(step.state.root)
               .map((n) => n.value)
               .join(', ')}`}
           />
@@ -127,7 +126,7 @@
       <aside class="min-w-0 px-4 py-6 lg:px-6">
         <p class="font-mono text-[11px] uppercase tracking-[0.14em]">{text.explanation}</p>
         <p
-          class="mt-2 max-w-[65ch] text-[17px] leading-[1.7] {lang === 'en' ? 'min-h-[15rem]' : 'min-h-[11rem]'}"
+          class="mt-2 max-w-[65ch] text-[17px] leading-[1.7] min-h-[11rem]"
           aria-live="polite"
         >
           {explain(lang, step.explain)}

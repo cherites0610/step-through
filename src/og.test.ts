@@ -25,7 +25,7 @@ function pngSize(file: string) {
 
 describe('Open Graph 圖（pnpm build && pnpm og 產生）', () => {
   it('有主題內容', () => {
-    expect(pairs.length).toBeGreaterThanOrEqual(12);
+    expect(pairs.length).toBeGreaterThanOrEqual(6);
   });
 
   for (const [lang, topic] of pairs) {
@@ -39,7 +39,7 @@ describe('Open Graph 圖（pnpm build && pnpm og 產生）', () => {
     });
   }
 
-  for (const lang of ['zh-TW', 'en']) {
+  for (const lang of ['zh-TW']) {
     it(`${lang}/home.png 存在、是 1200×630`, () => {
       const { width, height } = pngSize(path.join(root, 'public/og', lang, 'home.png'));
       expect([width, height]).toEqual([1200, 630]);

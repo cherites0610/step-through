@@ -2,11 +2,11 @@
 import Base from '../layouts/Base.astro';
 ---
 
-<!-- 404：Cloudflare Pages 找不到路徑時會自動回傳這一頁。不被索引，不輸出 canonical／hreflang。 -->
+<!-- 404：Cloudflare Pages 找不到路徑時會自動回傳這一頁。不被索引，不輸出 canonical。 -->
 <Base
   lang="zh-TW"
-  title="找不到頁面｜Page not found｜步步看懂 Step Through"
-  description="找不到這一頁。Page not found."
+  title="找不到頁面｜步步看懂"
+  description="找不到這一頁。"
   noindex
 >
   <main class="mx-auto flex min-h-[70vh] max-w-[720px] flex-col justify-center px-4 py-20">
@@ -20,14 +20,11 @@ import Base from '../layouts/Base.astro';
       <span class="reg br" aria-hidden="true"></span>
       <p class="font-mono text-[28px] font-medium tabular-nums">404</p>
       <h1 class="mt-4 text-[36px] leading-[1.15] tracking-[-0.02em] md:text-[44px]">找不到這一頁</h1>
-      <p class="mt-2 text-[22px]" lang="en">Page not found</p>
       <p class="mt-6 max-w-[34em] text-[15px] leading-[1.7]">
         網址可能打錯了，或這個主題還沒推出。從首頁的主題目錄找找看。
-        <span lang="en" class="block">The address may be mistyped, or the topic is not available yet. Try the topic index on the home page.</span>
       </p>
       <div class="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
         <a href="/zh-TW/" class="inline-flex h-11 items-center border border-ink bg-ink px-5 text-[15px] text-paper">回到首頁</a>
-        <a href="/en/" lang="en" class="inline-flex h-11 items-center text-[15px] underline underline-offset-4">Back to home →</a>
       </div>
     </div>
   </main>
