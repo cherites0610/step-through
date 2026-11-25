@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { locales, t, type Locale } from '../i18n';
+import { t, type Locale } from '../i18n';
 import Analytics from '../components/Analytics.astro';
 
 interface Props {
@@ -8,14 +8,12 @@ interface Props {
   title: string;
   description?: string;
   path?: string;
-  /** 此頁實際存在的語系（hreflang 只列出這些） */
-  alternates?: readonly Locale[];
   jsonLd?: object[];
   /** Open Graph 圖的路徑（站內，例如 /og/zh-TW/quick-sort.png）；預設用該語系的首頁圖 */
   image?: string;
   /** og:type：首頁 website，主題頁 article */
   type?: 'website' | 'article';
-  /** 不要被索引的頁面（404）：不輸出 canonical、hreflang、og:url */
+  /** 不要被索引的頁面（404）：不輸出 canonical、og:url */
   noindex?: boolean;
 }
 const {
@@ -23,7 +21,6 @@ const {
   title,
   description,
   path = '',
-  alternates = locales,
   jsonLd = [],
   image,
   type = 'website',
@@ -32,9 +29,8 @@ const {
 const desc = description ?? t(lang).description;
 const canonical = new URL(`/${lang}/${path}`, Astro.site);
 const ogImage = new URL(image ?? `/og/${lang}/home.png`, Astro.site);
-// og:locale 的格式是 zh_TW／en_US（底線），和 hreflang／lang 的連字號不同
-const ogLocale: Record<Locale, string> = { 'zh-TW': 'zh_TW', en: 'en_US' };
-const otherLocales = alternates.filter((l) => l !== lang);
+// og:locale 的格式是 zh_TW（底線），和 lang 的連字號不同
+const ogLocale: Record<Locale, string> = { 'zh-TW': 'zh_TW' };
 const siteName = t(lang).siteName;
 ---
 
@@ -55,23 +51,11 @@ const siteName = t(lang).siteName;
     <meta name="description" content={desc} />
     {noindex && <meta name="robots" content="noindex" />}
     {!noindex && <link rel="canonical" href={canonical} />}
-    {
-      !noindex &&
-        alternates.map((l) => (
-          <link rel="alternate" hreflang={l} href={new URL(`/${l}/${path}`, Astro.site)} />
-        ))
-    }
-    {
-      !noindex && alternates.includes('zh-TW') && (
-        <link rel="alternate" hreflang="x-default" href={new URL(`/zh-TW/${path}`, Astro.site)} />
-      )
-    }
     <meta property="og:type" content={type} />
     <meta property="og:site_name" content={siteName} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={desc} />
     <meta property="og:locale" content={ogLocale[lang]} />
-    {otherLocales.map((l) => <meta property="og:locale:alternate" content={ogLocale[l]} />)}
     {!noindex && <meta property="og:url" content={canonical} />}
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:type" content="image/png" />

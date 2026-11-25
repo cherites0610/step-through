@@ -29,8 +29,6 @@
   const impl = $derived(algos[algo]);
   const preset = $derived(presetsFor(algo));
   const recursive = $derived(algo === 'merge' || algo === 'quick');
-  // 全形冒號只用在中文
-  const colon = $derived(lang === 'en' ? ': ' : '：');
 
   let values = $state<number[]>([...initial]);
   let draft = $state(initial.join(', '));
@@ -131,7 +129,7 @@
               leftLabel={text.input.mergeLeft}
               rightLabel={text.input.mergeRight}
               outLabel={text.input.mergeOut}
-              ariaLabel={`${text.input.arrayLabel}${colon}${step.state.arr.join(', ')}`}
+              ariaLabel={`${text.input.arrayLabel}：${step.state.arr.join(', ')}`}
             />
           {:else}
             <ArrayView
@@ -141,7 +139,7 @@
               minLabel={text.input.min}
               pivotLabel={text.input.pivotTag}
               extra={algo === 'quick'}
-              ariaLabel={`${text.input.arrayLabel}${colon}${step.state.arr.join(', ')}`}
+              ariaLabel={`${text.input.arrayLabel}：${step.state.arr.join(', ')}`}
             />
           {/if}
         </div>

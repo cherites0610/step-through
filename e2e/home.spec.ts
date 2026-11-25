@@ -26,17 +26,15 @@ test('首頁：主要行動可用，首屏不載入互動 JS', async ({ page }) 
   await expect(page).toHaveURL(/\/zh-TW\/insertion-sort\/$/);
 });
 
-test('首頁：語言切換與 en 版內容', async ({ page }) => {
+test('首頁：只有繁體中文，沒有語言切換', async ({ page }) => {
   await page.goto('/zh-TW/');
-  await page.getByRole('navigation', { name: 'Language' }).first().getByRole('link', { name: 'EN' }).click();
-  await expect(page).toHaveURL(/\/en\/$/);
-  await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Step through it yourself');
-  await expect(page.locator('#index').getByRole('link', { name: 'Insertion Sort' })).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('lang', 'zh-TW');
+  await expect(page.getByRole('navigation', { name: 'Language' })).toHaveCount(0);
+  await expect(page.locator('a[href^="/en/"]')).toHaveCount(0);
 });
 
 test('首頁有 WebSite 結構化資料', async ({ page }) => {
-  await page.goto('/en/');
+  await page.goto('/zh-TW/');
   const types = await page
     .locator('script[type="application/ld+json"]')
     .evaluateAll((els) => els.map((e) => JSON.parse(e.textContent ?? '{}')['@type']));
@@ -67,7 +65,4 @@ test('頂列標籤：章節名加章內序號，且序號與首頁目錄順序�
     // 序號 = 目錄中的位置
     expect(expected[slug]).toBe(`排序 · ${String(i + 1).padStart(2, '0')}`);
   }
-
-  await page.goto('/en/bubble-sort/');
-  await expect(page.locator('header')).toContainText('Sorting · 02');
 });

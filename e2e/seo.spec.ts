@@ -10,19 +10,17 @@ const ldTypes = (page: Page) =>
     .locator('script[type="application/ld+json"]')
     .evaluateAll((els: Element[]) => els.map((e) => JSON.parse(e.textContent ?? '{}')['@type']));
 
-test('首頁有 title、description、canonical 與 hreflang', async ({ page }) => {
+test('首頁有 title、description、canonical，沒有 hreflang', async ({ page }) => {
   await page.goto('/zh-TW/');
   await expect(page).toHaveTitle(/步步看懂/);
   await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.+/);
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
-  // zh-TW、en 與 x-default
-  await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(3);
-  await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveAttribute('href', `${SITE}/zh-TW/`);
+  // 只有一個語系，不輸出 hreflang
+  await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
 });
 
-for (const lang of ['zh-TW', 'en']) {
-  const locale = lang === 'zh-TW' ? 'zh_TW' : 'en_US';
-  const other = lang === 'zh-TW' ? 'en_US' : 'zh_TW';
+{
+  const lang = 'zh-TW';
 
   for (const slug of ['', ...topics.map((t) => `${t}/`)]) {
     const label = slug || 'home';
@@ -36,9 +34,9 @@ for (const lang of ['zh-TW', 'en']) {
       expect(await meta(page, 'meta[property="og:image:alt"]')).toBeTruthy();
       expect(await meta(page, 'meta[property="og:type"]')).toBe(slug ? 'article' : 'website');
       expect(await meta(page, 'meta[property="og:site_name"]')).toBeTruthy();
-      // og:locale 是 zh_TW／en_US（底線），不是 hreflang 的連字號
-      expect(await meta(page, 'meta[property="og:locale"]')).toBe(locale);
-      expect(await meta(page, 'meta[property="og:locale:alternate"]')).toBe(other);
+      // og:locale 是 zh_TW（底線），不是 lang 的連字號
+      expect(await meta(page, 'meta[property="og:locale"]')).toBe('zh_TW');
+      await expect(page.locator('meta[property="og:locale:alternate"]')).toHaveCount(0);
       expect(await meta(page, 'meta[name="twitter:card"]')).toBe('summary_large_image');
       expect(await meta(page, 'meta[name="twitter:image"]')).toBe(expectedImage);
       expect(await meta(page, 'meta[name="theme-color"]')).toBe('#F5F4F6');
@@ -76,25 +74,33 @@ test('站內沒有設定分析時，不載入任何分析腳本', async ({ page 
   expect(html).not.toContain('umami');
 });
 
-test('sitemap：每個網址都有 hreflang alternate，且不含根路徑與 404', async ({ request }) => {
+test('sitemap：只有 zh-TW 網址，不含根路徑、404 與英文頁', async ({ request }) => {
   const index = await (await request.get('/sitemap-index.xml')).text();
   expect(index).toContain('sitemap-0.xml');
   const xml = await (await request.get('/sitemap-0.xml')).text();
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 
-  expect(locs).toHaveLength(2 * (topics.length + 1));
+  expect(locs).toHaveLength(topics.length + 1);
   expect(locs).not.toContain(`${SITE}/`);
   expect(locs.some((l) => l.includes('404'))).toBe(false);
-  for (const l of ['zh-TW', 'en']) {
-    expect(locs).toContain(`${SITE}/${l}/`);
-    for (const t of topics) expect(locs).toContain(`${SITE}/${l}/${t}/`);
+  expect(locs).toContain(`${SITE}/zh-TW/`);
+  for (const t of topics) expect(locs).toContain(`${SITE}/zh-TW/${t}/`);
+  expect(xml).not.toContain('/en/');
+  expect(xml).not.toContain('hreflang');
+});
+
+test('英文頁已移除：/en/ 不存在，_redirects 把舊網址 301 到對應的中文頁', async ({ request }) => {
+  for (const url of ['/en/', ...topics.map((t) => `/en/${t}/`)]) {
+    expect((await request.get(url)).status()).toBe(404);
   }
-  // 每個 <url> 都有兩個語系的 alternate
-  const urls = xml.split('<url>').slice(1);
-  for (const u of urls) {
-    expect(u).toContain('hreflang="zh-TW"');
-    expect(u).toContain('hreflang="en"');
-  }
+  // 本機預覽不處理 _redirects，只檢查檔案內容；正式環境由 Cloudflare Pages 執行
+  const rules = (await (await request.get('/_redirects')).text())
+    .split('\n')
+    .filter((l) => l.trim() && !l.startsWith('#'))
+    .map((l) => l.trim().split(/\s+/));
+  expect(rules).toContainEqual(['/', '/zh-TW/', '301']);
+  expect(rules).toContainEqual(['/en', '/zh-TW/', '301']);
+  expect(rules).toContainEqual(['/en/*', '/zh-TW/:splat', '301']);
 });
 
 test('robots.txt 指向 sitemap', async ({ request }) => {
@@ -111,14 +117,13 @@ test('404：回傳 404 狀態、noindex、沒有 canonical，並提供回首頁�
   await expect(page.locator('link[rel="canonical"]')).toHaveCount(0);
   await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
   await expect(page.getByRole('link', { name: '回到首頁' })).toHaveAttribute('href', '/zh-TW/');
-  await expect(page.getByRole('link', { name: /Back to home/ })).toHaveAttribute('href', '/en/');
 });
 
 test('根路徑 / 是 noindex 的跳轉頁，canonical 指向 zh-TW', async ({ request }) => {
   const html = await (await request.get('/')).text();
   expect(html).toContain('name="robots" content="noindex"');
   expect(html).toContain(`rel="canonical" href="${SITE}/zh-TW/"`);
-  expect(html).toContain('hreflang="x-default"');
+  expect(html).not.toContain('hreflang');
 });
 
 test.describe('上一個／下一個主題', () => {
@@ -133,10 +138,10 @@ test.describe('上一個／下一個主題', () => {
     await expect(mid.getByRole('link', { name: /合併排序/ })).toHaveAttribute('href', '/zh-TW/merge-sort/');
     await expect(mid.getByRole('link', { name: /AVL 樹插入/ })).toHaveAttribute('href', '/zh-TW/avl-insert/');
 
-    await page.goto('/en/avl-insert/');
-    const last = page.getByRole('navigation', { name: 'Previous and next topic' });
+    await page.goto('/zh-TW/avl-insert/');
+    const last = page.getByRole('navigation', { name: '上一個與下一個主題' });
     await expect(last.getByRole('link')).toHaveCount(1);
-    await expect(last.getByRole('link', { name: /Quick Sort/ })).toHaveAttribute('href', '/en/quick-sort/');
+    await expect(last.getByRole('link', { name: /快速排序/ })).toHaveAttribute('href', '/zh-TW/quick-sort/');
   });
 });
 

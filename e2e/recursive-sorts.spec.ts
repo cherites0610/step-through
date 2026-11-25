@@ -62,11 +62,11 @@ test.describe('快速排序', () => {
   });
 
   test('自訂輸入含重複值也能排好', async ({ page }) => {
-    await page.goto('/en/quick-sort/');
+    await page.goto('/zh-TW/quick-sort/');
     await page.getByRole('textbox').fill('5 5 3 9 3 1 5');
-    await page.getByRole('button', { name: 'Apply' }).click();
-    await toEnd(page, 'Step');
-    await expect(page.getByRole('img', { name: /Current array: 1, 3, 3, 5, 5, 5, 9/ })).toBeVisible();
+    await page.getByRole('button', { name: '套用' }).click();
+    await toEnd(page, '步驟');
+    await expect(page.getByRole('img', { name: /目前陣列：1, 3, 3, 5, 5, 5, 9/ })).toBeVisible();
   });
 });
 
@@ -108,12 +108,6 @@ test.describe('合併排序', () => {
       if (t.includes('取左邊')) seen = t;
     }
     expect(seen).toContain('相等時取左邊');
-  });
-
-  test('英文版文案與標籤', async ({ page }) => {
-    await page.goto('/en/merge-sort/');
-    await expect(page.getByRole('region', { name: 'Call stack' })).toBeVisible();
-    await expect(page.getByRole('img', { name: /Current array/ })).toContainText('LEFT');
   });
 });
 

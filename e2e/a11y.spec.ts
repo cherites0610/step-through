@@ -16,18 +16,16 @@ async function scan(page: Page) {
   expect(summary, JSON.stringify(summary, null, 2)).toEqual([]);
 }
 
-for (const lang of ['zh-TW', 'en']) {
-  test(`${lang} 首頁沒有無障礙違規`, async ({ page }) => {
-    await page.goto(`/${lang}/`);
+test('首頁沒有無障礙違規', async ({ page }) => {
+  await page.goto('/zh-TW/');
+  await scan(page);
+});
+
+for (const slug of topics) {
+  test(`${slug} 沒有無障礙違規`, async ({ page }) => {
+    await page.goto(`/zh-TW/${slug}/`);
     await scan(page);
   });
-
-  for (const slug of topics) {
-    test(`${lang}/${slug} 沒有無障礙違規`, async ({ page }) => {
-      await page.goto(`/${lang}/${slug}/`);
-      await scan(page);
-    });
-  }
 }
 
 test('404 頁沒有無障礙違規', async ({ page }) => {
@@ -36,10 +34,10 @@ test('404 頁沒有無障礙違規', async ({ page }) => {
 });
 
 test.describe('投影模式（純白紙面、2px 線、放大）', () => {
-  for (const url of ['/zh-TW/', '/zh-TW/quick-sort/', '/zh-TW/avl-insert/', '/en/merge-sort/']) {
+  for (const url of ['/zh-TW/', '/zh-TW/quick-sort/', '/zh-TW/avl-insert/', '/zh-TW/merge-sort/']) {
     test(`${url} 沒有無障礙違規`, async ({ page }) => {
       await page.goto(url);
-      await page.getByRole('button', { name: /投影模式|Projector mode/ }).click();
+      await page.getByRole('button', { name: '投影模式' }).click();
       await scan(page);
     });
   }

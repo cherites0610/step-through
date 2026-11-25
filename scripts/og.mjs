@@ -22,7 +22,7 @@ const DIST = path.join(root, 'dist');
 const OUT = path.join(root, 'public/og');
 const PORT = 4397;
 const BASE = `http://localhost:${PORT}`;
-const LANGS = ['zh-TW', 'en'];
+const LANGS = ['zh-TW'];
 
 if (!fs.existsSync(path.join(DIST, 'zh-TW/index.html'))) {
   console.error('找不到 dist/，請先執行 pnpm build');
@@ -131,7 +131,7 @@ try {
 
   for (const lang of LANGS) {
     fs.mkdirSync(path.join(OUT, lang), { recursive: true });
-    const brand = lang === 'en' ? 'Step Through' : '步步看懂  Step Through';
+    const brand = '步步看懂  Step Through';
     const url = 'step-through.cherites.org';
 
     // 首頁：首屏標本
@@ -185,7 +185,7 @@ try {
         html({
           label,
           title,
-          sub: lang === 'en' ? '' : titleEn,
+          sub: titleEn,
           meta,
           plate: `data:image/png;base64,${plate.toString('base64')}`,
           brand,

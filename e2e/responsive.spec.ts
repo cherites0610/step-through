@@ -3,13 +3,10 @@ import { expect, test } from './fixtures';
 const widths = [320, 390, 768, 1280];
 const pages = [
   '/zh-TW/',
-  '/en/',
   '/zh-TW/insertion-sort/',
-  '/en/insertion-sort/',
   '/zh-TW/merge-sort/',
-  '/en/quick-sort/',
+  '/zh-TW/quick-sort/',
   '/zh-TW/avl-insert/',
-  '/en/avl-insert/',
 ];
 
 for (const width of widths) {
