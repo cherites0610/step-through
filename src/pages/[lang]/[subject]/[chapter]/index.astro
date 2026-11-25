@@ -2,6 +2,8 @@
 import { getCollection, render } from 'astro:content';
 import Base from '../../../../layouts/Base.astro';
 import Solution from '../../../../components/chapter/Solution.astro';
+import { mdxComponents } from '../../../../components/content';
+import 'katex/dist/katex.min.css';
 import ChapterData from '../../../../components/progress/ChapterData.astro';
 import StateMark from '../../../../components/progress/StateMark.astro';
 import StateLabel from '../../../../components/progress/StateLabel.astro';
@@ -177,7 +179,7 @@ const jsonLd = [
         {
           concept ? (
             <div class="prose-plate mt-4 max-w-[65ch]">
-              <concept.Content />
+              <concept.Content components={mdxComponents} />
             </div>
           ) : (
             <p class="mt-3 max-w-[65ch] text-[15px] text-ink/70">{c.conceptsSoon}</p>
@@ -257,7 +259,7 @@ const jsonLd = [
                     <span class="sr-only">{c.difficulty.replace('{n}', String(q.difficulty))}</span>
                   </p>
                   <div class="prose-plate mt-3 text-[17px]">
-                    <Content components={{ Solution }} />
+                    <Content components={{ ...mdxComponents, Solution }} />
                   </div>
                   <fieldset class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
                     <legend class="sr-only">Q{pad2(i + 1)} {c.markLegend}</legend>

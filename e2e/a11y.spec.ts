@@ -35,6 +35,14 @@ for (const id of ['data-structures', 'algorithms']) {
   });
 }
 
+for (const url of ['/zh-TW/data-structures/basics/', '/zh-TW/data-structures/sorting/']) {
+  test(`章節頁 ${url} 沒有無障礙違規（含公式、圖、展開的詳解）`, async ({ page }) => {
+    await page.goto(url);
+    await page.locator('details').evaluateAll((ds) => ds.forEach((d) => ((d as HTMLDetailsElement).open = true)));
+    await scan(page);
+  });
+}
+
 test('404 頁沒有無障礙違規', async ({ page }) => {
   await page.goto('/404.html');
   await scan(page);

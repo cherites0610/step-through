@@ -6,29 +6,29 @@ kind: calc
 difficulty: 2
 ---
 
-用主定理求下列遞迴關係式的 Θ 解；不能用主定理的請說明原因。
+用主定理求下列遞迴關係式的 <M t="\Theta" /> 解；不能用主定理的請說明原因。
 
-(a) T(n) = 4T(n/2) + n
+(a) <M t="T(n) = 4T(n/2) + n" />
 
-(b) T(n) = 8T(n/2) + n²
+(b) <M t="T(n) = 8T(n/2) + n^2" />
 
-(c) T(n) = 3T(n/4) + n log n
+(c) <M t="T(n) = 3T(n/4) + n \log n" />
 
-(d) T(n) = T(2n/3) + 1
+(d) <M t="T(n) = T(2n/3) + 1" />
 
-(e) T(n) = 2T(n/2) + n log n
+(e) <M t="T(n) = 2T(n/2) + n \log n" />
 
 <Solution>
 
-| | n^(log_b a) | f(n) | 情況 | 答案 |
+| | <M t="n^{\log_b a}" /> | <M t="f(n)" /> | 情況 | 答案 |
 |---|---|---|---|---|
-| (a) | n² | n，小了多項式倍 | 1 | Θ(n²) |
-| (b) | n³ | n²，小了多項式倍 | 1 | Θ(n³) |
-| (c) | n^(log₄ 3) ≈ n^0.79 | n log n，大了多項式倍 | 3 | Θ(n log n) |
-| (d) | n^0 = 1 | Θ(1) | 2 | Θ(log n) |
-| (e) | n | n log n | 延伸的情況 2（k = 1） | Θ(n log² n) |
+| (a) | <M t="n^2" /> | <M t="n" />，小了多項式倍 | 1 | <M t="\Theta(n^2)" /> |
+| (b) | <M t="n^3" /> | <M t="n^2" />，小了多項式倍 | 1 | <M t="\Theta(n^3)" /> |
+| (c) | <M t="n^{\log_4 3} \approx n^{0.79}" /> | <M t="n \log n" />，大了多項式倍 | 3 | <M t="\Theta(n \log n)" /> |
+| (d) | <M t="n^0 = 1" /> | <M t="\Theta(1)" /> | 2 | <M t="\Theta(\log n)" /> |
+| (e) | <M t="n" /> | <M t="n \log n" /> | 延伸的情況 2（<M t="k = 1" />） | <M t="\Theta(n \log^2 n)" /> |
 
-- (c) 要檢查正規條件：3·(n/4)·log(n/4) = (3/4)·n·(log n − 2) ≤ (3/4)·n log n，c = 3/4 ＜ 1，成立。
-- (e) n log n 比 n 大，但只大了 log n 倍，**不是**多項式倍，所以基本的三種情況都不適用；要用延伸的情況 2：f(n) = Θ(n^(log_b a) · log^k n) 時 T(n) = Θ(n^(log_b a) · log^(k+1) n)。
+- (c) 要檢查正規條件：<M t="3 \cdot \frac{n}{4} \log \frac{n}{4} = \frac{3}{4} n (\log n - 2) \le \frac{3}{4} n \log n" />，<M t="c = \frac{3}{4} < 1" />，成立。
+- (e) <M t="n \log n" /> 比 <M t="n" /> 大，但只大了 <M t="\log n" /> 倍，**不是**多項式倍，所以基本的三種情況都不適用；要用延伸的情況 2：<M t="f(n) = \Theta(n^{\log_b a} \log^k n)" /> 時 <M t="T(n) = \Theta(n^{\log_b a} \log^{k+1} n)" />。
 
 </Solution>

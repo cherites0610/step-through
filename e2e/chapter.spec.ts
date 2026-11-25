@@ -79,6 +79,14 @@ test.describe('章節頁', () => {
     expect(decodeURIComponent(new URL(page.url()).hash)).toBe('#主定理');
 
     await expect(page.locator('li.question')).toHaveCount(10);
+    // 公式由 KaTeX 排版（含給螢幕閱讀器的 MathML）；觀念說明有 5 張圖，各有替代文字
+    await expect(page.locator('.katex').first()).toBeVisible();
+    expect(await page.locator('.katex math').count()).toBeGreaterThan(100);
+    await expect(page.locator('figure.fig')).toHaveCount(5);
+    for (const fig of await page.locator('figure.fig svg[role="img"]').all()) await expect(fig).toHaveAttribute('aria-label', /.+/);
+    await expect(page.locator('figure.fig figcaption').first()).toContainText('圖 1-1');
+    // 頁面本身不因公式或圖而橫向溢出
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
     await expect(page.locator('section[aria-labelledby="checklist"] fieldset')).toHaveCount(5);
     // 描述用觀念說明的摘要
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /漸近符號/);

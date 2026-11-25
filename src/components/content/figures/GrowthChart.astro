@@ -1,0 +1,77 @@
+---
+// 圖：常見函數的成長率（n = 1…20，縱軸 0…300）。超出縱軸的曲線在離開處標名稱。
+// 只用墨色，以直接標在曲線上的名稱區分（全站只有一個強調色）；下方附數值表。
+const W = 560, H = 320, L = 48, R = 96, T = 16, B = 36;
+const XMAX = 20, YMAX = 300;
+const pw = W - L - R, ph = H - T - B;
+const X = (x: number) => +(L + ((x - 1) / (XMAX - 1)) * pw).toFixed(1);
+const Y = (y: number) => +(T + ph - (Math.min(y, YMAX) / YMAX) * ph).toFixed(1);
+const series: { name: string; fn: (n: number) => number }[] = [
+  { name: 'log n', fn: (n) => Math.log2(n) },
+  { name: 'n', fn: (n) => n },
+  { name: 'n log n', fn: (n) => n * Math.log2(n) },
+  { name: 'n²', fn: (n) => n * n },
+  { name: '2ⁿ', fn: (n) => 2 ** n },
+];
+const STEP = 0.1;
+const xs = Array.from({ length: Math.round((XMAX - 1) / STEP) + 1 }, (_, i) => 1 + i * STEP);
+/** 曲線取樣到離開縱軸為止；回傳點與標籤位置 */
+const draw = (fn: (n: number) => number) => {
+  const pts: number[] = [];
+  for (const n of xs) {
+    pts.push(n);
+    if (fn(n) >= YMAX) break;
+  }
+  const last = pts.at(-1)!;
+  return {
+    points: pts.map((n) => `${X(n)},${Y(fn(n))}`).join(' '),
+    exits: fn(last) >= YMAX,
+    lx: X(last),
+    ly: Y(fn(last)),
+  };
+};
+const fmt = (v: number) => (v >= 1e6 ? v.toExponential(1).replace('e+', '×10^') : Number.isInteger(v) ? String(v) : v.toFixed(1));
+const tableNs = [4, 8, 16, 32, 64];
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="log n、n、n log n、n²、2ⁿ 在 n = 1 到 20 的曲線：2ⁿ 在 n 約 8.2 時就超過 300，n² 在約 17.3，n log n 到 n = 20 才約 86，n 與 log n 幾乎貼著底部">
+  <path class="axis" d={`M${L} ${T} L${L} ${T + ph} L${L + pw} ${T + ph}`} />
+  {[1, 5, 10, 15, 20].map((x) => <text class="mono" x={X(x)} y={T + ph + 16} text-anchor="middle">{x}</text>)}
+  {
+    [0, 100, 200, 300].map((y) => (
+      <>
+        <text class="mono" x={L - 8} y={Y(y) + 4} text-anchor="end">{y}</text>
+        <path class="axis" d={`M${L - 3} ${Y(y)} L${L} ${Y(y)}`} />
+      </>
+    ))
+  }
+  <text class="mono" x={L + pw} y={T + ph + 32} text-anchor="end">n</text>
+  {
+    series.map((s) => {
+      const d = draw(s.fn);
+      return (
+        <g>
+          <polyline class="ink" stroke-width="2" points={d.points} />
+          {d.exits ? (
+            <text x={d.lx} y={T - 4} text-anchor="middle" dy="12" dx="18">{s.name}</text>
+          ) : (
+            <text x={d.lx + 8} y={d.ly + 4}>{s.name}</text>
+          )}
+        </g>
+      );
+    })
+  }
+</svg>
+<details>
+  <summary>看數值</summary>
+  <table>
+    <thead>
+      <tr><th>n</th>{series.map((s) => <th>{s.name}</th>)}</tr>
+    </thead>
+    <tbody>
+      {tableNs.map((n) => (
+        <tr><td>{n}</td>{series.map((s) => <td class="font-mono">{fmt(s.fn(n))}</td>)}</tr>
+      ))}
+    </tbody>
+  </table>
+</details>

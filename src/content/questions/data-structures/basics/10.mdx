@@ -6,22 +6,24 @@ kind: calc
 difficulty: 3
 ---
 
-T(n) = 2T(n/2) + n / log n（log 以 2 為底，n 為 2 的次方）。能不能用主定理？請求出 T(n) 的 Θ 解。
+<M t="T(n) = 2T(n/2) + n / \log n" />（<M t="\log" /> 以 2 為底，<M t="n" /> 為 2 的次方）。能不能用主定理？請求出 <M t="T(n)" /> 的 <M t="\Theta" /> 解。
 
 <Solution>
 
-**不能用基本的主定理；T(n) = Θ(n log log n)。**
+**不能用基本的主定理；<M t="T(n) = \Theta(n \log \log n)" />。**
 
-n^(log₂ 2) = n。f(n) = n / log n 比 n 小，但只小了 log n 倍，不是多項式倍（找不到 ε > 0 使 n / log n = O(n^(1−ε))），所以不是情況 1；它也不是 Θ(n)，所以不是情況 2。
+<M t="n^{\log_2 2} = n" />。<M t="f(n) = n / \log n" /> 比 <M t="n" /> 小，但只小了 <M t="\log n" /> 倍，不是多項式倍（找不到 <M t="\varepsilon > 0" /> 使 <M t="n / \log n = O(n^{1-\varepsilon})" />），所以不是情況 1；它也不是 <M t="\Theta(n)" />，所以不是情況 2。
 
-改用遞迴樹。設 n = 2^m：
+改用遞迴樹（見觀念說明的圖 1-4）。設 <M t="n = 2^m" />：
 
-- 第 i 層有 2^i 個子問題，每個大小 n/2^i，成本 (n/2^i) / log(n/2^i) = (n/2^i) / (m − i)。
-- 這一層的總成本：2^i · (n/2^i) / (m − i) = n / (m − i)。
-- 從 i = 0 加到 m − 1：n · (1/m + 1/(m−1) + … + 1/1) = n · H_m。
+- 第 <M t="i" /> 層有 <M t="2^i" /> 個子問題，每個大小 <M t="n/2^i" />，成本 <M t="\dfrac{n/2^i}{\log(n/2^i)} = \dfrac{n/2^i}{m - i}" />。
+- 這一層的總成本：<M t="2^i \cdot \dfrac{n/2^i}{m-i} = \dfrac{n}{m-i}" />。
+- 從 <M t="i = 0" /> 加到 <M t="m-1" />：
 
-調和數 H_m = Θ(log m)，而 m = log n，所以
+<M d t="\sum_{i=0}^{m-1} \frac{n}{m-i} = n \left( \frac{1}{m} + \frac{1}{m-1} + \cdots + \frac{1}{1} \right) = n H_m" />
 
-T(n) = Θ(n log log n)
+調和數 <M t="H_m = \Theta(\log m)" />，而 <M t="m = \log n" />，所以
+
+<M d t="T(n) = \Theta(n \log \log n)" />
 
 </Solution>

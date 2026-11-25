@@ -1,0 +1,17 @@
+---
+// 數學式：<M t="\frac{n}{2}" />（行內）、<M d t="..." />（獨立一行）。
+// 建置時由 KaTeX 排好，輸出靜態 HTML 與 MathML（給螢幕閱讀器），瀏覽器不執行 JS。
+// MDX 會把 {} 當成 JavaScript，所以 TeX 放在屬性字串裡；寫錯時建置失敗。
+import katex from 'katex';
+
+interface Props {
+  t: string;
+  /** 獨立一行（display mode） */
+  d?: boolean;
+}
+const { t, d = false } = Astro.props;
+const html = katex.renderToString(t, { displayMode: d, throwOnError: true, output: 'htmlAndMathml' });
+---
+
+{/* 獨立一行的長公式在窄螢幕可能需要橫向捲動：讓鍵盤也能聚焦 */}
+{d ? <div class="math-display" tabindex="0" role="group" aria-label="公式" set:html={html} /> : <Fragment set:html={html} />}

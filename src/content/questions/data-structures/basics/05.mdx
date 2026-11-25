@@ -6,16 +6,16 @@ kind: fill
 difficulty: 2
 ---
 
-把下列函數依成長率由慢到快排列；成長率相同（互為 Θ）的請標出來。
+把下列函數依成長率由慢到快排列；成長率相同（互為 <M t="\Theta" />）的請標出來。
 
-f₁ = n²　f₂ = 2ⁿ　f₃ = n log n　f₄ = log(n!)　f₅ = n^(log n)　f₆ = 100n
+<M d t="f_1 = n^2 \quad f_2 = 2^n \quad f_3 = n \log n \quad f_4 = \log(n!) \quad f_5 = n^{\log n} \quad f_6 = 100n" />
 
 <Solution>
 
-**f₆ ＜ f₃ ＝ f₄ ＜ f₁ ＜ f₅ ＜ f₂**（f₃ 與 f₄ 互為 Θ）
+**<M t="f_6 < f_3 = f_4 < f_1 < f_5 < f_2" />**（<M t="f_3" /> 與 <M t="f_4" /> 互為 <M t="\Theta" />）
 
-- f₆ = 100n = Θ(n)，常數倍不影響。
-- f₄ = log(n!) = Θ(n log n)：上界 log(n!) ≤ log(nⁿ) = n log n；下界取 n! 的後半段 n/2 個因數，每個至少 n/2，得 log(n!) ≥ (n/2) log(n/2)。所以和 f₃ 同級。
-- f₅ = n^(log n)：取 log₂ 之後是 (log n)²，而 f₁ = n² 取 log 是 2 log n，f₂ = 2ⁿ 取 log 是 n。因為 2 log n ＜ (log n)² ＜ n（n 夠大時），所以 n² ＜ n^(log n) ＜ 2ⁿ。
+- <M t="f_6 = 100n = \Theta(n)" />，常數倍不影響。
+- <M t="f_4 = \log(n!) = \Theta(n \log n)" />：上界 <M t="\log(n!) \le \log(n^n) = n \log n" />；下界取 <M t="n!" /> 的後半段 <M t="n/2" /> 個因數，每個至少 <M t="n/2" />，得 <M t="\log(n!) \ge \frac{n}{2} \log \frac{n}{2}" />。所以和 <M t="f_3" /> 同級。
+- <M t="f_5 = n^{\log n}" />：取 <M t="\log_2" /> 之後是 <M t="(\log n)^2" />；<M t="f_1" /> 取 log 是 <M t="2 \log n" />，<M t="f_2" /> 取 log 是 <M t="n" />。因為 <M t="2 \log n < (\log n)^2 < n" />（<M t="n" /> 夠大時），所以 <M t="n^2 < n^{\log n} < 2^n" />。
 
 </Solution>

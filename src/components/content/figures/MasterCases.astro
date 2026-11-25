@@ -1,0 +1,33 @@
+---
+// 圖：主定理的三種情況＝遞迴樹每層成本的三種走勢（取前 5 層，以第 0 層的 f(n) 為單位）。
+const panels = [
+  { title: '4T(n/2) + n', costs: [1, 2, 4, 8, 16], note: '一層比一層多', result: '葉子主導 → Θ(n²)' },
+  { title: '2T(n/2) + n', costs: [1, 1, 1, 1, 1], note: '每層一樣多', result: '× 層數 → Θ(n log n)' },
+  { title: '2T(n/2) + n²', costs: [16, 8, 4, 2, 1], note: '一層比一層少', result: '根主導 → Θ(n²)' },
+];
+const PW = 176, GAP = 16, W = panels.length * PW + (panels.length - 1) * GAP, H = 214;
+const BAR_X = 58, BAR_MAX = PW - BAR_X - 8, ROW = 22, TOP = 40;
+const unitOf = (p: (typeof panels)[number]) => Math.max(...p.costs);
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="三個小圖：4T(n/2)+n 每層成本 n、2n、4n…遞增，葉子主導；2T(n/2)+n 每層都是 n；2T(n/2)+n² 每層 n²、n²/2…遞減，根主導">
+  {
+    panels.map((p, k) => {
+      const x0 = k * (PW + GAP);
+      return (
+        <g>
+          <text class="mono" x={x0} y="14">T(n) = {p.title}</text>
+          <path class="axis" d={`M${x0 + BAR_X - 4} ${TOP - 4} L${x0 + BAR_X - 4} ${TOP + p.costs.length * ROW}`} />
+          {p.costs.map((c, i) => (
+            <>
+              <text class="mono" x={x0 + BAR_X - 10} y={TOP + i * ROW + 12} text-anchor="end">第 {i} 層</text>
+              <rect x={x0 + BAR_X} y={TOP + i * ROW + 3} width={(c / unitOf(p)) * BAR_MAX} height="12" fill="var(--color-ink)" />
+            </>
+          ))}
+          <text x={x0} y={TOP + p.costs.length * ROW + 24}>{p.note}</text>
+          <text x={x0} y={TOP + p.costs.length * ROW + 44}>{p.result}</text>
+        </g>
+      );
+    })
+  }
+</svg>
