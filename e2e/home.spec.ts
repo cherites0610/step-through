@@ -66,7 +66,7 @@ test('單元頁頂列：科目連結與「章節編號 章名 · 章內序號」
   for (const [slug, title] of Object.entries(live)) {
     await page.goto(`/zh-TW/${slug}/`);
     const header = page.locator('header');
-    await expect(header.getByRole('link', { name: '資料結構' })).toHaveAttribute('href', '/zh-TW/data-structures/');
+    await expect(header.getByRole('link', { name: '資料結構' })).toHaveAttribute('href', '/zh-TW/data-structures/#ch-sorting');
     // 序號 = 在科目頁章節清單中的位置
     await expect(header).toContainText(`10 排序 · ${String(titles.indexOf(title) + 1).padStart(2, '0')}`);
   }

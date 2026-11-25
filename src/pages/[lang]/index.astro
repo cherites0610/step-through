@@ -44,7 +44,7 @@ const jsonLd = [
 ---
 
 <Base lang={lang} title={`${text.siteName}｜${text.tagline}`} jsonLd={jsonLd}>
-  <header class="flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6 lg:px-10">
+  <header class="sticky top-0 z-20 bg-paper flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6 lg:px-10">
     <a href={`/${lang}/`} class="shrink-0 font-medium">{text.siteName}</a>
   </header>
 
@@ -102,7 +102,7 @@ const jsonLd = [
       </figure>
     </section>
 
-    <section id="index" class="scroll-mt-4 border-t border-hairline">
+    <section id="index" class="scroll-mt-14 border-t border-hairline">
       <div class="mx-auto max-w-[1280px] px-4 pt-12 lg:px-10">
         <div class="flex flex-wrap items-end justify-between gap-x-8 gap-y-3">
           <div>

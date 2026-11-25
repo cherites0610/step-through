@@ -100,13 +100,19 @@ const rows: [string, string][] = [
   image={ogImagePath}
   type="article"
 >
-  <header class="flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6">
-    <a href={`/${lang}/`} class="shrink-0 font-medium">{text.siteName}</a>
-    <a href={`/${lang}/${subject.id}/`} class="shrink-0 text-[15px] underline-offset-4 hover:underline">{subject.title}</a>
+  <header class="sticky top-0 z-20 bg-paper flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6">
+    <a href={`/${lang}/`} class="shrink-0 font-medium max-md:hidden">{text.siteName}</a>
+    <!-- 回到科目地圖的這一章；手機上是唯一的返回連結，所以加箭頭與底線 -->
+    <a
+      href={`/${lang}/${subject.id}/#ch-${chapter.id}`}
+      class="shrink-0 text-[15px] underline underline-offset-4 md:no-underline md:hover:underline"
+      ><span class="md:hidden">← </span>{subject.title}</a
+    >
     <span class="hidden font-mono text-[11px] uppercase tracking-[0.14em] md:inline"
       >{plateLabel}</span
     >
     <span class="hidden text-[15px] md:inline">{d.title}</span>
+    <a href={`/${lang}/`} class="ml-auto shrink-0 font-medium md:hidden">{text.siteName}</a>
   </header>
 
   <div class="md:grid md:grid-cols-[220px_1fr]">
@@ -116,7 +122,7 @@ const rows: [string, string][] = [
     >
       <a
         href={`/${lang}/${subject.id}/#ch-${chapter.id}`}
-        class="mb-3 inline-block whitespace-nowrap text-[13px] underline underline-offset-4"
+        class="mb-3 inline-block whitespace-nowrap text-[13px] underline underline-offset-4 max-md:hidden"
       >
         ← {backToMap}
       </a>
