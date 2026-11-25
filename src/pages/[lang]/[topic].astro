@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import SortViz from '../../components/viz/sorting/SortViz.svelte';
 import AvlViz from '../../components/viz/avl/AvlViz.svelte';
 import { t, type Locale } from '../../i18n';
-import { locateTopic, topicOrder } from '../../i18n/roadmap';
+import { locateTopic, pad2, topicOrder } from '../../data/subjects';
 
 export async function getStaticPaths() {
   const all = await getCollection('topics');
@@ -20,11 +20,13 @@ const text = t(lang);
 const d = entry.data;
 const { Content } = await render(entry);
 
-// 章節與序號都以路線圖為唯一來源；主題沒登記在路線圖時在建置階段就報錯
+// 科目、章節與序號都以 src/data/subjects.ts 為唯一來源；主題沒登記時在建置階段就報錯
 const loc = locateTopic(d.topic);
-if (!loc) throw new Error(`主題 "${d.topic}" 沒有登記在 src/i18n/roadmap.ts`);
-const { chapter, index } = loc;
-const plateLabel = `${chapter.title[lang]} · ${String(index).padStart(2, '0')}`;
+if (!loc) throw new Error(`主題 "${d.topic}" 沒有登記在 src/data/subjects.ts`);
+const { subject, chapter, index } = loc;
+const plateLabel = `${pad2(chapter.no)} ${chapter.title} · ${pad2(index)}`;
+const subjectUrl = new URL(`/${lang}/${subject.id}/`, Astro.site).href;
+const backToMap = text.subject.backToMap.replace('{subject}', subject.title);
 
 const siblings = (await getCollection('topics'))
   .filter((e) => e.data.lang === lang && locateTopic(e.data.topic)?.chapter.id === chapter.id)
@@ -63,7 +65,8 @@ const jsonLd = [
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: text.siteName, item: new URL(`/${lang}/`, Astro.site).href },
-      { '@type': 'ListItem', position: 2, name: d.title, item: url },
+      { '@type': 'ListItem', position: 2, name: subject.title, item: subjectUrl },
+      { '@type': 'ListItem', position: 3, name: d.title, item: url },
     ],
   },
   {
@@ -99,6 +102,7 @@ const rows: [string, string][] = [
 >
   <header class="flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6">
     <a href={`/${lang}/`} class="shrink-0 font-medium">{text.siteName}</a>
+    <a href={`/${lang}/${subject.id}/`} class="shrink-0 text-[15px] underline-offset-4 hover:underline">{subject.title}</a>
     <span class="hidden font-mono text-[11px] uppercase tracking-[0.14em] md:inline"
       >{plateLabel}</span
     >
@@ -110,7 +114,13 @@ const rows: [string, string][] = [
       class="border-b border-hairline px-4 py-4 md:border-b-0 md:border-r"
       aria-label={text.topics}
     >
-      <p class="mb-2 font-mono text-[11px] uppercase tracking-[0.14em]">{chapter.title[lang]}</p>
+      <a
+        href={`/${lang}/${subject.id}/#ch-${chapter.id}`}
+        class="mb-3 inline-block whitespace-nowrap text-[13px] underline underline-offset-4"
+      >
+        ← {backToMap}
+      </a>
+      <p class="mb-2 font-mono text-[11px] uppercase tracking-[0.14em]">{pad2(chapter.no)} {chapter.title}</p>
       <ul class="flex gap-4 overflow-x-auto md:flex-col md:gap-0">
         {
           siblings.map((s) => (

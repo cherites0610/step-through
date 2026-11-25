@@ -1,17 +1,16 @@
 import { expect, test } from './fixtures';
 
-test('首頁（zh-TW）：路線圖只連結已上線主題，即將推出的不是連結', async ({ page }) => {
+test('首頁：科目目錄只連結已開放的科目，即將推出的不是連結', async ({ page }) => {
   await page.goto('/zh-TW/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('看課本看不懂的');
 
   const index = page.locator('#index');
-  for (const name of ['插入排序', '氣泡排序', '選擇排序', '合併排序', '快速排序']) {
-    await expect(index.getByRole('link', { name })).toBeVisible();
+  await expect(index.getByRole('heading', { name: '科目目錄' })).toBeVisible();
+  await expect(index.getByRole('link', { name: /資料結構/ })).toHaveAttribute('href', '/zh-TW/data-structures/');
+  await expect(index.getByRole('link')).toHaveCount(1);
+  for (const name of ['演算法', '作業系統', '計算機組織', '資料庫']) {
+    await expect(index.getByText(name, { exact: true })).toBeVisible();
   }
-  // 尚未上線的主題不應是連結，但螢幕閱讀器要讀得到狀態
-  await expect(index.getByRole('link', { name: 'AVL 樹插入' })).toBeVisible();
-  await expect(index.getByRole('link', { name: /紅黑樹|Dijkstra|二元搜尋樹/ })).toHaveCount(0);
-  await expect(index.getByText('紅黑樹')).toBeVisible();
   await expect(index.getByText('即將推出').first()).toBeAttached();
 });
 
@@ -19,11 +18,11 @@ test('首頁：主要行動可用，首屏不載入互動 JS', async ({ page }) 
   await page.goto('/zh-TW/');
   await expect(page.locator('astro-island')).toHaveCount(0);
 
-  await page.getByRole('link', { name: '瀏覽主題目錄' }).click();
+  await page.getByRole('link', { name: '瀏覽科目' }).click();
   await expect(page).toHaveURL(/#index$/);
 
-  await page.getByRole('link', { name: /從插入排序開始/ }).click();
-  await expect(page).toHaveURL(/\/zh-TW\/insertion-sort\/$/);
+  await page.getByRole('link', { name: /從資料結構開始/ }).click();
+  await expect(page).toHaveURL(/\/zh-TW\/data-structures\/$/);
 });
 
 test('首頁：只有繁體中文，沒有語言切換', async ({ page }) => {
@@ -41,28 +40,35 @@ test('首頁有 WebSite 結構化資料', async ({ page }) => {
   expect(types).toEqual(['WebSite']);
 });
 
-test('頂列標籤：章節名加章內序號，且序號與首頁目錄順序一致', async ({ page }) => {
-  const expected: Record<string, string> = {
-    'insertion-sort': '排序 · 01',
-    'bubble-sort': '排序 · 02',
-    'selection-sort': '排序 · 03',
-    'merge-sort': '排序 · 04',
-    'quick-sort': '排序 · 05',
-  };
+test('單元頁頂列：科目連結與「章節編號 章名 · 章內序號」，序號與科目頁的章節清單一致', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/zh-TW/data-structures/');
+  const units = page.locator('#ch-sorting li');
+  const titles = (await units.allInnerTexts()).map((t) => t.replace(/已上線|即將推出/, '').trim());
 
-  // 首頁目錄的實際順序
-  await page.goto('/zh-TW/');
-  const hrefs = await page.locator('#index a[href*="-sort/"]').evaluateAll((els) =>
-    els.map((e) => (e as HTMLAnchorElement).getAttribute('href')!.split('/').filter(Boolean).pop()!),
-  );
-  expect(hrefs).toEqual(['insertion-sort', 'bubble-sort', 'selection-sort', 'merge-sort', 'quick-sort']);
-  await expect(page.getByText('Plate 00')).toHaveCount(0);
-
-  for (const [i, slug] of hrefs.entries()) {
+  const live: Record<string, string> = {
+    'insertion-sort': '插入排序',
+    'bubble-sort': '氣泡排序',
+    'selection-sort': '選擇排序',
+    'merge-sort': '合併排序',
+    'quick-sort': '快速排序',
+  };
+  for (const [slug, title] of Object.entries(live)) {
     await page.goto(`/zh-TW/${slug}/`);
-    await expect(page.locator('header')).toContainText(expected[slug]);
-    // 序號 = 目錄中的位置
-    expect(expected[slug]).toBe(`排序 · ${String(i + 1).padStart(2, '0')}`);
+    const header = page.locator('header');
+    await expect(header.getByRole('link', { name: '資料結構' })).toHaveAttribute('href', '/zh-TW/data-structures/');
+    // 序號 = 在科目頁章節清單中的位置
+    await expect(header).toContainText(`10 排序 · ${String(titles.indexOf(title) + 1).padStart(2, '0')}`);
   }
+  await page.goto('/zh-TW/avl-insert/');
+  await expect(page.locator('header')).toContainText('08 平衡搜尋樹 · 01');
+  await expect(page.getByText('Plate 00')).toHaveCount(0);
+});
+
+test('單元頁的章節欄可以回到科目地圖的該章', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/zh-TW/quick-sort/');
+  await page.getByRole('link', { name: /資料結構學習地圖/ }).click();
+  await expect(page).toHaveURL(/\/zh-TW\/data-structures\/#ch-sorting$/);
+  await expect(page.locator('#ch-sorting')).toBeInViewport();
 });

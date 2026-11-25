@@ -25,7 +25,7 @@ test.describe('AVL 樹插入', () => {
     }
     await expect(page.getByText('平衡因子 BF')).toBeVisible();
     await expect(page.locator('li[aria-current="step"]')).toContainText('insert(v)');
-    await expect(page.locator('header')).toContainText('樹 · 02');
+    await expect(page.locator('header')).toContainText('08 平衡搜尋樹 · 01');
   });
 
   for (const [preset, kind] of [

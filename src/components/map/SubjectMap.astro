@@ -1,0 +1,132 @@
+---
+// 科目地圖：先修關係圖，建置時算好座標輸出成靜態 SVG（不載入 JS）。
+// 節點連到頁面下方對應的章節清單。
+import { layoutMap, defaultLayoutOptions as o } from '../../core/map/layout';
+import { pad2, type Subject } from '../../data/subjects';
+
+interface Props {
+  subject: Subject;
+  /** 已上線的主題（有主題頁） */
+  live: Set<string>;
+  labels: { live: string; soon: string; units: string; mapLabel: string };
+}
+const { subject, live, labels } = Astro.props;
+
+const PAD = 24;
+const layout = layoutMap(subject.chapters);
+const W = layout.width + PAD * 2;
+const H = layout.height + PAD * 2;
+const pos = new Map(layout.nodes.map((n) => [n.id, n]));
+
+const liveCount = (c: Subject['chapters'][number]) => c.units.filter((u) => u.topic && live.has(u.topic)).length;
+const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x + PAD} ${y + PAD}`).join(' ');
+---
+
+<div
+  class="relative border border-hairline"
+  style="background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px); background-size: 16px 16px;"
+>
+  <span class="reg tl" aria-hidden="true"></span>
+  <span class="reg tr" aria-hidden="true"></span>
+  <span class="reg bl" aria-hidden="true"></span>
+  <span class="reg br" aria-hidden="true"></span>
+  <!-- 窄螢幕時在框內橫向捲動，不縮小文字 -->
+  <div class="overflow-x-auto py-2">
+    <svg
+      class="subject-map mx-auto block"
+      width={W}
+      height={H}
+      viewBox={`0 0 ${W} ${H}`}
+      role="group"
+      aria-label={labels.mapLabel}
+    >
+      <g aria-hidden="true">
+        {
+          layout.edges.map((e) => {
+            const [x, y] = e.points.at(-1)!;
+            return (
+              <g>
+                <path d={path(e.points)} fill="none" stroke="var(--color-ink)" stroke-width="1" />
+                <path d={`M${x + PAD - 4} ${y + PAD - 7} L${x + PAD + 4} ${y + PAD - 7} L${x + PAD} ${y + PAD} Z`} fill="var(--color-ink)" />
+              </g>
+            );
+          })
+        }
+      </g>
+      {
+        subject.chapters.map((c) => {
+          const n = pos.get(c.id)!;
+          const x = n.x + PAD;
+          const y = n.y + PAD;
+          const k = liveCount(c);
+          const isLive = k > 0;
+          const stats = isLive ? `${labels.live} ${k}／${c.units.length} ${labels.units}` : `${labels.soon} · ${c.units.length} ${labels.units}`;
+          return (
+            <a href={`#ch-${c.id}`} class:list={['node', isLive ? 'is-live' : 'is-soon']} aria-label={`${pad2(c.no)} ${c.title}，${stats}`}>
+              <rect
+                class="frame"
+                x={x + 0.5}
+                y={y + 0.5}
+                width={o.nodeWidth - 1}
+                height={o.nodeHeight - 1}
+                stroke-dasharray={isLive ? undefined : '2 2'}
+              />
+              {isLive ? (
+                <rect x={x + 10} y={y + 10} width="10" height="10" fill="var(--color-ink)" />
+              ) : (
+                <rect x={x + 10.5} y={y + 10.5} width="9" height="9" fill="none" stroke="var(--color-ink)" stroke-dasharray="2 2" />
+              )}
+              <text x={x + 28} y={y + 19.5} class="no">{pad2(c.no)}</text>
+              <text x={x + 10} y={y + 41} class="title">{c.title}</text>
+              <text x={x + 10} y={y + 56} class="stats">{stats}</text>
+            </a>
+          );
+        })
+      }
+    </svg>
+  </div>
+</div>
+
+<style>
+  .subject-map .frame {
+    fill: var(--color-paper);
+    stroke: var(--color-ink);
+    stroke-width: 1;
+  }
+  .subject-map .node:hover .frame {
+    fill: var(--color-stamp);
+  }
+  .subject-map .node:focus-visible {
+    outline: none;
+  }
+  .subject-map .node:focus-visible .frame {
+    stroke-width: 2;
+  }
+  .subject-map text {
+    fill: var(--color-ink);
+  }
+  .subject-map .is-soon text {
+    fill-opacity: 0.7;
+  }
+  .subject-map .no,
+  .subject-map .stats {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+  .subject-map .title {
+    font-size: 17px;
+  }
+  .reg {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    background:
+      linear-gradient(var(--color-ink), var(--color-ink)) center / 100% 1px no-repeat,
+      linear-gradient(var(--color-ink), var(--color-ink)) center / 1px 100% no-repeat;
+  }
+  .tl { top: 4px; left: 4px; }
+  .tr { top: 4px; right: 4px; }
+  .bl { bottom: 4px; left: 4px; }
+  .br { bottom: 4px; right: 4px; }
+</style>

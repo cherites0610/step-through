@@ -84,6 +84,10 @@ for (const t of topics) {
     assert(res.status === 200, `狀態 ${res.status}`);
   });
 }
+await check('/zh-TW/data-structures/ 回 200', async () => {
+  const res = await get('/zh-TW/data-structures/');
+  assert(res.status === 200, `狀態 ${res.status}`);
+});
 await check('/ 轉到 /zh-TW/', () => redirectsTo('/', '/zh-TW/'));
 await check('/en/ 轉到 /zh-TW/', () => redirectsTo('/en/', '/zh-TW/'));
 for (const t of topics) {
