@@ -1,16 +1,17 @@
 ---
 // 科目地圖：先修關係圖，建置時算好座標輸出成靜態 SVG（不載入 JS）。
-// 節點連到頁面下方對應的章節清單；連結名稱直接取自節點裡的文字（編號、章名、狀態）。
+// 節點連到該章的章節頁；連結名稱直接取自節點裡的文字（編號、章名、狀態）。
 import { layoutMap, defaultLayoutOptions as o } from '../../core/map/layout';
-import { pad2, type Subject } from '../../data/subjects';
+import { chapterPath, pad2, type Subject } from '../../data/subjects';
 
 interface Props {
   subject: Subject;
   /** 已上線的主題（有主題頁） */
   live: Set<string>;
+  lang: string;
   labels: { live: string; soon: string; units: string; mapLabel: string };
 }
-const { subject, live, labels } = Astro.props;
+const { subject, live, lang, labels } = Astro.props;
 
 const PAD = 24;
 const layout = layoutMap(subject.chapters);
@@ -62,7 +63,7 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
           const isLive = k > 0;
           const stats = isLive ? `${labels.live} ${k}／${c.units.length} ${labels.units}` : `${labels.soon} · ${c.units.length} ${labels.units}`;
           return (
-            <a href={`#ch-${c.id}`} class:list={['node', isLive ? 'is-live' : 'is-soon']}>
+            <a href={chapterPath(lang, subject, c)} class:list={['node', isLive ? 'is-live' : 'is-soon']}>
               <rect
                 class="frame"
                 x={x + 0.5}

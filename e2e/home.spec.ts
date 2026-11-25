@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { expect, test, unitUrl } from './fixtures';
 
 test('首頁：科目目錄列出所有科目，每個都連到它的學習地圖', async ({ page }) => {
   await page.goto('/zh-TW/');
@@ -64,21 +64,22 @@ test('單元頁頂列：科目連結與「章節編號 章名 · 章內序號」
     'quick-sort': '快速排序',
   };
   for (const [slug, title] of Object.entries(live)) {
-    await page.goto(`/zh-TW/${slug}/`);
+    await page.goto(unitUrl(slug));
     const header = page.locator('header');
-    await expect(header.getByRole('link', { name: '資料結構' })).toHaveAttribute('href', '/zh-TW/data-structures/#ch-sorting');
+    await expect(header.getByRole('link', { name: '資料結構', exact: true })).toHaveAttribute('href', '/zh-TW/data-structures/');
+    await expect(header.getByRole('link', { name: /^10 排序 · / })).toHaveAttribute('href', '/zh-TW/data-structures/sorting/');
     // 序號 = 在科目頁章節清單中的位置
     await expect(header).toContainText(`10 排序 · ${String(titles.indexOf(title) + 1).padStart(2, '0')}`);
   }
-  await page.goto('/zh-TW/avl-insert/');
+  await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
   await expect(page.locator('header')).toContainText('08 平衡搜尋樹 · 01');
   await expect(page.getByText('Plate 00')).toHaveCount(0);
 });
 
-test('單元頁的章節欄可以回到科目地圖的該章', async ({ page }) => {
+test('單元頁的單元欄可以回到所屬的章節頁', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto('/zh-TW/quick-sort/');
-  await page.getByRole('link', { name: /資料結構學習地圖/ }).click();
-  await expect(page).toHaveURL(/\/zh-TW\/data-structures\/#ch-sorting$/);
-  await expect(page.locator('#ch-sorting')).toBeInViewport();
+  await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
+  await page.getByRole('link', { name: '← 10 排序' }).click();
+  await expect(page).toHaveURL(/\/zh-TW\/data-structures\/sorting\/$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('排序');
 });

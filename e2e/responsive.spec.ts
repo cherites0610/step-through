@@ -4,10 +4,10 @@ const widths = [320, 390, 768, 1280];
 const pages = [
   '/zh-TW/',
   '/zh-TW/data-structures/',
-  '/zh-TW/insertion-sort/',
-  '/zh-TW/merge-sort/',
-  '/zh-TW/quick-sort/',
-  '/zh-TW/avl-insert/',
+  '/zh-TW/data-structures/sorting/insertion-sort/',
+  '/zh-TW/data-structures/sorting/merge-sort/',
+  '/zh-TW/data-structures/sorting/quick-sort/',
+  '/zh-TW/data-structures/balanced-trees/avl-insert/',
 ];
 
 for (const width of widths) {

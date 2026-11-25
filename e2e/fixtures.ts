@@ -18,3 +18,15 @@ export const test = base.extend({
 });
 
 export { expect };
+
+/** 單元頁的網址（與 src/data/subjects.ts 一致；e2e 也會檢查舊網址的轉址設定） */
+const chapterOf: Record<string, string> = {
+  'insertion-sort': 'sorting',
+  'bubble-sort': 'sorting',
+  'selection-sort': 'sorting',
+  'merge-sort': 'sorting',
+  'quick-sort': 'sorting',
+  'avl-insert': 'balanced-trees',
+};
+export const unitUrl = (topic: string) => `/zh-TW/data-structures/${chapterOf[topic]}/${topic}/`;
+

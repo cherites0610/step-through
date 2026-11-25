@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from './fixtures';
+import { expect, test, unitUrl } from './fixtures';
 import type { Page } from '@playwright/test';
 
 const topics = ['insertion-sort', 'bubble-sort', 'selection-sort', 'merge-sort', 'quick-sort', 'avl-insert'];
@@ -23,7 +23,7 @@ test('首頁沒有無障礙違規', async ({ page }) => {
 
 for (const slug of topics) {
   test(`${slug} 沒有無障礙違規`, async ({ page }) => {
-    await page.goto(`/zh-TW/${slug}/`);
+    await page.goto(unitUrl(slug));
     await scan(page);
   });
 }
@@ -44,7 +44,7 @@ test.describe('互動後的狀態', () => {
   const toStep = (page: Page, name: string, i: number) => page.getByRole('slider', { name }).fill(String(i));
 
   test('AVL：失衡與旋轉中的樹', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     await page.getByRole('button', { name: 'LR 雙旋' }).click();
     for (const i of [11, 12, 13]) {
       await toStep(page, '步驟', i);
@@ -53,18 +53,18 @@ test.describe('互動後的狀態', () => {
   });
 
   test('AVL：空樹', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     await scan(page);
   });
 
   test('合併排序：合併進行中', async ({ page }) => {
-    await page.goto('/zh-TW/merge-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/merge-sort/');
     await toStep(page, '步驟', 20);
     await scan(page);
   });
 
   test('快速排序：分割進行中、切換基準後', async ({ page }) => {
-    await page.goto('/zh-TW/quick-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
     await toStep(page, '步驟', 12);
     await scan(page);
     await page.locator('fieldset label', { hasText: '三數取中' }).click();
@@ -72,7 +72,7 @@ test.describe('互動後的狀態', () => {
   });
 
   test('輸入錯誤時的提示', async ({ page }) => {
-    await page.goto('/zh-TW/bubble-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/bubble-sort/');
     await page.getByRole('textbox').fill('3 x');
     await page.getByRole('button', { name: '套用' }).click();
     await expect(page.getByRole('alert')).toBeVisible();

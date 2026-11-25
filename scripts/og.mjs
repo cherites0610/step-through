@@ -110,11 +110,19 @@ const stopServer = (child) => {
   } catch {}
 };
 
-const topicsOf = (lang) =>
-  fs
-    .readdirSync(path.join(DIST, lang), { withFileTypes: true })
-    .filter((e) => e.isDirectory() && fs.existsSync(path.join(DIST, lang, e.name, 'index.html')))
-    .map((e) => e.name);
+/** 單元頁在 dist/<lang>/<科目>/<章節>/<單元>/index.html；回傳 [主題, 網址路徑] */
+const topicsOf = (lang) => {
+  const dirs = (p) =>
+    fs.existsSync(p) ? fs.readdirSync(p, { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name) : [];
+  const base = path.join(DIST, lang);
+  return dirs(base).flatMap((s) =>
+    dirs(path.join(base, s)).flatMap((c) =>
+      dirs(path.join(base, s, c))
+        .filter((u) => fs.existsSync(path.join(base, s, c, u, 'index.html')))
+        .map((u) => [u, `/${lang}/${s}/${c}/${u}/`]),
+    ),
+  );
+};
 
 async function hydrated(page) {
   await page.waitForFunction(() => !document.querySelector('astro-island[ssr]'));
@@ -154,8 +162,8 @@ try {
     );
     await compose.screenshot({ path: path.join(OUT, lang, 'home.png') });
 
-    for (const topic of topicsOf(lang)) {
-      await shot.goto(`${BASE}/${lang}/${topic}/`);
+    for (const [topic, urlPath] of topicsOf(lang)) {
+      await shot.goto(`${BASE}${urlPath}`);
       await hydrated(shot);
       await hidePlayerBar();
       const slider = shot.getByRole('slider').first();

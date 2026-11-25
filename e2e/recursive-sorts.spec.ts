@@ -9,7 +9,7 @@ const toEnd = (page: Page, name: string) => page.getByRole('slider', { name }).f
 
 test.describe('快速排序', () => {
   test('基準選法：預設「尾」，可切換，切換後回到第一步', async ({ page }) => {
-    await page.goto('/zh-TW/quick-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
     const last = page.getByRole('radio', { name: '尾' });
     await expect(last).toBeChecked();
 
@@ -23,7 +23,7 @@ test.describe('快速排序', () => {
   });
 
   test('已排序＋尾基準是最差情況；改用三數取中後比較次數與遞迴深度都變少', async ({ page }) => {
-    await page.goto('/zh-TW/quick-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
     await page.getByRole('button', { name: '已排序' }).click();
 
     await toEnd(page, '步驟');
@@ -42,14 +42,14 @@ test.describe('快速排序', () => {
   });
 
   test('平衡分割預設：n = 8 時遞迴深度 4，遠小於最差情況的 8', async ({ page }) => {
-    await page.goto('/zh-TW/quick-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
     await page.getByRole('button', { name: '平衡分割' }).click();
     await toEnd(page, '步驟');
     await expect(stat(page, '最大遞迴深度')).toHaveText('4'); // ⌈log2(8 + 1)⌉
   });
 
   test('畫面標出基準與 i／j 指標，並有呼叫堆疊', async ({ page }) => {
-    await page.goto('/zh-TW/quick-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
     // 第 3 步：挑基準
     await page.getByRole('slider', { name: '步驟' }).fill('2');
     await expect(page.getByRole('img', { name: /目前陣列/ })).toContainText('基準');
@@ -62,7 +62,7 @@ test.describe('快速排序', () => {
   });
 
   test('自訂輸入含重複值也能排好', async ({ page }) => {
-    await page.goto('/zh-TW/quick-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
     await page.getByRole('textbox').fill('5 5 3 9 3 1 5');
     await page.getByRole('button', { name: '套用' }).click();
     await toEnd(page, '步驟');
@@ -72,7 +72,7 @@ test.describe('快速排序', () => {
 
 test.describe('合併排序', () => {
   test('遞迴樹、合併區與呼叫堆疊都在，播放到最後排好', async ({ page }) => {
-    await page.goto('/zh-TW/merge-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/merge-sort/');
     await expect(page.getByRole('region', { name: '呼叫堆疊' })).toBeVisible();
     await expect(page.getByRole('img', { name: /目前陣列/ })).toContainText('左半');
 
@@ -83,7 +83,7 @@ test.describe('合併排序', () => {
   });
 
   test('合併到一半時，呼叫堆疊最上面是正在合併的那一段', async ({ page }) => {
-    await page.goto('/zh-TW/merge-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/merge-sort/');
     // 切到「比較左…與右…」那一類的步驟
     const slider = page.getByRole('slider', { name: '步驟' });
     let found = false;
@@ -97,7 +97,7 @@ test.describe('合併排序', () => {
   });
 
   test('相等的數字取左邊（穩定）', async ({ page }) => {
-    await page.goto('/zh-TW/merge-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/merge-sort/');
     await page.getByRole('textbox').fill('2, 2');
     await page.getByRole('button', { name: '套用' }).click();
     const slider = page.getByRole('slider', { name: '步驟' });
@@ -113,7 +113,7 @@ test.describe('合併排序', () => {
 
 test('手機：快速排序舞台在容器內捲動，頁面本身不橫向溢出', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/zh-TW/quick-sort/');
+  await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
   expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
   // 12 個數字時，數字仍維持可讀大小（SVG 不被縮到看不清楚）
   await page.getByRole('textbox').fill('1 2 3 4 5 6 7 8 9 10 11 12');

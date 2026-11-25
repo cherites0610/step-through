@@ -3,6 +3,28 @@
 # 只有繁體中文；根路徑直接送到 /zh-TW/
 /  /zh-TW/  301
 
+# v1 的主題網址 /zh-TW/<主題>/ 改為 /zh-TW/<科目>/<章節>/<單元>/（src/data/subjects.ts 決定位置；vitest 會檢查每個主題都有一行）
+/zh-TW/insertion-sort/  /zh-TW/data-structures/sorting/insertion-sort/  301
+/zh-TW/insertion-sort  /zh-TW/data-structures/sorting/insertion-sort/  301
+/zh-TW/bubble-sort/  /zh-TW/data-structures/sorting/bubble-sort/  301
+/zh-TW/bubble-sort  /zh-TW/data-structures/sorting/bubble-sort/  301
+/zh-TW/selection-sort/  /zh-TW/data-structures/sorting/selection-sort/  301
+/zh-TW/selection-sort  /zh-TW/data-structures/sorting/selection-sort/  301
+/zh-TW/merge-sort/  /zh-TW/data-structures/sorting/merge-sort/  301
+/zh-TW/merge-sort  /zh-TW/data-structures/sorting/merge-sort/  301
+/zh-TW/quick-sort/  /zh-TW/data-structures/sorting/quick-sort/  301
+/zh-TW/quick-sort  /zh-TW/data-structures/sorting/quick-sort/  301
+/zh-TW/avl-insert/  /zh-TW/data-structures/balanced-trees/avl-insert/  301
+/zh-TW/avl-insert  /zh-TW/data-structures/balanced-trees/avl-insert/  301
+
+# 英文版已移除：舊的英文主題網址直接轉到新網址，不經過兩次轉址
+/en/insertion-sort/  /zh-TW/data-structures/sorting/insertion-sort/  301
+/en/bubble-sort/  /zh-TW/data-structures/sorting/bubble-sort/  301
+/en/selection-sort/  /zh-TW/data-structures/sorting/selection-sort/  301
+/en/merge-sort/  /zh-TW/data-structures/sorting/merge-sort/  301
+/en/quick-sort/  /zh-TW/data-structures/sorting/quick-sort/  301
+/en/avl-insert/  /zh-TW/data-structures/balanced-trees/avl-insert/  301
+
 # 英文版已移除：舊的 /en/ 網址轉到對應的中文頁
 /en  /zh-TW/  301
 /en/*  /zh-TW/:splat  301
