@@ -122,7 +122,8 @@ const jsonLd = [
           </p>
         )
       }
-      <div class="mt-4">
+      <p class="mt-2 font-mono text-[11px] md:hidden" aria-hidden="true">← {s.dragHint} →</p>
+      <div class="mt-4 max-md:mt-2">
         <SubjectMap
           subject={subject}
           live={live}
@@ -132,9 +133,6 @@ const jsonLd = [
             soon: h.soon,
             units: s.units,
             mapLabel: fill(s.mapLabel, { subject: subject.title }),
-            layer: s.layer,
-            parallel: s.parallel,
-            prereqs: s.prereqs,
           }}
         />
       </div>

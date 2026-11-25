@@ -110,19 +110,36 @@ test.describe('地圖高亮', () => {
   });
 });
 
-test.describe('手機：縱向地圖', () => {
+test.describe('手機：在框內拖動地圖', () => {
   test.use({ viewport: devices['iPhone 13'].viewport, hasTouch: true, isMobile: true });
 
-  test('依層排列、標示可以平行讀，SVG 地圖收起', async ({ page }) => {
+  test('地圖比畫面寬時在框內捲動，頁面本身不溢出；載入後自動捲到建議下一章', async ({ page }) => {
     await page.goto('/zh-TW/data-structures/');
-    await expect(page.locator(map)).toBeHidden();
-    const vmap = page.getByRole('list', { name: '資料結構的章節先修關係圖' });
-    await expect(vmap).toBeVisible();
-    await expect(vmap.getByRole('link')).toHaveCount(11);
-    await expect(vmap).toContainText('第 3 層');
-    await expect(vmap).toContainText('可以平行讀');
-    await vmap.getByRole('link', { name: /10\s*排序/ }).click();
-    await expect(page).toHaveURL(/\/zh-TW\/data-structures\/sorting\/$/);
+    await expect(page.getByText('左右拖動看完整地圖')).toBeVisible();
+    const svg = page.locator(map);
+    await expect(svg).toBeVisible();
+    expect((await svg.boundingBox())!.width).toBeGreaterThan(390);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+
+    // 沒有進度時建議 01：它的節點在畫面裡
+    await expect(page.locator(node('basics'))).toHaveAttribute('data-suggested', '');
+    await expect(page.locator(`${node('basics')} .frame`)).toBeInViewport();
+    const scrolled = await page.locator('.map-scroll').evaluate((el) => el.scrollLeft);
+    expect(scrolled).toBeGreaterThan(0);
+
+    await page.locator(node('basics')).tap();
+    await expect(page).toHaveURL(/\/zh-TW\/data-structures\/basics\/$/);
+  });
+
+  test('有進度時捲到新的建議下一章', async ({ page }) => {
+    await page.goto('/zh-TW/data-structures/basics/');
+    const inputs = page.locator('input[data-check][value="mastered"]');
+    for (let i = 0; i < (await inputs.count()); i++) await inputs.nth(i).check({ force: true });
+    await page.goto('/zh-TW/data-structures/');
+    await expect(page.locator(node('arrays'))).toHaveAttribute('data-suggested', '');
+    // 水平方向在畫面內（第二層可能在首屏下方，所以只看左右）
+    const box = (await page.locator(`${node('arrays')} .frame`).boundingBox())!;
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(390);
   });
 });

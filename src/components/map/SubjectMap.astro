@@ -2,19 +2,17 @@
 // 科目地圖：先修關係圖，建置時算好座標輸出成靜態 SVG。
 // 節點連到該章的章節頁；連結名稱直接取自節點裡的文字（編號、章名、狀態）。
 // 框線表示內容（實線＝有已上線的單元、虛線＝即將推出），左上角記號表示本機的學習狀態。
-// 手機（md 以下）改為依層排列的縱向地圖。
+// 窄螢幕在框內拖動捲動（不縮小文字），載入時自動捲到建議下一章。
 import { layoutMap, defaultLayoutOptions as o } from '../../core/map/layout';
 import { chapterPath, initialStates, pad2, type Subject } from '../../data/subjects';
 import { stateLabels } from '../../lib/progress';
-import StateMark from '../progress/StateMark.astro';
-import StateLabel from '../progress/StateLabel.astro';
 
 interface Props {
   subject: Subject;
   /** 已上線的主題（有主題頁） */
   live: Set<string>;
   lang: string;
-  labels: { live: string; soon: string; units: string; mapLabel: string; layer: string; parallel: string; prereqs: string };
+  labels: { live: string; soon: string; units: string; mapLabel: string };
 }
 const { subject, live, lang, labels } = Astro.props;
 
@@ -23,7 +21,6 @@ const layout = layoutMap(subject.chapters);
 const W = layout.width + PAD * 2;
 const H = layout.height + PAD * 2;
 const pos = new Map(layout.nodes.map((n) => [n.id, n]));
-const byId = new Map(subject.chapters.map((c) => [c.id, c]));
 const states = initialStates(subject);
 
 const liveCount = (c: Subject['chapters'][number]) => c.units.filter((u) => u.topic && live.has(u.topic)).length;
@@ -35,14 +32,14 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
 ---
 
 <div
-  class="relative border border-hairline max-md:hidden"
+  class="relative border border-hairline"
   style="background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px); background-size: 16px 16px;"
 >
   <span class="reg tl" aria-hidden="true"></span>
   <span class="reg tr" aria-hidden="true"></span>
   <span class="reg bl" aria-hidden="true"></span>
   <span class="reg br" aria-hidden="true"></span>
-  <div class="overflow-x-auto py-2">
+  <div class="map-scroll overflow-x-auto overscroll-x-contain py-2">
     <svg
       class="subject-map mx-auto block"
       width={W}
@@ -104,53 +101,22 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
   </div>
 </div>
 
-<!-- 手機：依層由上往下排，同一層的章節可以平行讀 -->
-<ol class="md:hidden" aria-label={labels.mapLabel}>
-  {
-    layout.layers.map((ids, l) => (
-      <li class:list={[l > 0 && 'mt-1']}>
-        {l > 0 && <p class="pb-1 text-center" aria-hidden="true">↓</p>}
-        <p class="font-mono text-[11px] uppercase tracking-[0.14em]">
-          {labels.layer.replace('{n}', String(l + 1))}
-          {ids.length > 1 && <span class="ml-2">· {labels.parallel}</span>}
-        </p>
-        <ul class="mt-1 grid gap-2 border-l border-ink pl-3">
-          {ids
-            .map((id) => byId.get(id)!)
-            .sort((a, b) => a.no - b.no)
-            .map((c) => (
-              <li>
-                <a
-                  href={chapterPath(lang, subject, c)}
-                  class:list={['m-node block px-3 py-2', liveCount(c) > 0 ? 'border border-ink' : 'border border-dashed border-ink text-ink/70']}
-                  data-state-for={`${subject.id}/${c.id}`}
-                  data-state={states[c.id]}
-                >
-                  <span class="flex items-center gap-2">
-                    <StateMark />
-                    <span class="font-mono text-[11px] tabular-nums">{pad2(c.no)}</span>
-                    <span class="text-[17px]">{c.title}</span>
-                  </span>
-                  <span class="mt-1 block font-mono text-[11px]">
-                    {stats(c)}
-                    {c.prereqs.length > 0 && (
-                      <>
-                        {' · '}
-                        {labels.prereqs} {c.prereqs.map((p) => pad2(byId.get(p)!.no)).join('、')}
-                      </>
-                    )}
-                  </span>
-                  <StateLabel state={states[c.id]} />
-                </a>
-              </li>
-            ))}
-        </ul>
-      </li>
-    ))
-  }
-</ol>
-
 <script>
+  // 窄螢幕：地圖比框寬時，載入後把建議下一章（沒有就是第一層的章節）捲到框的正中央。
+  // 等 load 事件，讓本機進度先套用完（建議下一章依進度而定）。
+  window.addEventListener('load', () => {
+    for (const box of document.querySelectorAll<HTMLElement>('.map-scroll')) {
+      if (box.scrollWidth <= box.clientWidth) continue;
+      const target =
+        box.querySelector<SVGAElement>('a.node[data-suggested] .frame') ??
+        box.querySelector<SVGAElement>('a.node[data-prereqs=""] .frame');
+      if (!target) continue;
+      const t = target.getBoundingClientRect();
+      const b = box.getBoundingClientRect();
+      box.scrollLeft += t.left + t.width / 2 - (b.left + b.width / 2);
+    }
+  });
+
   // 滑鼠移到節點上或鍵盤聚焦時，高亮它所有的先修與後續（遞移），其餘淡出
   for (const svg of document.querySelectorAll<SVGSVGElement>('svg.subject-map')) {
     const nodes = [...svg.querySelectorAll<SVGAElement>('a.node')];
@@ -270,9 +236,6 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
   .subject-map .state-text {
     font-size: 1px;
     fill-opacity: 0;
-  }
-  .m-node[data-state='mastered'] {
-    background: var(--color-stamp);
   }
   .reg {
     position: absolute;
