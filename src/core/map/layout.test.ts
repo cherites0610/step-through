@@ -93,6 +93,12 @@ describe('版面', () => {
     }
   });
 
+  for (const subject of subjects) {
+    it(`${subject.title}：地圖排得出來，邊不穿過節點、節點不重疊`, () => {
+      expectWellFormed(layoutMap(subject.chapters), subject.chapters);
+    });
+  }
+
   it('各種形狀的圖都排得出來', () => {
     const cases: MapNodeInput[][] = [
       [{ id: 'a', prereqs: [] }],

@@ -84,9 +84,16 @@ for (const t of topics) {
     assert(res.status === 200, `狀態 ${res.status}`);
   });
 }
-await check('/zh-TW/data-structures/ 回 200', async () => {
-  const res = await get('/zh-TW/data-structures/');
-  assert(res.status === 200, `狀態 ${res.status}`);
+await check('sitemap 裡的每個網址都回 200', async () => {
+  const xml = await (await get('/sitemap-0.xml')).text();
+  const paths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+  assert(paths.length > 0, 'sitemap 沒有網址');
+  const bad = [];
+  for (const p of paths) {
+    const res = await get(p);
+    if (res.status !== 200) bad.push(`${p} → ${res.status}`);
+  }
+  assert(!bad.length, bad.join('、'));
 });
 await check('/ 轉到 /zh-TW/', () => redirectsTo('/', '/zh-TW/'));
 await check('/en/ 轉到 /zh-TW/', () => redirectsTo('/en/', '/zh-TW/'));

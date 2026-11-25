@@ -1,17 +1,27 @@
 import { expect, test } from './fixtures';
 
-test('首頁：科目目錄只連結已開放的科目，即將推出的不是連結', async ({ page }) => {
+test('首頁：科目目錄列出所有科目，每個都連到它的學習地圖', async ({ page }) => {
   await page.goto('/zh-TW/');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('看課本看不懂的');
 
   const index = page.locator('#index');
   await expect(index.getByRole('heading', { name: '科目目錄' })).toBeVisible();
-  await expect(index.getByRole('link', { name: /資料結構/ })).toHaveAttribute('href', '/zh-TW/data-structures/');
-  await expect(index.getByRole('link')).toHaveCount(1);
-  for (const name of ['演算法', '作業系統', '計算機組織', '資料庫']) {
-    await expect(index.getByText(name, { exact: true })).toBeVisible();
+  const subjects: Record<string, string> = {
+    資料結構: 'data-structures',
+    演算法: 'algorithms',
+    作業系統: 'operating-systems',
+    計算機組織: 'computer-organization',
+    離散數學: 'discrete-math',
+    線性代數: 'linear-algebra',
+    資料庫: 'databases',
+    計算機概論: 'intro-cs',
+  };
+  await expect(index.getByRole('link')).toHaveCount(Object.keys(subjects).length);
+  for (const [name, id] of Object.entries(subjects)) {
+    await expect(index.getByRole('link', { name: new RegExp(`^${name}`) })).toHaveAttribute('href', `/zh-TW/${id}/`);
   }
-  await expect(index.getByText('即將推出').first()).toBeAttached();
+  // 沒有即將推出的科目時，不顯示圖例
+  await expect(index.getByText('即將推出')).toHaveCount(0);
 });
 
 test('首頁：主要行動可用，首屏不載入互動 JS', async ({ page }) => {

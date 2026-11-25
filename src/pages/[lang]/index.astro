@@ -109,18 +109,22 @@ const jsonLd = [
             <h2 class="text-[28px] leading-[1.2] tracking-[-0.01em]">{h.indexHeading}</h2>
             <p class="mt-2 text-[15px]">{h.indexNote}</p>
           </div>
-          <p class="flex items-center gap-5 font-mono text-[13px]" aria-hidden="true">
-            <span class="inline-flex items-center gap-2">
-              <svg width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" fill="currentColor" /></svg>
-              {h.live}
-            </span>
-            <span class="inline-flex items-center gap-2">
-              <svg width="10" height="10" viewBox="0 0 10 10">
-                <rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-dasharray="2 2" />
-              </svg>
-              {h.soon}
-            </span>
-          </p>
+          {
+            subjects.some((sub) => !isOpen(sub)) && (
+              <p class="flex items-center gap-5 font-mono text-[13px]" aria-hidden="true">
+                <span class="inline-flex items-center gap-2">
+                  <svg width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" fill="currentColor" /></svg>
+                  {h.live}
+                </span>
+                <span class="inline-flex items-center gap-2">
+                  <svg width="10" height="10" viewBox="0 0 10 10">
+                    <rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-dasharray="2 2" />
+                  </svg>
+                  {h.soon}
+                </span>
+              </p>
+            )
+          }
         </div>
       </div>
 
