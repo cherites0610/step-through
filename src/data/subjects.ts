@@ -12,6 +12,8 @@ export type Chapter = {
   /** 建議先讀的章節 id（同一科目內）；構成地圖的邊 */
   prereqs: string[];
   units: Unit[];
+  /** 章末自我檢核的「我能……」；全部自評為已掌握時，這一章在地圖上變成已掌握 */
+  checklist?: string[];
 };
 
 export type Subject = {
@@ -47,6 +49,11 @@ export const subjects: Subject[] = [
         title: '基本觀念與複雜度',
         prereqs: [],
         units: [{ title: '漸近符號' }, { title: '遞迴與遞迴關係式' }, { title: '主定理' }],
+        checklist: [
+          '能用 Big-O、Ω、Θ 描述成長率，並比較兩個函數的大小關係',
+          '能從遞迴程式列出它的遞迴關係式',
+          '能用主定理求解 T(n) = aT(n/b) + f(n)',
+        ],
       },
       {
         id: 'arrays',
@@ -54,6 +61,11 @@ export const subjects: Subject[] = [
         title: '陣列與矩陣',
         prereqs: ['basics'],
         units: [{ title: '多維陣列位址計算' }, { title: '稀疏矩陣' }, { title: '特殊矩陣' }],
+        checklist: [
+          '能用列優先與行優先公式計算多維陣列元素的位址',
+          '能把稀疏矩陣轉成三元組表示，並完成轉置',
+          '能計算三角矩陣與帶狀矩陣的元素存在一維陣列的哪個位置',
+        ],
       },
       {
         id: 'stacks-queues',
@@ -61,6 +73,12 @@ export const subjects: Subject[] = [
         title: '堆疊與佇列',
         prereqs: ['arrays'],
         units: [{ title: '中序轉後序' }, { title: '運算式求值' }, { title: '環狀佇列' }, { title: '遞迴的堆疊模擬' }],
+        checklist: [
+          '能把中序運算式轉成前序與後序',
+          '能用堆疊計算後序運算式',
+          '能寫出環狀佇列判斷空與滿的條件',
+          '能用堆疊模擬遞迴呼叫的過程',
+        ],
       },
       {
         id: 'linked-lists',
@@ -68,6 +86,11 @@ export const subjects: Subject[] = [
         title: '鏈結串列',
         prereqs: ['arrays'],
         units: [{ title: '單向、雙向與環狀串列' }, { title: '多項式相加' }],
+        checklist: [
+          '能寫出單向與雙向串列插入、刪除節點的步驟',
+          '能說明環狀串列與帶頭節點的好處',
+          '能用串列表示多項式並完成相加',
+        ],
       },
       {
         id: 'trees',
@@ -82,6 +105,13 @@ export const subjects: Subject[] = [
           { title: '樹與森林的轉換' },
           { title: '互斥集合（Union-Find）' },
         ],
+        checklist: [
+          '能推導二元樹的節點數、葉節點數與高度之間的關係',
+          '能寫出前序、中序、後序與層序走訪的結果',
+          '能由「中序＋前序」或「中序＋後序」重建二元樹',
+          '能說明引線二元樹的引線如何建立',
+          '能用 Union-Find 的 union by rank 與路徑壓縮',
+        ],
       },
       {
         id: 'bst',
@@ -89,6 +119,11 @@ export const subjects: Subject[] = [
         title: '二元搜尋樹',
         prereqs: ['trees'],
         units: [{ title: '搜尋' }, { title: '插入' }, { title: '刪除' }],
+        checklist: [
+          '能在二元搜尋樹中搜尋、插入並畫出結果',
+          '能刪除有零、一、兩個子節點的節點',
+          '能說明二元搜尋樹在最差情況會退化成什麼，以及時間複雜度',
+        ],
       },
       {
         id: 'heaps',
@@ -100,6 +135,11 @@ export const subjects: Subject[] = [
           { title: 'Min-Max Heap' },
           { title: 'Leftist Heap' },
           { title: 'Binomial 與 Fibonacci Heap' },
+        ],
+        checklist: [
+          '能手算二元堆積的插入與刪除最小值',
+          '能用由下而上的建堆法，並說明為什麼是 O(n)',
+          '能說明 Min-Max Heap 與 Leftist Heap 的性質與操作',
         ],
       },
       {
@@ -115,6 +155,12 @@ export const subjects: Subject[] = [
           { title: 'B 樹與 B+ 樹' },
           { title: 'Splay Tree' },
         ],
+        checklist: [
+          '能手算 AVL 樹插入，並指出 LL、RR、LR、RL 哪一種旋轉',
+          '能手算 AVL 樹刪除後的再平衡',
+          '能在 2-3-4 樹與紅黑樹之間互相轉換',
+          '能手算 B 樹插入時的節點分裂',
+        ],
       },
       {
         id: 'graphs',
@@ -129,6 +175,13 @@ export const subjects: Subject[] = [
           { title: '拓樸排序' },
           { title: 'AOE 與關鍵路徑' },
           { title: '關節點' },
+        ],
+        checklist: [
+          '能用相鄰矩陣與相鄰串列表示圖，並比較它們的空間',
+          '能寫出 DFS 與 BFS 的走訪順序',
+          '能用 Kruskal 與 Prim 求最小生成樹',
+          '能用 Dijkstra 求單源最短路徑，並說明為什麼不能有負邊',
+          '能做拓樸排序，並求出 AOE 網路的關鍵路徑',
         ],
       },
       {
@@ -146,6 +199,12 @@ export const subjects: Subject[] = [
           { title: '計數排序與基數排序' },
           { title: '比較排序的下界' },
         ],
+        checklist: [
+          '能手算插入、氣泡、選擇排序每一趟之後的陣列',
+          '能手算合併排序與快速排序（指定基準）的過程',
+          '能比較各種排序的最佳、平均、最差時間與是否穩定',
+          '能說明比較排序的下界為什麼是 Ω(n log n)',
+        ],
       },
       {
         id: 'hashing',
@@ -157,6 +216,12 @@ export const subjects: Subject[] = [
           { title: '雜湊函數' },
           { title: '碰撞處理' },
           { title: '負載因子' },
+        ],
+        checklist: [
+          '能寫出二分搜尋並計算比較次數',
+          '能用線性探測、二次探測與雙重雜湊處理碰撞，並畫出雜湊表',
+          '能用鏈結法處理碰撞',
+          '能說明負載因子對搜尋效率的影響',
         ],
       },
     ],
@@ -305,3 +370,18 @@ export const topicOrder = subjects.flatMap((s) =>
 );
 
 export const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/** 頁面網址（不含網域）：科目／章節／單元 */
+export const subjectPath = (lang: string, s: Subject) => `/${lang}/${s.id}/`;
+export const chapterPath = (lang: string, s: Subject, c: Chapter) => `/${lang}/${s.id}/${c.id}/`;
+export const unitPath = (lang: string, s: Subject, c: Chapter, topic: string) => `/${lang}/${s.id}/${c.id}/${topic}/`;
+
+/** 主題（v1 的 /zh-TW/<topic>/）的新網址 */
+export function topicPath(lang: string, topic: string) {
+  const loc = locateTopic(topic);
+  if (!loc) throw new Error(`主題 "${topic}" 沒有登記在 src/data/subjects.ts`);
+  return unitPath(lang, loc.subject, loc.chapter, topic);
+}
+
+/** 依先修關係反查：哪些章節把這一章列為先修 */
+export const dependentsOf = (s: Subject, c: Chapter) => s.chapters.filter((x) => x.prereqs.includes(c.id));

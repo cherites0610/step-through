@@ -1,15 +1,15 @@
-import { expect, test } from './fixtures';
+import { expect, test, unitUrl } from './fixtures';
 
 const slugs = ['insertion-sort', 'bubble-sort', 'selection-sort', 'merge-sort', 'quick-sort', 'avl-insert'];
 
 for (const slug of slugs) {
   test(`${slug} 有獨立 meta 與結構化資料，沒有 hreflang`, async ({ page }) => {
-    await page.goto(`/zh-TW/${slug}/`);
+    await page.goto(unitUrl(slug));
     await expect(page.locator('h1')).toBeVisible();
     await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /.{20,}/);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       'href',
-      `https://step-through.cherites.org/zh-TW/${slug}/`,
+      `https://step-through.cherites.org${unitUrl(slug)}`,
     );
     await expect(page.locator('link[rel="alternate"][hreflang]')).toHaveCount(0);
 
@@ -21,7 +21,7 @@ for (const slug of slugs) {
 }
 
 test('播放器：下一步、上一步、鍵盤與時間軸', async ({ page }) => {
-  await page.goto('/zh-TW/insertion-sort/');
+  await page.goto('/zh-TW/data-structures/sorting/insertion-sort/');
   const counter = page.getByText(/步驟\s*0?1\s*\/\s*\d+/);
   await expect(counter).toBeVisible();
 
@@ -40,7 +40,7 @@ test('播放器：下一步、上一步、鍵盤與時間軸', async ({ page }) 
 });
 
 test('自訂輸入：套用後重置步驟；不合法輸入顯示錯誤', async ({ page }) => {
-  await page.goto('/zh-TW/bubble-sort/');
+  await page.goto('/zh-TW/data-structures/sorting/bubble-sort/');
   const input = page.getByRole('textbox');
 
   await input.fill('3, 1, 2');
@@ -60,7 +60,7 @@ test('自訂輸入：套用後重置步驟；不合法輸入顯示錯誤', async
 });
 
 test('最佳／最差情況預設：插入排序計次符合理論值', async ({ page }) => {
-  await page.goto('/zh-TW/insertion-sort/');
+  await page.goto('/zh-TW/data-structures/sorting/insertion-sort/');
   await page.getByRole('button', { name: '最佳情況' }).click();
   await page.getByRole('slider', { name: '步驟' }).fill('99999');
   await expect(page.getByText('排序完成，整個陣列都在正確的位置上。')).toBeVisible();

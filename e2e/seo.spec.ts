@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures';
+import { expect, test, unitUrl } from './fixtures';
 import type { Page } from '@playwright/test';
 
 const SITE = 'https://step-through.cherites.org';
@@ -32,11 +32,12 @@ test('首頁有 title、description、canonical，沒有 hreflang', async ({ pag
 {
   const lang = 'zh-TW';
 
-  for (const slug of ['', ...topics.map((t) => `${t}/`)]) {
+  for (const slug of ['', ...topics]) {
     const label = slug || 'home';
+    const path = slug ? unitUrl(slug) : `/${lang}/`;
     test(`${lang}/${label}：Open Graph、Twitter card 與 OG 圖`, async ({ page, request }) => {
-      await page.goto(`/${lang}/${slug}`);
-      const expectedImage = `${SITE}/og/${lang}/${slug ? slug.replace('/', '') : 'home'}.png`;
+      await page.goto(path);
+      const expectedImage = `${SITE}/og/${lang}/${slug || 'home'}.png`;
 
       expect(await meta(page, 'meta[property="og:image"]')).toBe(expectedImage);
       expect(await meta(page, 'meta[property="og:image:width"]')).toBe('1200');
@@ -50,7 +51,7 @@ test('首頁有 title、description、canonical，沒有 hreflang', async ({ pag
       expect(await meta(page, 'meta[name="twitter:card"]')).toBe('summary_large_image');
       expect(await meta(page, 'meta[name="twitter:image"]')).toBe(expectedImage);
       expect(await meta(page, 'meta[name="theme-color"]')).toBe('#F5F4F6');
-      expect(await meta(page, 'meta[property="og:url"]')).toBe(`${SITE}/${lang}/${slug}`);
+      expect(await meta(page, 'meta[property="og:url"]')).toBe(`${SITE}${path}`);
 
       // 圖真的存在且是 PNG（用站內路徑請求，因為測試伺服器不是正式網域）
       const res = await request.get(new URL(expectedImage).pathname);
@@ -61,25 +62,27 @@ test('首頁有 title、description、canonical，沒有 hreflang', async ({ pag
 
   for (const slug of topics) {
     test(`${lang}/${slug}：結構化資料 LearningResource、FAQPage、BreadcrumbList`, async ({ page }) => {
-      await page.goto(`/${lang}/${slug}/`);
+      await page.goto(unitUrl(slug));
       expect(await ldTypes(page)).toEqual(['LearningResource', 'BreadcrumbList', 'FAQPage']);
 
       const lr = await page.locator('script[type="application/ld+json"]').first().evaluate((e) => JSON.parse(e.textContent!));
       expect(lr.inLanguage).toBe(lang);
       expect(lr.image).toBe(`${SITE}/og/${lang}/${slug}.png`);
       expect(lr.isAccessibleForFree).toBe(true);
-      expect(lr.url).toBe(`${SITE}/${lang}/${slug}/`);
+      expect(lr.url).toBe(`${SITE}${unitUrl(slug)}`);
 
       const bc = await page.locator('script[type="application/ld+json"]').nth(1).evaluate((e) => JSON.parse(e.textContent!));
-      expect(bc.itemListElement.map((i: { position: number }) => i.position)).toEqual([1, 2, 3]);
+      // 首頁 → 科目 → 章節 → 單元
+      expect(bc.itemListElement.map((i: { position: number }) => i.position)).toEqual([1, 2, 3, 4]);
       expect(bc.itemListElement[1].item).toBe(`${SITE}/${lang}/data-structures/`);
-      expect(bc.itemListElement[2].item).toBe(`${SITE}/${lang}/${slug}/`);
+      expect(bc.itemListElement[2].item).toBe(`${SITE}${unitUrl(slug).replace(/[^/]+\/$/, '')}`);
+      expect(bc.itemListElement[3].item).toBe(`${SITE}${unitUrl(slug)}`);
     });
   }
 }
 
 test('站內沒有設定分析時，不載入任何分析腳本', async ({ page }) => {
-  await page.goto('/zh-TW/quick-sort/');
+  await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
   const html = await page.content();
   expect(html).not.toContain('cloudflareinsights');
   expect(html).not.toContain('umami');
@@ -91,11 +94,14 @@ test('sitemap：只有 zh-TW 網址，不含根路徑、404 與英文頁', async
   const xml = await (await request.get('/sitemap-0.xml')).text();
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 
-  expect(locs).toHaveLength(topics.length + subjects.length + 1);
+  // 首頁 + 科目 + 章節（8 科共 78 章）+ 單元
+  expect(locs).toHaveLength(1 + subjects.length + 78 + topics.length);
   expect(locs).not.toContain(`${SITE}/`);
   expect(locs.some((l) => l.includes('404'))).toBe(false);
   expect(locs).toContain(`${SITE}/zh-TW/`);
-  for (const t of [...topics, ...subjects]) expect(locs).toContain(`${SITE}/zh-TW/${t}/`);
+  for (const s of subjects) expect(locs).toContain(`${SITE}/zh-TW/${s}/`);
+  for (const t of topics) expect(locs).toContain(`${SITE}${unitUrl(t)}`);
+  expect(locs).toContain(`${SITE}/zh-TW/data-structures/sorting/`);
   expect(xml).not.toContain('/en/');
   expect(xml).not.toContain('hreflang');
 });
@@ -140,17 +146,17 @@ test('根路徑 / 是 noindex 的跳轉頁，canonical 指向 zh-TW', async ({ r
 test.describe('上一個／下一個主題', () => {
   test('依章節編號與章內順序（08 平衡搜尋樹在 10 排序之前），頭尾各缺一邊', async ({ page }) => {
     const nav = () => page.getByRole('navigation', { name: '上一個與下一個主題' });
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     await expect(nav().getByRole('link')).toHaveCount(1);
-    await expect(nav().getByRole('link', { name: /插入排序/ })).toHaveAttribute('href', '/zh-TW/insertion-sort/');
+    await expect(nav().getByRole('link', { name: /插入排序/ })).toHaveAttribute('href', '/zh-TW/data-structures/sorting/insertion-sort/');
 
-    await page.goto('/zh-TW/insertion-sort/');
-    await expect(nav().getByRole('link', { name: /AVL 樹插入/ })).toHaveAttribute('href', '/zh-TW/avl-insert/');
-    await expect(nav().getByRole('link', { name: /氣泡排序/ })).toHaveAttribute('href', '/zh-TW/bubble-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/insertion-sort/');
+    await expect(nav().getByRole('link', { name: /AVL 樹插入/ })).toHaveAttribute('href', '/zh-TW/data-structures/balanced-trees/avl-insert/');
+    await expect(nav().getByRole('link', { name: /氣泡排序/ })).toHaveAttribute('href', '/zh-TW/data-structures/sorting/bubble-sort/');
 
-    await page.goto('/zh-TW/quick-sort/');
+    await page.goto('/zh-TW/data-structures/sorting/quick-sort/');
     await expect(nav().getByRole('link')).toHaveCount(1);
-    await expect(nav().getByRole('link', { name: /合併排序/ })).toHaveAttribute('href', '/zh-TW/merge-sort/');
+    await expect(nav().getByRole('link', { name: /合併排序/ })).toHaveAttribute('href', '/zh-TW/data-structures/sorting/merge-sort/');
   });
 });
 

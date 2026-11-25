@@ -27,4 +27,26 @@ const topics = defineCollection({
   }),
 });
 
-export const collections = { topics };
+/**
+ * 考題（一題一檔）：src/content/questions/<科目>/<章節>/<編號>.mdx。
+ * 內文是題目，詳解寫在 <Solution> 裡（章節頁會把它收合起來）。
+ */
+const questions = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/questions' }),
+  schema: z.object({
+    subject: z.string(),
+    chapter: z.string(),
+    /** 章內的排列順序 */
+    order: z.number(),
+    /** 考古題出處；省略＝自編題 */
+    source: z
+      .object({ school: z.string(), year: z.number(), dept: z.string(), no: z.string() })
+      .optional(),
+    kind: z.enum(['choice', 'fill', 'calc', 'proof', 'essay']),
+    difficulty: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+    /** 相關的單元（topic） */
+    units: z.array(z.string()).optional(),
+  }),
+});
+
+export const collections = { topics, questions };

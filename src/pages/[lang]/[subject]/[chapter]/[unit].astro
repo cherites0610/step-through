@@ -1,17 +1,22 @@
 ---
 import { getCollection, render } from 'astro:content';
-import Base from '../../layouts/Base.astro';
-import SortViz from '../../components/viz/sorting/SortViz.svelte';
-import AvlViz from '../../components/viz/avl/AvlViz.svelte';
-import { t, type Locale } from '../../i18n';
-import { locateTopic, pad2, topicOrder } from '../../data/subjects';
+import Base from '../../../../layouts/Base.astro';
+import SortViz from '../../../../components/viz/sorting/SortViz.svelte';
+import AvlViz from '../../../../components/viz/avl/AvlViz.svelte';
+import { t, type Locale } from '../../../../i18n';
+import { chapterPath, locateTopic, pad2, subjectPath, topicOrder, topicPath } from '../../../../data/subjects';
 
 export async function getStaticPaths() {
   const all = await getCollection('topics');
-  return all.map((entry) => ({
-    params: { lang: entry.data.lang, topic: entry.data.topic },
-    props: { entry },
-  }));
+  return all.map((entry) => {
+    // 科目、章節都以 src/data/subjects.ts 為唯一來源；主題沒登記時在建置階段就報錯
+    const loc = locateTopic(entry.data.topic);
+    if (!loc) throw new Error(`主題 "${entry.data.topic}" 沒有登記在 src/data/subjects.ts`);
+    return {
+      params: { lang: entry.data.lang, subject: loc.subject.id, chapter: loc.chapter.id, unit: entry.data.topic },
+      props: { entry },
+    };
+  });
 }
 
 const { entry } = Astro.props;
@@ -20,20 +25,19 @@ const text = t(lang);
 const d = entry.data;
 const { Content } = await render(entry);
 
-// 科目、章節與序號都以 src/data/subjects.ts 為唯一來源；主題沒登記時在建置階段就報錯
-const loc = locateTopic(d.topic);
-if (!loc) throw new Error(`主題 "${d.topic}" 沒有登記在 src/data/subjects.ts`);
-const { subject, chapter, index } = loc;
+const { subject, chapter, index } = locateTopic(d.topic)!;
 const plateLabel = `${pad2(chapter.no)} ${chapter.title} · ${pad2(index)}`;
-const subjectUrl = new URL(`/${lang}/${subject.id}/`, Astro.site).href;
-const backToMap = text.subject.backToMap.replace('{subject}', subject.title);
+const subjectHref = subjectPath(lang, subject);
+const chapterHref = chapterPath(lang, subject, chapter);
+const chapterName = `${pad2(chapter.no)} ${chapter.title}`;
 
 const siblings = (await getCollection('topics'))
   .filter((e) => e.data.lang === lang && locateTopic(e.data.topic)?.chapter.id === chapter.id)
   .sort((a, b) => topicOrder.indexOf(a.data.topic) - topicOrder.indexOf(b.data.topic));
 
 const displayName = `${d.title}（${d.titleEn}）`;
-const url = new URL(`/${lang}/${d.topic}/`, Astro.site).href;
+const path = topicPath(lang, d.topic);
+const url = new URL(path, Astro.site).href;
 const ogImagePath = `/og/${lang}/${d.topic}.png`;
 const ogImageUrl = new URL(ogImagePath, Astro.site).href;
 
@@ -65,8 +69,9 @@ const jsonLd = [
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: text.siteName, item: new URL(`/${lang}/`, Astro.site).href },
-      { '@type': 'ListItem', position: 2, name: subject.title, item: subjectUrl },
-      { '@type': 'ListItem', position: 3, name: d.title, item: url },
+      { '@type': 'ListItem', position: 2, name: subject.title, item: new URL(subjectHref, Astro.site).href },
+      { '@type': 'ListItem', position: 3, name: chapterName, item: new URL(chapterHref, Astro.site).href },
+      { '@type': 'ListItem', position: 4, name: d.title, item: url },
     ],
   },
   {
@@ -95,21 +100,20 @@ const rows: [string, string][] = [
   lang={lang}
   title={`${displayName} ${text.interactive}｜${text.siteName}`}
   description={d.description}
-  path={`${d.topic}/`}
+  path={path.replace(`/${lang}/`, '')}
   jsonLd={jsonLd}
   image={ogImagePath}
   type="article"
 >
   <header class="sticky top-0 z-20 bg-paper flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline px-4 md:gap-6">
     <a href={`/${lang}/`} class="shrink-0 font-medium max-md:hidden">{text.siteName}</a>
-    <!-- 回到科目地圖的這一章；手機上是唯一的返回連結，所以加箭頭與底線 -->
+    <a href={subjectHref} class="shrink-0 text-[15px] underline-offset-4 hover:underline max-md:hidden">{subject.title}</a>
+    <!-- 手機：回到這一章，是唯一的返回連結，所以加箭頭與底線 -->
+    <a href={chapterHref} class="min-w-0 truncate text-[15px] underline underline-offset-4 md:hidden">← {chapter.title}</a>
     <a
-      href={`/${lang}/${subject.id}/#ch-${chapter.id}`}
-      class="shrink-0 text-[15px] underline underline-offset-4 md:no-underline md:hover:underline"
-      ><span class="md:hidden">← </span>{subject.title}</a
-    >
-    <span class="hidden font-mono text-[11px] uppercase tracking-[0.14em] md:inline"
-      >{plateLabel}</span
+      href={chapterHref}
+      class="hidden font-mono text-[11px] uppercase tracking-[0.14em] underline-offset-4 hover:underline md:inline"
+      >{plateLabel}</a
     >
     <span class="hidden text-[15px] md:inline">{d.title}</span>
     <a href={`/${lang}/`} class="ml-auto shrink-0 font-medium md:hidden">{text.siteName}</a>
@@ -121,18 +125,18 @@ const rows: [string, string][] = [
       aria-label={text.topics}
     >
       <a
-        href={`/${lang}/${subject.id}/#ch-${chapter.id}`}
+        href={chapterHref}
         class="mb-3 inline-block whitespace-nowrap text-[13px] underline underline-offset-4 max-md:hidden"
       >
-        ← {backToMap}
+        ← {chapterName}
       </a>
-      <p class="mb-2 font-mono text-[11px] uppercase tracking-[0.14em]">{pad2(chapter.no)} {chapter.title}</p>
+      <p class="mb-2 font-mono text-[11px] uppercase tracking-[0.14em] md:hidden">{chapterName}</p>
       <ul class="flex gap-4 overflow-x-auto md:flex-col md:gap-0">
         {
           siblings.map((s) => (
             <li>
               <a
-                href={`/${lang}/${s.data.topic}/`}
+                href={topicPath(lang, s.data.topic)}
                 aria-current={s.data.topic === d.topic ? 'page' : undefined}
                 class:list={[
                   'block whitespace-nowrap px-2 py-1.5 text-[15px]',
@@ -203,7 +207,7 @@ const rows: [string, string][] = [
           <div class="border-b border-hairline py-4 sm:border-b-0 sm:border-r sm:pr-4">
             {
               prev && (
-                <a href={`/${lang}/${prev.data.topic}/`} class="block hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink">
+                <a href={topicPath(lang, prev.data.topic)} class="block hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink">
                   <span class="block font-mono text-[11px] uppercase tracking-[0.14em]">← {text.topicNav.prev}</span>
                   <span class="mt-1 block text-[17px]">{prev.data.title}</span>
                 </a>
@@ -213,7 +217,7 @@ const rows: [string, string][] = [
           <div class="py-4 sm:pl-4 sm:text-right">
             {
               next && (
-                <a href={`/${lang}/${next.data.topic}/`} class="block hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink">
+                <a href={topicPath(lang, next.data.topic)} class="block hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink">
                   <span class="block font-mono text-[11px] uppercase tracking-[0.14em]">{text.topicNav.next} →</span>
                   <span class="mt-1 block text-[17px]">{next.data.title}</span>
                 </a>

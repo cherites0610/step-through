@@ -1,0 +1,320 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../../../layouts/Base.astro';
+import Solution from '../../../../components/chapter/Solution.astro';
+import { locales, t, type Locale } from '../../../../i18n';
+import {
+  chapterPath,
+  dependentsOf,
+  isOpen,
+  pad2,
+  subjectPath,
+  subjects,
+  topicPath,
+  type Chapter,
+  type Subject,
+} from '../../../../data/subjects';
+
+export async function getStaticPaths() {
+  const known = new Set(subjects.flatMap((s) => s.chapters.map((c) => `${s.id}/${c.id}`)));
+  // 考題指到不存在的章節時，在建置階段就報錯
+  for (const e of await getCollection('questions')) {
+    if (!known.has(`${e.data.subject}/${e.data.chapter}`))
+      throw new Error(`${e.id}：找不到章節 ${e.data.subject}/${e.data.chapter}（見 src/data/subjects.ts）`);
+  }
+  return locales.flatMap((lang) =>
+    subjects.filter(isOpen).flatMap((subject) =>
+      subject.chapters.map((chapter) => ({
+        params: { lang, subject: subject.id, chapter: chapter.id },
+        props: { subject, chapter },
+      })),
+    ),
+  );
+}
+
+const { subject, chapter } = Astro.props as { subject: Subject; chapter: Chapter };
+const lang = Astro.params.lang as Locale;
+const text = t(lang);
+const c = text.chapter;
+const h = text.home;
+
+const live = new Set(
+  (await getCollection('topics')).filter((e) => e.data.lang === lang).map((e) => e.data.topic),
+);
+const isLiveUnit = (u: Chapter['units'][number]) => !!u.topic && live.has(u.topic);
+const hasLive = (ch: Chapter) => ch.units.some(isLiveUnit);
+
+// 觀念說明的內容模型在第一篇內容上線時（N1）加入；目前一律顯示準備中
+const questions = await Promise.all(
+  (await getCollection('questions'))
+    .filter((e) => e.data.subject === subject.id && e.data.chapter === chapter.id)
+    .sort((a, b) => a.data.order - b.data.order)
+    .map(async (e) => ({ data: e.data, Content: (await render(e)).Content })),
+);
+
+const ordered = [...subject.chapters].sort((a, b) => a.no - b.no);
+const byId = new Map(ordered.map((x) => [x.id, x]));
+const prereqs = chapter.prereqs.map((id) => byId.get(id)!);
+const dependents = dependentsOf(subject, chapter).sort((a, b) => a.no - b.no);
+const at = ordered.indexOf(chapter);
+const prev = ordered[at - 1];
+const next = ordered[at + 1];
+const name = (x: Chapter) => `${pad2(x.no)} ${x.title}`;
+
+const path = chapterPath(lang, subject, chapter);
+const url = new URL(path, Astro.site).href;
+const title = `${chapter.title}｜${subject.title}｜${text.siteName}`;
+const description = `${subject.title}第 ${chapter.no} 章「${chapter.title}」：${chapter.units.map((u) => u.title).join('、')}。`;
+const sourceLabel = (q: (typeof questions)[number]['data']) =>
+  q.source ? `${q.source.year} · ${q.source.school}${q.source.dept} · 第 ${q.source.no} 題` : c.selfMade;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'LearningResource',
+    name: `${subject.title}：${chapter.title}`,
+    description,
+    inLanguage: lang,
+    url,
+    isAccessibleForFree: true,
+    isPartOf: { '@type': 'Course', name: subject.title, url: new URL(subjectPath(lang, subject), Astro.site).href },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: text.siteName, item: new URL(`/${lang}/`, Astro.site).href },
+      { '@type': 'ListItem', position: 2, name: subject.title, item: new URL(subjectPath(lang, subject), Astro.site).href },
+      { '@type': 'ListItem', position: 3, name: name(chapter), item: url },
+    ],
+  },
+];
+---
+
+<Base lang={lang} title={title} description={description} path={path.replace(`/${lang}/`, '')} jsonLd={jsonLd} type="article">
+  <header class="sticky top-0 z-20 flex h-14 items-center gap-3 whitespace-nowrap border-b border-hairline bg-paper px-4 md:gap-6">
+    <a href={`/${lang}/`} class="shrink-0 font-medium max-md:hidden">{text.siteName}</a>
+    <a href={subjectPath(lang, subject)} class="shrink-0 text-[15px] underline-offset-4 hover:underline max-md:hidden">{subject.title}</a>
+    <!-- 手機：回到科目地圖，是唯一的返回連結，所以加箭頭與底線 -->
+    <a href={subjectPath(lang, subject)} class="shrink-0 text-[15px] underline underline-offset-4 md:hidden">← {subject.title}</a>
+    <span class="hidden font-mono text-[11px] uppercase tracking-[0.14em] md:inline">{subject.title} · {pad2(chapter.no)}</span>
+    <span class="min-w-0 truncate text-[15px] max-md:hidden">{chapter.title}</span>
+    <a href={`/${lang}/`} class="ml-auto shrink-0 font-medium md:hidden">{text.siteName}</a>
+  </header>
+
+  <div class="md:grid md:grid-cols-[220px_minmax(0,1fr)] lg:grid-cols-[220px_minmax(0,1fr)_300px]">
+    <!-- 手機不顯示章節欄：頂列的「← 科目」與頁尾的上一章／下一章已經足夠 -->
+    <nav class="border-hairline px-4 py-4 max-md:hidden md:border-r" aria-label={c.chapters}>
+      <a href={subjectPath(lang, subject)} class="mb-3 inline-block whitespace-nowrap text-[13px] underline underline-offset-4 max-md:hidden">
+        ← {subject.title}
+      </a>
+      <ol class="flex gap-4 overflow-x-auto md:flex-col md:gap-0">
+        {
+          ordered.map((x) => (
+            <li>
+              <a
+                href={chapterPath(lang, subject, x)}
+                aria-current={x === chapter ? 'page' : undefined}
+                class:list={[
+                  'flex items-baseline gap-2 whitespace-nowrap px-2 py-1.5 text-[15px]',
+                  x === chapter && 'bg-stamp outline outline-1 outline-ink',
+                  !hasLive(x) && x !== chapter && 'text-ink/70',
+                ]}
+              >
+                <span class="font-mono text-[11px] tabular-nums">{pad2(x.no)}</span>
+                {x.title}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+
+    <main class="min-w-0 px-4 pb-16 pt-8 lg:px-8">
+      <p class="font-mono text-[11px] uppercase tracking-[0.14em]">{subject.title} · {pad2(chapter.no)}</p>
+      <h1 class="text-[44px] leading-[1.1] tracking-[-0.02em] max-md:text-[32px]">{chapter.title}</h1>
+      <p class="mt-3 max-w-[65ch] text-[15px]">
+        {
+          prereqs.length ? (
+            <>
+              {c.prereqs}：
+              {prereqs.map((p, i) => (
+                <>
+                  {i > 0 && '、'}
+                  <a href={chapterPath(lang, subject, p)} class="underline underline-offset-4">{name(p)}</a>
+                </>
+              ))}
+            </>
+          ) : (
+            c.noPrereqs
+          )
+        }
+      </p>
+
+      <section class="mt-10 border-t border-ink pt-6" aria-labelledby="concepts">
+        <h2 id="concepts" class="text-[28px] leading-[1.2] tracking-[-0.01em]">{c.concepts}</h2>
+        <p class="mt-3 max-w-[65ch] text-[15px] text-ink/70">{c.conceptsSoon}</p>
+      </section>
+
+      <section class="mt-12 border-t border-ink pt-6" aria-labelledby="units">
+        <h2 id="units" class="text-[28px] leading-[1.2] tracking-[-0.01em]">{c.units}</h2>
+        <ul class="mt-4 max-w-[65ch] border-t border-hairline">
+          {
+            chapter.units.map((u, i) => (
+              <li class="border-b border-hairline">
+                {isLiveUnit(u) ? (
+                  <a
+                    href={topicPath(lang, u.topic!)}
+                    class="-mx-2 flex items-baseline gap-3 px-2 py-2.5 hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink"
+                  >
+                    <svg class="shrink-0 self-center" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                      <rect width="10" height="10" fill="currentColor" />
+                    </svg>
+                    <span class="font-mono text-[11px] tabular-nums">{pad2(i + 1)}</span>
+                    <span class="flex-1 text-[17px]">{u.title}</span>
+                    <span class="font-mono text-[11px] uppercase tracking-[0.14em]">{c.interactive}</span>
+                    <span class="sr-only">{h.live}</span>
+                  </a>
+                ) : (
+                  <div class="-mx-2 flex items-baseline gap-3 px-2 py-2.5 text-ink/70">
+                    <svg class="shrink-0 self-center" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                      <rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-dasharray="2 2" />
+                    </svg>
+                    <span class="font-mono text-[11px] tabular-nums">{pad2(i + 1)}</span>
+                    <span class="flex-1 text-[17px]">{u.title}</span>
+                    <span class="sr-only">{h.soon}</span>
+                  </div>
+                )}
+              </li>
+            ))
+          }
+        </ul>
+      </section>
+
+      <section class="mt-12 border-t border-ink pt-6" aria-labelledby="questions">
+        <h2 id="questions" class="text-[28px] leading-[1.2] tracking-[-0.01em]">{c.questions}</h2>
+        {
+          questions.length ? (
+            <ol class="mt-4 max-w-[65ch]">
+              {questions.map(({ data: q, Content }, i) => (
+                <li class="question border-t border-hairline py-6" id={`q-${q.order}`}>
+                  <p class="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] uppercase tracking-[0.14em]">
+                    <span class="tabular-nums">Q{pad2(i + 1)}</span>
+                    <span>{sourceLabel(q)}</span>
+                    <span>{c.kinds[q.kind]}</span>
+                    <span class="inline-flex items-center gap-1" aria-hidden="true">
+                      {[1, 2, 3].map((n) => (
+                        <svg width="6" height="6" viewBox="0 0 6 6">
+                          {n <= q.difficulty ? (
+                            <rect width="6" height="6" fill="currentColor" />
+                          ) : (
+                            <rect x="0.5" y="0.5" width="5" height="5" fill="none" stroke="currentColor" />
+                          )}
+                        </svg>
+                      ))}
+                    </span>
+                    <span class="sr-only">{c.difficulty.replace('{n}', String(q.difficulty))}</span>
+                  </p>
+                  <div class="prose-plate mt-3 text-[17px]">
+                    <Content components={{ Solution }} />
+                  </div>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p class="mt-3 text-[15px] text-ink/70">{c.questionsSoon}</p>
+          )
+        }
+      </section>
+
+      <section class="mt-12 border-t border-ink pt-6" aria-labelledby="checklist">
+        <h2 id="checklist" class="text-[28px] leading-[1.2] tracking-[-0.01em]">{c.checklist}</h2>
+        {
+          chapter.checklist?.length ? (
+            <>
+              <p class="mt-2 text-[15px]">{c.checklistNote}</p>
+              <ul class="mt-4 max-w-[65ch] border-t border-hairline">
+                {chapter.checklist.map((item) => (
+                  <li class="border-b border-hairline py-3 text-[17px]">{item}</li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p class="mt-3 text-[15px] text-ink/70">{c.checklistSoon}</p>
+          )
+        }
+      </section>
+
+      <nav class="mt-14 grid max-w-[65ch] border-t border-ink sm:grid-cols-2" aria-label={c.chapterNav}>
+        <div class="border-b border-hairline py-4 sm:border-b-0 sm:border-r sm:pr-4">
+          {
+            prev && (
+              <a href={chapterPath(lang, subject, prev)} class="block hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink">
+                <span class="block font-mono text-[11px] uppercase tracking-[0.14em]">← {c.prevChapter}</span>
+                <span class="mt-1 block text-[17px]">{name(prev)}</span>
+              </a>
+            )
+          }
+        </div>
+        <div class="py-4 sm:pl-4 sm:text-right">
+          {
+            next && (
+              <a href={chapterPath(lang, subject, next)} class="block hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink">
+                <span class="block font-mono text-[11px] uppercase tracking-[0.14em]">{c.nextChapter} →</span>
+                <span class="mt-1 block text-[17px]">{name(next)}</span>
+              </a>
+            )
+          }
+        </div>
+      </nav>
+    </main>
+
+    <!-- 迷你地圖：只畫直接先修、本章、直接後續 -->
+    <aside class="border-t border-hairline px-4 py-6 lg:border-l lg:border-t-0 lg:px-6">
+      <div class="lg:sticky lg:top-20">
+        <p class="font-mono text-[11px] uppercase tracking-[0.14em]">{c.prereqs}</p>
+        <ul class="mt-2 grid gap-2">
+          {
+            prereqs.length ? (
+              prereqs.map((p) => (
+                <li>
+                  <a href={chapterPath(lang, subject, p)} class="block border border-ink px-3 py-2 text-[15px] hover:bg-stamp">
+                    <span class="mr-2 font-mono text-[11px] tabular-nums">{pad2(p.no)}</span>
+                    {p.title}
+                  </a>
+                </li>
+              ))
+            ) : (
+              <li class="text-[15px] text-ink/70">—</li>
+            )
+          }
+        </ul>
+        <p class="my-2 text-center" aria-hidden="true">↓</p>
+        <p class="border border-ink bg-ink px-3 py-2 text-[15px] text-paper" aria-current="page">
+          <span class="mr-2 font-mono text-[11px] tabular-nums">{pad2(chapter.no)}</span>
+          {chapter.title}
+        </p>
+        <p class="my-2 text-center" aria-hidden="true">↓</p>
+        <p class="font-mono text-[11px] uppercase tracking-[0.14em]">{c.dependents}</p>
+        <ul class="mt-2 grid gap-2">
+          {
+            dependents.length ? (
+              dependents.map((p) => (
+                <li>
+                  <a href={chapterPath(lang, subject, p)} class="block border border-ink px-3 py-2 text-[15px] hover:bg-stamp">
+                    <span class="mr-2 font-mono text-[11px] tabular-nums">{pad2(p.no)}</span>
+                    {p.title}
+                  </a>
+                </li>
+              ))
+            ) : (
+              <li class="text-[15px] text-ink/70">—</li>
+            )
+          }
+        </ul>
+        <a href={`${subjectPath(lang, subject)}#ch-${chapter.id}`} class="mt-6 inline-block text-[13px] underline underline-offset-4">
+          {c.fullMap} →
+        </a>
+      </div>
+    </aside>
+  </div>
+</Base>

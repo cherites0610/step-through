@@ -28,10 +28,14 @@ test.describe('科目頁：資料結構學習地圖', () => {
     await expect(map.getByRole('link', { name: /^09\s*圖\s*即將推出/ })).toBeVisible();
   });
 
-  test('點地圖節點跳到章節清單的那一章', async ({ page }) => {
-    await page.getByRole('link', { name: /^10\s*排序/ }).click();
-    await expect(page).toHaveURL(/#ch-sorting$/);
-    await expect(page.locator('#ch-sorting')).toBeInViewport();
+  test('點地圖節點進入該章的章節頁；清單的章名也連到章節頁', async ({ page }) => {
+    await page.locator('svg.subject-map').getByRole('link', { name: /^10\s*排序/ }).click();
+    await expect(page).toHaveURL(/\/zh-TW\/data-structures\/sorting\/$/);
+    await page.goBack();
+    await expect(page.locator('#ch-graphs').getByRole('link', { name: /^09\s*圖/ })).toHaveAttribute(
+      'href',
+      '/zh-TW/data-structures/graphs/',
+    );
   });
 
   test('章節清單：先修連結、已上線單元可以點進單元頁', async ({ page }) => {
@@ -41,7 +45,7 @@ test.describe('科目頁：資料結構學習地圖', () => {
     await expect(page.locator('#ch-basics')).toContainText('從這裡開始');
 
     await page.locator('#ch-sorting').getByRole('link', { name: /快速排序/ }).click();
-    await expect(page).toHaveURL(/\/zh-TW\/quick-sort\/$/);
+    await expect(page).toHaveURL(/\/zh-TW\/data-structures\/sorting\/quick-sort\/$/);
   });
 
   test('窄螢幕：地圖在框內橫向捲動，頁面本身不溢出', async ({ page }) => {

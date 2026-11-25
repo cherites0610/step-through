@@ -18,7 +18,7 @@ const nodes = (page: Page) =>
 
 test.describe('AVL 樹插入', () => {
   test('頁面基本元素：輸入、預設按鈕、平衡因子說明、偽代碼', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('AVL 樹插入');
     for (const name of ['隨機', 'LL 右旋', 'RR 左旋', 'LR 雙旋', 'RL 雙旋', '連續遞增']) {
       await expect(page.getByRole('button', { name })).toBeVisible();
@@ -35,7 +35,7 @@ test.describe('AVL 樹插入', () => {
     ['RL 雙旋', 'RL'],
   ] as const) {
     test(`${preset}：失衡時標出 ${kind}，旋轉後 20 成為根、三個節點平衡因子都是 0`, async ({ page }) => {
-      await page.goto('/zh-TW/avl-insert/');
+      await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
       await page.getByRole('button', { name: preset }).click();
 
       // 找到失衡那一步
@@ -64,7 +64,7 @@ test.describe('AVL 樹插入', () => {
   }
 
   test('旋轉只讓節點上下移動，左右位置不變（中序順序不變）', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     await page.getByRole('button', { name: 'RR 左旋' }).click();
     const s = slider(page, '步驟');
     let unb = -1;
@@ -82,7 +82,7 @@ test.describe('AVL 樹插入', () => {
   });
 
   test('連續遞增：AVL 保持完美平衡，樹高 3、根是 40，共 4 次旋轉', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     await page.getByRole('button', { name: '連續遞增' }).click();
     await toEnd(page);
     await page.waitForTimeout(600);
@@ -95,7 +95,7 @@ test.describe('AVL 樹插入', () => {
   });
 
   test('自訂輸入：重複的數字被略過；不合法輸入顯示錯誤且不改動樹', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     const input = page.getByRole('textbox');
     await input.fill('5 3 5 8');
     await page.getByRole('button', { name: '套用' }).click();
@@ -116,7 +116,7 @@ test.describe('AVL 樹插入', () => {
   });
 
   test('空樹：整組內容置中——虛線根預留框、「空樹」標題與「10 會成為根」', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     await toEnd(page);
     await slider(page, '步驟').fill('0');
     const svg = page.getByRole('img', { name: /目前的樹/ });
@@ -147,7 +147,7 @@ test.describe('AVL 樹插入', () => {
   });
 
   test('只有一個數字時：空狀態不擠在一起，文字都在舞台內，樹也置中', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     await page.getByRole('textbox').fill('7');
     await page.getByRole('button', { name: '套用' }).click();
     const svg = page.getByRole('img', { name: /目前的樹/ });
@@ -170,7 +170,7 @@ test.describe('AVL 樹插入', () => {
   ] as const) {
     test(`空樹的說明文字在窄螢幕不會被截掉（${label}）`, async ({ page }) => {
       await page.setViewportSize({ width: 390, height: 844 });
-      await page.goto('/zh-TW/avl-insert/');
+      await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
       await page.getByRole('textbox').fill(seq);
       await page.getByRole('button', { name: '套用' }).click();
       const svg = page.getByRole('img', { name: /目前的樹/ });
@@ -189,7 +189,7 @@ test.describe('AVL 樹插入', () => {
   }
 
   test('大小順序刻度軸：依序標出所有數字，已插入＝實心、未插入＝空心', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/'); // 10, 20, 30, 40, 50, 25
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/'); // 10, 20, 30, 40, 50, 25
     const svg = page.getByRole('img', { name: /目前的樹/ });
     const ticks = svg.locator('rect[width="6"]');
     await expect(ticks).toHaveCount(6);
@@ -206,7 +206,7 @@ test.describe('AVL 樹插入', () => {
 
   test('減少動態：旋轉的移動動畫仍保留（縮短為 250ms），不是瞬移', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     const duration = () =>
       page.evaluate(() => getComputedStyle(document.querySelector('svg g.node') ?? document.body).transitionDuration);
 
@@ -240,7 +240,7 @@ test.describe('AVL 樹插入', () => {
 
   test('一般偏好：旋轉動畫 450ms', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     await page.getByRole('button', { name: 'RR 左旋' }).click();
     await slider(page, '步驟').fill('3');
     expect(
@@ -250,7 +250,7 @@ test.describe('AVL 樹插入', () => {
 
   test('其他裝飾性過場在減少動態時仍然停用', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/zh-TW/avl-insert/');
+    await page.goto('/zh-TW/data-structures/balanced-trees/avl-insert/');
     const d = await page.evaluate(() => getComputedStyle(document.querySelector('h1')!).transitionDuration);
     expect(parseFloat(d)).toBeLessThan(0.001);
   });

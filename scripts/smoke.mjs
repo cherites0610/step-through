@@ -78,15 +78,14 @@ await check('/zh-TW/ 回 200、是繁體中文、有安全標頭', async () => {
   assert((await res.text()).includes('<html lang="zh-TW"'), '找不到 <html lang="zh-TW">');
   assert(res.headers.get('x-content-type-options') === 'nosniff', '缺少 X-Content-Type-Options');
 });
+// 網址以 sitemap 為準：單元頁在 /zh-TW/<科目>/<章節>/<主題>/
+const sitemap = await (await get('/sitemap-0.xml')).text();
+const paths = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
+const unitOf = (t) => paths.find((p) => p.endsWith(`/${t}/`) && p.split('/').length === 6);
 for (const t of topics) {
-  await check(`/zh-TW/${t}/ 回 200`, async () => {
-    const res = await get(`/zh-TW/${t}/`);
-    assert(res.status === 200, `狀態 ${res.status}`);
-  });
+  await check(`主題 ${t} 的單元頁在 sitemap 裡`, async () => assert(unitOf(t), '找不到'));
 }
 await check('sitemap 裡的每個網址都回 200', async () => {
-  const xml = await (await get('/sitemap-0.xml')).text();
-  const paths = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => new URL(m[1]).pathname);
   assert(paths.length > 0, 'sitemap 沒有網址');
   const bad = [];
   for (const p of paths) {
@@ -98,7 +97,10 @@ await check('sitemap 裡的每個網址都回 200', async () => {
 await check('/ 轉到 /zh-TW/', () => redirectsTo('/', '/zh-TW/'));
 await check('/en/ 轉到 /zh-TW/', () => redirectsTo('/en/', '/zh-TW/'));
 for (const t of topics) {
-  await check(`/en/${t}/ 轉到 /zh-TW/${t}/`, () => redirectsTo(`/en/${t}/`, `/zh-TW/${t}/`));
+  const to = unitOf(t);
+  if (!to) continue;
+  await check(`v1 的 /zh-TW/${t}/ 轉到 ${to}`, () => redirectsTo(`/zh-TW/${t}/`, to));
+  await check(`/en/${t}/ 轉到 ${to}`, () => redirectsTo(`/en/${t}/`, to));
 }
 await check('不存在的頁面回 404', async () => {
   const res = await get('/zh-TW/no-such-page/');
