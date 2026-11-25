@@ -14,8 +14,6 @@ const ui = {
     reset: '重設',
     step: '步驟',
     interactive: '互動視覺化',
-    projection: '投影模式',
-    projectionShort: '投影',
     speed: '速度',
     topics: '主題',
     explanation: '這一步',

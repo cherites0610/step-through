@@ -57,4 +57,4 @@ pnpm smoke [網址]  # 對已部署的網站做冒煙測試（預設正式站）
 
 - Lighthouse 行動版（模擬慢速 4G）：效能 99、無障礙 100、最佳實務 100、SEO 100（首頁、主題頁皆量過；當時含英文版）。
 - 首頁互動 JS 為 0；主題頁約 34～37 KB gzip（目標 < 50 KB）。404 頁的 Lighthouse SEO 較低是預期的（404 狀態且刻意 noindex）。
-- `pnpm test:e2e` 含 axe 無障礙掃描（WCAG 2.0／2.1 A 與 AA）：所有頁面、投影模式與互動後的狀態。
+- `pnpm test:e2e` 含 axe 無障礙掃描（WCAG 2.0／2.1 A 與 AA）：所有頁面與互動後的狀態。

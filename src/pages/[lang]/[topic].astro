@@ -1,7 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import ProjectionToggle from '../../components/ProjectionToggle.astro';
 import SortViz from '../../components/viz/sorting/SortViz.svelte';
 import AvlViz from '../../components/viz/avl/AvlViz.svelte';
 import { t, type Locale } from '../../i18n';
@@ -104,14 +103,11 @@ const rows: [string, string][] = [
       >{plateLabel}</span
     >
     <span class="hidden text-[15px] md:inline">{d.title}</span>
-    <div class="ml-auto flex shrink-0 items-center gap-2 md:gap-4">
-      <ProjectionToggle lang={lang} />
-    </div>
   </header>
 
-  <div class="topic-shell md:grid md:grid-cols-[220px_1fr]">
+  <div class="md:grid md:grid-cols-[220px_1fr]">
     <nav
-      class="chapter-rail border-b border-hairline px-4 py-4 md:border-b-0 md:border-r"
+      class="border-b border-hairline px-4 py-4 md:border-b-0 md:border-r"
       aria-label={text.topics}
     >
       <p class="mb-2 font-mono text-[11px] uppercase tracking-[0.14em]">{chapter.title[lang]}</p>

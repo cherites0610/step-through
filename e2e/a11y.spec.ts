@@ -33,16 +33,6 @@ test('404 頁沒有無障礙違規', async ({ page }) => {
   await scan(page);
 });
 
-test.describe('投影模式（純白紙面、2px 線、放大）', () => {
-  for (const url of ['/zh-TW/', '/zh-TW/quick-sort/', '/zh-TW/avl-insert/', '/zh-TW/merge-sort/']) {
-    test(`${url} 沒有無障礙違規`, async ({ page }) => {
-      await page.goto(url);
-      await page.getByRole('button', { name: '投影模式' }).click();
-      await scan(page);
-    });
-  }
-});
-
 test.describe('互動後的狀態', () => {
   const toStep = (page: Page, name: string, i: number) => page.getByRole('slider', { name }).fill(String(i));
 

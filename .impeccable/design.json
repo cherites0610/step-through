@@ -195,14 +195,6 @@
       "css": ".ds-nav { list-style: none; margin: 0; padding: 0; width: 200px; } .ds-nav-item { display: block; padding: 6px 8px; font: 400 15px 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans CJK TC', system-ui, sans-serif; color: #16181A; text-decoration: none; } .ds-nav-item[aria-current='page'] { background: #DCDDF3; outline: 1px solid #16181A; }"
     },
     {
-      "name": "Projection Toggle",
-      "kind": "button",
-      "refersTo": "chip-preset",
-      "description": "頂列的投影模式切換；啟用時反白為實心墨色。",
-      "html": "<div style=\"display:flex;gap:12px\"><button class=\"ds-proj\" aria-pressed=\"false\">投影模式</button><button class=\"ds-proj\" aria-pressed=\"true\">投影模式</button></div>",
-      "css": ".ds-proj { height: 36px; padding: 0 12px; background: #F5F4F6; color: #16181A; border: 1px solid #C9C7C4; border-radius: 0; font: 400 13px 'JetBrains Mono', ui-monospace, monospace; } .ds-proj:hover { border-color: #16181A; } .ds-proj[aria-pressed='true'] { background: #16181A; border-color: #16181A; color: #F5F4F6; } .ds-proj:focus-visible { outline: 2px solid #16181A; outline-offset: 2px; }"
-    },
-    {
       "name": "Roadmap Row",
       "kind": "custom",
       "refersTo": "roadmap-row-live-hover",
@@ -272,7 +264,7 @@
     "rules": [
       {
         "name": "The Never-Pure Rule",
-        "body": "沒有 #000 與 #FFF；墨與紙都帶一點色相。（投影模式例外。）",
+        "body": "沒有 #000 與 #FFF；墨與紙都帶一點色相。",
         "section": "colors"
       },
       {
@@ -318,8 +310,7 @@
       "Do 讓首屏為靜態 HTML；互動元件按需載入（首頁零 JS）。",
       "Do 在舞台標本與文案中使用真實的演算法軌跡與數字，不使用示意性的假資料。",
       "Do 為瀏覽器預設樣式帶入設計：選取色為藍紫底墨色字、accent-color 為墨色、捲軸為髮絲灰、prefers-reduced-motion 時停用裝飾性過場（承載資訊的步驟移動保留）。",
-      "Do 邊框寬度用 border、border-t 等標準工具類別（由 --hair 驅動），不要寫死 1px 的自訂邊框，否則投影模式的 2px 不會生效。",
-      "Do 投影模式的版面覆寫寫在 layer 之外，才贏得過 Tailwind 工具類別。",
+      "Do 邊框寬度用 border、border-t 等標準工具類別（1px），不要另寫自訂邊框寬度。",
       "Do 讓一個舞台元素只有一種表達：目前＝實心墨色、基準＝粗框加標籤、已完成＝藍紫底加框；不要為了新演算法再引入新的顏色。",
       "Do 樹的節點位置要讓「大小順序」一眼可見：水平位置由排序名次決定，不要為了好看重新排版。"
     ],
@@ -329,7 +320,7 @@
       "Don't 用髮絲灰寫需要閱讀的文字，也不要用 ●○ 這類字元充當狀態圖示；狀態記號是繪製的 SVG 方框。",
       "Don't 引入第二個強調色，或讓藍紫佔畫面超過 15%、或用作文字色。",
       "Don't 使用粗體（700）或斜體；階層靠尺寸、字體族與大小寫。",
-      "Don't 使用純黑 #000 與純白 #FFF（投影模式除外）。",
+      "Don't 使用純黑 #000 與純白 #FFF。",
       "Don't 用相同尺寸的圖示加標題加內文卡片排成頁面結構；用髮絲線分欄的列表與表格。",
       "Don't 在會落在紙角的固定元件上放不同於紙色的實心底色而造成接縫；底部播放列只在播放器區塊內 sticky，正是為了避開右下角的綠漂移。"
     ]
