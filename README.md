@@ -25,6 +25,7 @@ pnpm smoke [網址]  # 對已部署的網站做冒煙測試（預設正式站）
 
 - **新增主題**：在 `src/content/topics/<主題>/` 加 `zh-TW.mdx`，並在 `src/data/subjects.ts` 對應章節的單元加上 `topic`（沒登記會在建置時報錯）。科目、章節、先修關係也都在這個檔案；學習地圖由先修關係自動排版（`src/core/map/layout.ts`），先修不存在或有環時建置會失敗。接著執行 `pnpm build && pnpm og` 產生 OG 圖；vitest 會檢查每個主題都有圖。主題若曾在 v1 以 `/zh-TW/<主題>/` 上線，`public/_redirects` 要有轉到新網址的一行（vitest 會檢查）。
 - **新增考題**：在 `src/content/questions/<科目>/<章節>/` 加一個 MDX（frontmatter 見 `src/content.config.ts`：出處、題型、難度、章內順序；省略出處＝自編題）。內文是題目，詳解寫在 `<Solution>…</Solution>` 裡，章節頁會把它收合起來。指到不存在的章節時建置會失敗。
+- **章節的觀念說明**：在 `src/content/chapters/<科目>/<章節>.mdx` 寫一篇（frontmatter 有 `summary`，顯示在章節頁標題下方，也當作頁面描述）。內文用 `###` 分段；標題與單元名稱相同時，章節頁的單元清單會連到那一段。程式碼區塊不上色（偽代碼）。
 - **章末自我檢核**：在 `src/data/subjects.ts` 該章的 `checklist` 寫「能……」的具體能力描述。
 - **字體**：中文刻意用系統字體（不載入網頁字體），Noto Sans TC 只載入拉丁字母／數字。原因與實測數字見 [DESIGN.md](DESIGN.md) 的 Typography。改了字體相關設定後執行 `pnpm fonts`，vitest 會確認沒有過期。
 - **OG 圖**：`pnpm og` 會啟動預覽伺服器，把各頁視覺化舞台截圖後排版；需要本機有繁體中文字體與 Playwright 的 Chromium（`pnpm exec playwright install chromium`）。產出的 PNG 會 commit，所以 CI 與部署不需要 Chromium。

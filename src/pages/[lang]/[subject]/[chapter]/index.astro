@@ -6,6 +6,7 @@ import ChapterData from '../../../../components/progress/ChapterData.astro';
 import StateMark from '../../../../components/progress/StateMark.astro';
 import StateLabel from '../../../../components/progress/StateLabel.astro';
 import { locales, t, type Locale } from '../../../../i18n';
+import { chapterContent, contentIndex } from '../../../../lib/content';
 import {
   chapterPath,
   dependentsOf,
@@ -21,8 +22,8 @@ import {
 
 export async function getStaticPaths() {
   const known = new Set(subjects.flatMap((s) => s.chapters.map((c) => `${s.id}/${c.id}`)));
-  // 考題指到不存在的章節時，在建置階段就報錯
-  for (const e of await getCollection('questions')) {
+  // 觀念說明與考題指到不存在的章節時，在建置階段就報錯
+  for (const e of [...(await getCollection('chapters')), ...(await getCollection('questions'))]) {
     if (!known.has(`${e.data.subject}/${e.data.chapter}`))
       throw new Error(`${e.id}：找不到章節 ${e.data.subject}/${e.data.chapter}（見 src/data/subjects.ts）`);
   }
@@ -42,13 +43,18 @@ const text = t(lang);
 const c = text.chapter;
 const h = text.home;
 
-const live = new Set(
-  (await getCollection('topics')).filter((e) => e.data.lang === lang).map((e) => e.data.topic),
-);
-const isLiveUnit = (u: Chapter['units'][number]) => !!u.topic && live.has(u.topic);
-const hasLive = (ch: Chapter) => ch.units.some(isLiveUnit);
+const content = await contentIndex(lang);
+const isLiveUnit = (u: Chapter['units'][number]) => !!u.topic && content.live.has(u.topic);
+const hasContent = (ch: Chapter) => chapterContent(content, subject, ch).any;
 
-// 觀念說明的內容模型在第一篇內容上線時（N1）加入；目前一律顯示準備中
+const conceptEntry = (await getCollection('chapters')).find(
+  (e) => e.data.subject === subject.id && e.data.chapter === chapter.id,
+);
+const concept = conceptEntry && (await render(conceptEntry));
+// 觀念說明裡與單元同名的 ### 標題：單元清單連到那一段
+const unitAnchor = new Map(
+  (concept?.headings ?? []).filter((x) => x.depth === 3).map((x) => [x.text, x.slug]),
+);
 const questions = await Promise.all(
   (await getCollection('questions'))
     .filter((e) => e.data.subject === subject.id && e.data.chapter === chapter.id)
@@ -72,7 +78,9 @@ const chip =
 const path = chapterPath(lang, subject, chapter);
 const url = new URL(path, Astro.site).href;
 const title = `${chapter.title}｜${subject.title}｜${text.siteName}`;
-const description = `${subject.title}第 ${chapter.no} 章「${chapter.title}」：${chapter.units.map((u) => u.title).join('、')}。`;
+const description =
+  conceptEntry?.data.summary ??
+  `${subject.title}第 ${chapter.no} 章「${chapter.title}」：${chapter.units.map((u) => u.title).join('、')}。`;
 const sourceLabel = (q: (typeof questions)[number]['data']) =>
   q.source ? `${q.source.year} · ${q.source.school}${q.source.dept} · 第 ${q.source.no} 題` : c.selfMade;
 const jsonLd = [
@@ -127,7 +135,7 @@ const jsonLd = [
                 class:list={[
                   'flex items-baseline gap-2 whitespace-nowrap px-2 py-1.5 text-[15px]',
                   x === chapter && 'bg-stamp outline outline-1 outline-ink',
-                  !hasLive(x) && x !== chapter && 'text-ink/70',
+                  !hasContent(x) && x !== chapter && 'text-ink/70',
                 ]}
               >
                 <StateMark />
@@ -145,6 +153,7 @@ const jsonLd = [
       <ChapterData subject={subject} />
       <p class="font-mono text-[11px] uppercase tracking-[0.14em]">{subject.title} · {pad2(chapter.no)}</p>
       <h1 class="text-[44px] leading-[1.1] tracking-[-0.02em] max-md:text-[32px]">{chapter.title}</h1>
+      {conceptEntry && <p class="mt-3 max-w-[65ch] text-[17px] leading-[1.7]">{conceptEntry.data.summary}</p>}
       <p class="mt-3 max-w-[65ch] text-[15px]">
         {
           prereqs.length ? (
@@ -165,7 +174,15 @@ const jsonLd = [
 
       <section class="mt-10 border-t border-ink pt-6" aria-labelledby="concepts">
         <h2 id="concepts" class="text-[28px] leading-[1.2] tracking-[-0.01em]">{c.concepts}</h2>
-        <p class="mt-3 max-w-[65ch] text-[15px] text-ink/70">{c.conceptsSoon}</p>
+        {
+          concept ? (
+            <div class="prose-plate mt-4 max-w-[65ch]">
+              <concept.Content />
+            </div>
+          ) : (
+            <p class="mt-3 max-w-[65ch] text-[15px] text-ink/70">{c.conceptsSoon}</p>
+          )
+        }
       </section>
 
       <section class="mt-12 border-t border-ink pt-6" aria-labelledby="units">
@@ -186,6 +203,18 @@ const jsonLd = [
                     <span class="flex-1 text-[17px]">{u.title}</span>
                     <span class="font-mono text-[11px] uppercase tracking-[0.14em]">{c.interactive}</span>
                     <span class="sr-only">{h.live}</span>
+                  </a>
+                ) : unitAnchor.has(u.title) ? (
+                  <a
+                    href={`#${unitAnchor.get(u.title)}`}
+                    class="-mx-2 flex items-baseline gap-3 px-2 py-2.5 hover:bg-stamp hover:outline hover:outline-1 hover:outline-ink"
+                  >
+                    <svg class="shrink-0 self-center" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
+                      <rect width="10" height="10" fill="currentColor" />
+                    </svg>
+                    <span class="font-mono text-[11px] tabular-nums">{pad2(i + 1)}</span>
+                    <span class="flex-1 text-[17px]">{u.title}</span>
+                    <span class="font-mono text-[11px] uppercase tracking-[0.14em]">{c.conceptTag}</span>
                   </a>
                 ) : (
                   <div class="-mx-2 flex items-baseline gap-3 px-2 py-2.5 text-ink/70">

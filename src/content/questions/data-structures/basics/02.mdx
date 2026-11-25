@@ -1,0 +1,25 @@
+---
+subject: data-structures
+chapter: basics
+order: 2
+kind: calc
+difficulty: 1
+---
+
+下面的程式中，`x = x + 1` 共執行幾次？用 Θ 表示時間複雜度。
+
+```
+for i = 1 to n
+    for j = i to n
+        x = x + 1
+```
+
+<Solution>
+
+**n(n + 1) / 2 次，Θ(n²)。**
+
+i = 1 時內層從 1 跑到 n，共 n 次；i = 2 時 n − 1 次；……；i = n 時 1 次。
+
+總和 = n + (n − 1) + … + 1 = n(n + 1) / 2 = Θ(n²)。
+
+</Solution>

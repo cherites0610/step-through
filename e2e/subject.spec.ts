@@ -16,15 +16,16 @@ test.describe('科目頁：資料結構學習地圖', () => {
     expect(types).toEqual(['Course', 'BreadcrumbList']);
   });
 
-  test('地圖：11 個章節節點、每條先修一條邊；有內容的章節是實線框', async ({ page }) => {
+  test('地圖：11 個章節節點、每條先修一條邊；有內容（觀念、互動或考題）的章節是實線框', async ({ page }) => {
     const map = page.getByRole('group', { name: '資料結構的章節先修關係圖' });
     const nodes = map.getByRole('link');
     await expect(nodes).toHaveCount(11);
     // 先修共 12 條（鏈結串列 → 圖、樹與二元樹 → 圖 等）
     await expect(map.locator('g[aria-hidden="true"] > g')).toHaveCount(12);
-    await expect(map.locator('a.is-live')).toHaveCount(2);
-    await expect(map.getByRole('link', { name: /^10\s*排序\s*已上線 5／8/ })).toBeVisible();
-    await expect(map.getByRole('link', { name: /^08\s*平衡搜尋樹\s*已上線 1／6/ })).toBeVisible();
+    await expect(map.locator('a.is-live')).toHaveCount(3);
+    await expect(map.getByRole('link', { name: /^10\s*排序\s*互動 5／8 · 2 題/ })).toBeVisible();
+    await expect(map.getByRole('link', { name: /^08\s*平衡搜尋樹\s*互動 1／6/ })).toBeVisible();
+    await expect(map.getByRole('link', { name: /^01\s*基本觀念與複雜度\s*觀念 · 10 題/ })).toBeVisible();
     await expect(map.getByRole('link', { name: /^09\s*圖\s*即將推出/ })).toBeVisible();
   });
 

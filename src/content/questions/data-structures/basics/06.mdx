@@ -1,0 +1,31 @@
+---
+subject: data-structures
+chapter: basics
+order: 6
+kind: choice
+difficulty: 2
+---
+
+下列敘述哪些正確？（複選）
+
+(A) 2ⁿ⁺¹ = O(2ⁿ)
+
+(B) 2²ⁿ = O(2ⁿ)
+
+(C) n log n = Ω(n)
+
+(D) log₂ n = Θ(log₁₀ n)
+
+(E) n³ = O(n² log n)
+
+<Solution>
+
+**答案：(A)、(C)、(D)。**
+
+- (A) 對。2ⁿ⁺¹ = 2·2ⁿ，取 c = 2 即可。
+- (B) 錯。2²ⁿ = 4ⁿ，4ⁿ / 2ⁿ = 2ⁿ → ∞，找不到常數 c。指數的**底數**不同就不是同一級。
+- (C) 對。n ≥ 2 時 n log₂ n ≥ n，取 c = 1、n₀ = 2。
+- (D) 對。log₂ n = log₁₀ n / log₁₀ 2，只差常數倍。對數的**底數**不影響成長率。
+- (E) 錯。n³ / (n² log n) = n / log n → ∞。
+
+</Solution>

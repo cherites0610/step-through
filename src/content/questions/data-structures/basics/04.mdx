@@ -1,0 +1,28 @@
+---
+subject: data-structures
+chapter: basics
+order: 4
+kind: calc
+difficulty: 2
+---
+
+下面的程式中，最內層的敘述共執行幾次？用 Θ 表示。
+
+```
+for i = 1 to n
+    for j = i + 1 to n
+        for k = j + 1 to n
+            x = x + 1
+```
+
+<Solution>
+
+**n(n − 1)(n − 2) / 6 次，Θ(n³)。**
+
+三個迴圈變數滿足 1 ≤ i < j < k ≤ n，而且每一組 (i, j, k) 恰好被執行一次。所以次數就是「從 1…n 中選 3 個不同的數」的組合數：
+
+C(n, 3) = n(n − 1)(n − 2) / 6 = Θ(n³)
+
+把巢狀迴圈看成「選出幾個遞增的索引」，常常比一層一層加總快。
+
+</Solution>

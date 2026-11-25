@@ -1,20 +1,20 @@
 ---
 // 科目地圖：先修關係圖，建置時算好座標輸出成靜態 SVG。
 // 節點連到該章的章節頁；連結名稱直接取自節點裡的文字（編號、章名、狀態）。
-// 框線表示內容（實線＝有已上線的單元、虛線＝即將推出），左上角記號表示本機的學習狀態。
+// 框線表示內容（實線＝有觀念說明、考題或互動單元，虛線＝即將推出），左上角記號表示本機的學習狀態。
 // 窄螢幕在框內拖動捲動（不縮小文字），載入時自動捲到建議下一章。
 import { layoutMap, defaultLayoutOptions as o } from '../../core/map/layout';
 import { chapterPath, initialStates, pad2, type Subject } from '../../data/subjects';
 import { stateLabels } from '../../lib/progress';
+import { chapterContent, type ContentIndex } from '../../lib/content';
 
 interface Props {
   subject: Subject;
-  /** 已上線的主題（有主題頁） */
-  live: Set<string>;
+  content: ContentIndex;
   lang: string;
-  labels: { live: string; soon: string; units: string; mapLabel: string };
+  labels: { soon: string; units: string; mapLabel: string; concept: string; interactive: string; questions: string };
 }
-const { subject, live, lang, labels } = Astro.props;
+const { subject, content, lang, labels } = Astro.props;
 
 const PAD = 24;
 const layout = layoutMap(subject.chapters);
@@ -23,10 +23,17 @@ const H = layout.height + PAD * 2;
 const pos = new Map(layout.nodes.map((n) => [n.id, n]));
 const states = initialStates(subject);
 
-const liveCount = (c: Subject['chapters'][number]) => c.units.filter((u) => u.topic && live.has(u.topic)).length;
+// 節點底部一行內容摘要：觀念 · 互動 5／8 · 10 題；什麼都沒有時為「即將推出 · 4 單元」
 const stats = (c: Subject['chapters'][number]) => {
-  const k = liveCount(c);
-  return k > 0 ? `${labels.live} ${k}／${c.units.length} ${labels.units}` : `${labels.soon} · ${c.units.length} ${labels.units}`;
+  const k = chapterContent(content, subject, c);
+  if (!k.any) return `${labels.soon} · ${c.units.length} ${labels.units}`;
+  return [
+    k.concept && labels.concept,
+    k.liveUnits > 0 && `${labels.interactive} ${k.liveUnits}／${c.units.length}`,
+    k.questions > 0 && labels.questions.replace('{n}', String(k.questions)),
+  ]
+    .filter(Boolean)
+    .join(' · ');
 };
 const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x + PAD} ${y + PAD}`).join(' ');
 ---
@@ -66,7 +73,7 @@ const path = (pts: [number, number][]) => pts.map(([x, y], i) => `${i ? 'L' : 'M
           const n = pos.get(c.id)!;
           const x = n.x + PAD;
           const y = n.y + PAD;
-          const isLive = liveCount(c) > 0;
+          const isLive = chapterContent(content, subject, c).any;
           return (
             <a
               href={chapterPath(lang, subject, c)}

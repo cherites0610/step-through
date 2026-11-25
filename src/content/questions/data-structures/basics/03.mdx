@@ -1,0 +1,29 @@
+---
+subject: data-structures
+chapter: basics
+order: 3
+kind: calc
+difficulty: 1
+---
+
+下面的迴圈本體共執行幾次（n ≥ 1）？時間複雜度是多少？
+
+```
+i = 1
+while i < n
+    i = i * 2
+```
+
+<Solution>
+
+**⌈log₂ n⌉ 次，Θ(log n)。**
+
+i 依序是 1, 2, 4, 8, …。第 k 次執行本體之前 i = 2^(k−1)，當 i ≥ n 時停止。
+
+- n = 1：一開始就不成立，0 次（⌈log₂ 1⌉ = 0）
+- n = 5：i = 1, 2, 4 時執行，共 3 次（⌈log₂ 5⌉ = 3）
+- n = 8：i = 1, 2, 4 時執行，共 3 次（log₂ 8 = 3）
+
+變數每次乘以常數，次數就是 log。
+
+</Solution>

@@ -22,5 +22,7 @@ export default defineConfig({
     locales: ['zh-TW'],
     routing: { prefixDefaultLocale: true },
   },
+  // 內容裡的程式碼區塊是偽代碼，不上色（避免深色主題的淺色字落在淺色紙面上），由 .prose-plate pre 統一排版
+  markdown: { syntaxHighlight: false },
   vite: { plugins: [tailwindcss()] },
 });

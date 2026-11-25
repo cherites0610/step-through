@@ -1,0 +1,27 @@
+---
+subject: data-structures
+chapter: basics
+order: 10
+kind: calc
+difficulty: 3
+---
+
+T(n) = 2T(n/2) + n / log n（log 以 2 為底，n 為 2 的次方）。能不能用主定理？請求出 T(n) 的 Θ 解。
+
+<Solution>
+
+**不能用基本的主定理；T(n) = Θ(n log log n)。**
+
+n^(log₂ 2) = n。f(n) = n / log n 比 n 小，但只小了 log n 倍，不是多項式倍（找不到 ε > 0 使 n / log n = O(n^(1−ε))），所以不是情況 1；它也不是 Θ(n)，所以不是情況 2。
+
+改用遞迴樹。設 n = 2^m：
+
+- 第 i 層有 2^i 個子問題，每個大小 n/2^i，成本 (n/2^i) / log(n/2^i) = (n/2^i) / (m − i)。
+- 這一層的總成本：2^i · (n/2^i) / (m − i) = n / (m − i)。
+- 從 i = 0 加到 m − 1：n · (1/m + 1/(m−1) + … + 1/1) = n · H_m。
+
+調和數 H_m = Θ(log m)，而 m = log n，所以
+
+T(n) = Θ(n log log n)
+
+</Solution>

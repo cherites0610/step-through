@@ -1,0 +1,21 @@
+---
+subject: data-structures
+chapter: basics
+order: 5
+kind: fill
+difficulty: 2
+---
+
+把下列函數依成長率由慢到快排列；成長率相同（互為 Θ）的請標出來。
+
+f₁ = n²　f₂ = 2ⁿ　f₃ = n log n　f₄ = log(n!)　f₅ = n^(log n)　f₆ = 100n
+
+<Solution>
+
+**f₆ ＜ f₃ ＝ f₄ ＜ f₁ ＜ f₅ ＜ f₂**（f₃ 與 f₄ 互為 Θ）
+
+- f₆ = 100n = Θ(n)，常數倍不影響。
+- f₄ = log(n!) = Θ(n log n)：上界 log(n!) ≤ log(nⁿ) = n log n；下界取 n! 的後半段 n/2 個因數，每個至少 n/2，得 log(n!) ≥ (n/2) log(n/2)。所以和 f₃ 同級。
+- f₅ = n^(log n)：取 log₂ 之後是 (log n)²，而 f₁ = n² 取 log 是 2 log n，f₂ = 2ⁿ 取 log 是 n。因為 2 log n ＜ (log n)² ＜ n（n 夠大時），所以 n² ＜ n^(log n) ＜ 2ⁿ。
+
+</Solution>
