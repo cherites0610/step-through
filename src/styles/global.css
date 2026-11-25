@@ -68,6 +68,18 @@
   .prose-plate tr:last-child td { border-bottom: 0; }
 }
 
+/*
+ * 學習狀態記號（StateMark、地圖節點）：外觀由最近的 [data-state] 決定。
+ * 已掌握＝實心、學習中＝左半實心、可以開始＝空心墨框、建議先讀先修＝空心髮絲框。
+ */
+@layer components {
+  .state-mark .box { fill: none; stroke: var(--color-ink); stroke-width: 1; }
+  .state-mark .half { fill: none; }
+  [data-state='mastered'] .state-mark .box { fill: var(--color-ink); }
+  [data-state='learning'] .state-mark .half { fill: var(--color-ink); }
+  [data-state='blocked'] .state-mark .box { stroke: var(--color-hairline); }
+}
+
 /* 瀏覽器預設樣式也要帶設計：選取、控制項強調色、捲軸 */
 @layer base {
   ::selection {

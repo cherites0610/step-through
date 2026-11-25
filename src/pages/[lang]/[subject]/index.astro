@@ -2,8 +2,12 @@
 import { getCollection } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import SubjectMap from '../../../components/map/SubjectMap.astro';
+import ChapterData from '../../../components/progress/ChapterData.astro';
+import StateMark from '../../../components/progress/StateMark.astro';
+import StateLabel from '../../../components/progress/StateLabel.astro';
+import { stateLabels, suggestNext } from '../../../lib/progress';
 import { locales, t, type Locale } from '../../../i18n';
-import { chapterPath, isOpen, pad2, subjects, topicPath, type Subject } from '../../../data/subjects';
+import { chapterInfos, chapterPath, initialStates, isOpen, pad2, subjectPath, subjects, topicPath, type Subject } from '../../../data/subjects';
 
 export function getStaticPaths() {
   return locales.flatMap((lang) =>
@@ -24,6 +28,10 @@ const live = new Set(
 
 const chapters = [...subject.chapters].sort((a, b) => a.no - b.no);
 const byId = new Map(chapters.map((c) => [c.id, c]));
+const states = initialStates(subject);
+const suggestedInfo = suggestNext(chapterInfos(subject), states);
+const suggested = suggestedInfo && byId.get(suggestedInfo.id);
+const titles = Object.fromEntries(chapters.map((c) => [c.id, c.title]));
 const unitCount = chapters.reduce((n, c) => n + c.units.length, 0);
 const liveCount = chapters.reduce((n, c) => n + c.units.filter((u) => u.topic && live.has(u.topic)).length, 0);
 const fill = (tpl: string, vars: Record<string, string | number>) =>
@@ -80,25 +88,52 @@ const jsonLd = [
           <h2 id="map-heading" class="text-[28px] leading-[1.2] tracking-[-0.01em]">{s.mapHeading}</h2>
           <p class="mt-2 max-w-[60ch] text-[15px]">{s.mapNote}</p>
         </div>
-        <p class="flex items-center gap-5 font-mono text-[13px]" aria-hidden="true">
-          <span class="inline-flex items-center gap-2">
-            <svg width="10" height="10" viewBox="0 0 10 10"><rect width="10" height="10" fill="currentColor" /></svg>
-            {h.live}
-          </span>
-          <span class="inline-flex items-center gap-2">
-            <svg width="10" height="10" viewBox="0 0 10 10">
-              <rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-dasharray="2 2" />
-            </svg>
-            {h.soon}
-          </span>
-        </p>
+        <div class="grid gap-1 font-mono text-[11px]" aria-hidden="true">
+          <p class="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {
+              (['mastered', 'learning', 'ready', 'blocked'] as const).map((st) => (
+                <span class="inline-flex items-center gap-2" data-state={st}>
+                  <svg class="state-mark" width="10" height="10" viewBox="0 0 10 10">
+                    <rect class="box" x="0.5" y="0.5" width="9" height="9" />
+                    <rect class="half" x="0.5" y="0.5" width="4.5" height="9" />
+                  </svg>
+                  {stateLabels[st]}
+                </span>
+              ))
+            }
+          </p>
+          <p>{s.legendContent}；{s.legendProgress}</p>
+        </div>
       </div>
-      <div class="mt-6">
+      <ChapterData subject={subject} />
+      {
+        suggested && (
+          <p
+            class="mt-6 text-[15px]"
+            data-suggest-for={subject.id}
+            data-href-base={subjectPath(lang, subject)}
+            data-titles={JSON.stringify(titles)}
+          >
+            {s.suggest}：
+            <a data-suggest-link href={chapterPath(lang, subject, suggested)} class="underline underline-offset-4">
+              {pad2(suggested.no)} {suggested.title}
+            </a>{' '}
+            →
+          </p>
+        )
+      }
+      <p class="mt-2 font-mono text-[11px] md:hidden" aria-hidden="true">← {s.dragHint} →</p>
+      <div class="mt-4 max-md:mt-2">
         <SubjectMap
           subject={subject}
           live={live}
           lang={lang}
-          labels={{ live: h.live, soon: h.soon, units: s.units, mapLabel: fill(s.mapLabel, { subject: subject.title }) }}
+          labels={{
+            live: h.live,
+            soon: h.soon,
+            units: s.units,
+            mapLabel: fill(s.mapLabel, { subject: subject.title }),
+          }}
         />
       </div>
     </section>
@@ -111,9 +146,16 @@ const jsonLd = [
             <li id={`ch-${c.id}`} class="grid scroll-mt-14 gap-x-8 gap-y-3 border-b border-hairline py-6 md:grid-cols-[minmax(0,280px)_1fr]">
               <div>
                 <h3>
-                  <a href={chapterPath(lang, subject, c)} class="group flex items-baseline gap-3">
+                  <a
+                    href={chapterPath(lang, subject, c)}
+                    class="group flex items-baseline gap-3"
+                    data-state-for={`${subject.id}/${c.id}`}
+                    data-state={states[c.id]}
+                  >
+                    <StateMark />
                     <span class="font-mono text-[13px] tabular-nums">{pad2(c.no)}</span>
                     <span class="text-[22px] leading-[1.3] underline-offset-4 group-hover:underline">{c.title} →</span>
+                    <StateLabel state={states[c.id]} />
                   </a>
                 </h3>
                 <p class="mt-2 text-[15px]">
