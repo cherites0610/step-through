@@ -1,0 +1,33 @@
+---
+subject: data-structures
+chapter: basics
+order: 7
+kind: calc
+difficulty: 2
+---
+
+寫出兩個函數的遞迴關係式並求出時間複雜度（<M t="n" /> 為 2 的次方）。
+
+```
+g(n):
+    if n <= 1: return 1
+    s = 0
+    for i = 1 to n: s = s + 1
+    return g(n/2) + g(n/2) + s
+
+h(n):
+    if n <= 1: return 1
+    s = 0
+    for i = 1 to n: s = s + 1
+    t = h(n/2)
+    return t + t + s
+```
+
+<Solution>
+
+- **g：<M t="T(n) = 2T(n/2) + \Theta(n)" /> → <M t="\Theta(n \log n)" />。** 遞迴呼叫了兩次。主定理：<M t="n^{\log_2 2} = n" />，<M t="f(n) = \Theta(n)" />，情況 2。
+- **h：<M t="T(n) = T(n/2) + \Theta(n)" /> → <M t="\Theta(n)" />。** 只呼叫一次，把結果存起來用兩次。主定理：<M t="n^{\log_2 1} = 1" />，<M t="f(n) = n" /> 大了多項式倍，而且 <M t="1 \cdot \frac{n}{2} \le \frac{1}{2} n" />，情況 3。也可以直接加總：<M t="n + \frac{n}{2} + \frac{n}{4} + \cdots < 2n" />。
+
+兩個函數的回傳值相同，但 g 多做了大量重複計算。
+
+</Solution>

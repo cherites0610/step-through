@@ -1,0 +1,21 @@
+---
+subject: data-structures
+chapter: basics
+order: 5
+kind: fill
+difficulty: 2
+---
+
+把下列函數依成長率由慢到快排列；成長率相同（互為 <M t="\Theta" />）的請標出來。
+
+<M d t="f_1 = n^2 \quad f_2 = 2^n \quad f_3 = n \log n \quad f_4 = \log(n!) \quad f_5 = n^{\log n} \quad f_6 = 100n" />
+
+<Solution>
+
+**<M t="f_6 < f_3 = f_4 < f_1 < f_5 < f_2" />**（<M t="f_3" /> 與 <M t="f_4" /> 互為 <M t="\Theta" />）
+
+- <M t="f_6 = 100n = \Theta(n)" />，常數倍不影響。
+- <M t="f_4 = \log(n!) = \Theta(n \log n)" />：上界 <M t="\log(n!) \le \log(n^n) = n \log n" />；下界取 <M t="n!" /> 的後半段 <M t="n/2" /> 個因數，每個至少 <M t="n/2" />，得 <M t="\log(n!) \ge \frac{n}{2} \log \frac{n}{2}" />。所以和 <M t="f_3" /> 同級。
+- <M t="f_5 = n^{\log n}" />：取 <M t="\log_2" /> 之後是 <M t="(\log n)^2" />；<M t="f_1" /> 取 log 是 <M t="2 \log n" />，<M t="f_2" /> 取 log 是 <M t="n" />。因為 <M t="2 \log n < (\log n)^2 < n" />（<M t="n" /> 夠大時），所以 <M t="n^2 < n^{\log n} < 2^n" />。
+
+</Solution>

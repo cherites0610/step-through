@@ -6,6 +6,7 @@ import ChapterData from '../../../components/progress/ChapterData.astro';
 import StateMark from '../../../components/progress/StateMark.astro';
 import StateLabel from '../../../components/progress/StateLabel.astro';
 import { stateLabels, suggestNext } from '../../../lib/progress';
+import { contentIndex } from '../../../lib/content';
 import { locales, t, type Locale } from '../../../i18n';
 import { chapterInfos, chapterPath, initialStates, isOpen, pad2, subjectPath, subjects, topicPath, type Subject } from '../../../data/subjects';
 
@@ -21,10 +22,9 @@ const text = t(lang);
 const s = text.subject;
 const h = text.home;
 
-// 已上線的主題：以 content collection 為準
-const live = new Set(
-  (await getCollection('topics')).filter((e) => e.data.lang === lang).map((e) => e.data.topic),
-);
+// 已上線的內容（互動單元、觀念說明、考題）：以 content collections 為準
+const content = await contentIndex(lang);
+const live = content.live;
 
 const chapters = [...subject.chapters].sort((a, b) => a.no - b.no);
 const byId = new Map(chapters.map((c) => [c.id, c]));
@@ -126,12 +126,14 @@ const jsonLd = [
       <div class="mt-4 max-md:mt-2">
         <SubjectMap
           subject={subject}
-          live={live}
+          content={content}
           lang={lang}
           labels={{
-            live: h.live,
             soon: h.soon,
             units: s.units,
+            concept: s.concept,
+            interactive: s.interactive,
+            questions: s.questionCount,
             mapLabel: fill(s.mapLabel, { subject: subject.title }),
           }}
         />

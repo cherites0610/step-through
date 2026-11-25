@@ -28,6 +28,20 @@ const topics = defineCollection({
 });
 
 /**
+ * 章節的觀念說明（一章一檔，可以沒有）：src/content/chapters/<科目>/<章節>.mdx。
+ * 內文的 ### 標題若與單元名稱相同，章節頁的單元清單會連到那一段。
+ */
+const chapters = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/chapters' }),
+  schema: z.object({
+    subject: z.string(),
+    chapter: z.string(),
+    /** 章節頁標題下方的一段摘要：這一章考什麼 */
+    summary: z.string(),
+  }),
+});
+
+/**
  * 考題（一題一檔）：src/content/questions/<科目>/<章節>/<編號>.mdx。
  * 內文是題目，詳解寫在 <Solution> 裡（章節頁會把它收合起來）。
  */
@@ -49,4 +63,4 @@ const questions = defineCollection({
   }),
 });
 
-export const collections = { topics, questions };
+export const collections = { topics, chapters, questions };

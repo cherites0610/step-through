@@ -1,0 +1,19 @@
+---
+// 觀念說明的圖：圖版框、編號（章-序號）與說明。圖比內容欄寬時在框內橫向捲動，不縮小文字。
+interface Props {
+  /** 圖號，例如 1-2（第 1 章第 2 張） */
+  no: string;
+  caption: string;
+}
+const { no, caption } = Astro.props;
+---
+
+<figure class="fig my-6">
+  <!-- 可能需要橫向捲動：讓鍵盤也能聚焦後用方向鍵捲動 -->
+  <div class="overflow-x-auto border border-hairline px-4 py-4" tabindex="0" role="region" aria-label={`圖 ${no}`}>
+    <slot />
+  </div>
+  <figcaption class="mt-2 text-[15px] leading-[1.6]">
+    <span class="mr-2 font-mono text-[11px] uppercase tracking-[0.14em]">圖 {no}</span>{caption}
+  </figcaption>
+</figure>

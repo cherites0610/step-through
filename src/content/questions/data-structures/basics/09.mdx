@@ -1,0 +1,29 @@
+---
+subject: data-structures
+chapter: basics
+order: 9
+kind: calc
+difficulty: 2
+---
+
+用展開法求出下列遞迴關係式的**精確**解。
+
+(a) 河內塔：<M t="T(1) = 1" />，<M t="T(n) = 2T(n-1) + 1" />
+
+(b) <M t="T(1) = 1" />，<M t="T(n) = T(n-1) + n" />
+
+<Solution>
+
+**(a) <M t="T(n) = 2^n - 1" />。**
+
+<M d t="\begin{aligned} T(n) &= 2T(n-1) + 1 \\ &= 2[2T(n-2) + 1] + 1 = 4T(n-2) + 2 + 1 \\ &= 8T(n-3) + 4 + 2 + 1 \\ &= \cdots \\ &= 2^{n-1} T(1) + 2^{n-2} + \cdots + 2 + 1 \\ &= 2^{n-1} + (2^{n-1} - 1) = 2^n - 1 \end{aligned}" />
+
+驗算：<M t="T(2) = 3" />、<M t="T(3) = 7" />，與 <M t="2^n - 1" /> 相符。
+
+**(b) <M t="T(n) = \dfrac{n(n+1)}{2}" />。**
+
+<M d t="T(n) = n + (n-1) + \cdots + 2 + T(1) = \frac{n(n+1)}{2} = \Theta(n^2)" />
+
+這一題不是「除以 <M t="b" />」的形式，不能用主定理。
+
+</Solution>

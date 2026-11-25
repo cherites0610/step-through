@@ -1,0 +1,38 @@
+---
+// 圖：Big-O 的定義。f(n) = n² + 6n + 10、c·g(n) = 2n²；
+// 兩者相等於 n² = 6n + 10 的正根 n₀ = 3 + √19 ≈ 7.36，之後 f(n) 一直在 c·g(n) 下方。
+const W = 560, H = 300, L = 48, R = 150, T = 16, B = 36;
+const XMAX = 14, YMAX = 400;
+const pw = W - L - R, ph = H - T - B;
+const X = (x: number) => +(L + (x / XMAX) * pw).toFixed(1);
+const Y = (y: number) => +(T + ph - (y / YMAX) * ph).toFixed(1);
+const f = (n: number) => n * n + 6 * n + 10;
+const cg = (n: number) => 2 * n * n;
+const n0 = 3 + Math.sqrt(19);
+const curve = (fn: (n: number) => number) =>
+  Array.from({ length: XMAX * 4 + 1 }, (_, i) => i / 4)
+    .map((n) => `${X(n)},${Y(Math.min(fn(n), YMAX))}`)
+    .join(' ');
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="f(n) = n² + 6n + 10 與 2n² 的曲線：n 小於約 7.4 時 f(n) 比較大，之後 f(n) 一直在 2n² 下方">
+  <path class="axis" d={`M${L} ${T} L${L} ${T + ph} L${L + pw} ${T + ph}`} />
+  {[0, 2, 4, 6, 8, 10, 12, 14].map((x) => <text class="mono" x={X(x)} y={T + ph + 16} text-anchor="middle">{x}</text>)}
+  {
+    [0, 100, 200, 300, 400].map((y) => (
+      <>
+        <text class="mono" x={L - 8} y={Y(y) + 4} text-anchor="end">{y}</text>
+        <path class="axis" d={`M${L - 3} ${Y(y)} L${L} ${Y(y)}`} />
+      </>
+    ))
+  }
+  <text class="mono" x={L + pw} y={T + ph + 32} text-anchor="end">n</text>
+  <path class="axis" d={`M${X(n0)} ${T} L${X(n0)} ${T + ph}`} />
+  <text class="mono" x={X(n0) + 4} y={T + 10}>n₀ ≈ 7.4</text>
+  <polyline class="ink" stroke-width="2" points={curve(cg)} />
+  <polyline class="ink" stroke-width="2" stroke-dasharray="6 4" points={curve(f)} />
+  <text x={X(XMAX) + 8} y={Y(cg(XMAX)) + 4}>c·g(n) = 2n²</text>
+  <text x={X(XMAX) + 8} y={Y(f(XMAX)) + 4}>f(n) = n² + 6n + 10</text>
+  <path class="ink" d={`M${X(n0)} ${T + ph - 6} L${X(XMAX)} ${T + ph - 6}`} />
+  <text class="mono" x={(X(n0) + X(XMAX)) / 2} y={T + ph - 12} text-anchor="middle">n ≥ n₀ 時 f(n) ≤ c·g(n)</text>
+</svg>

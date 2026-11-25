@@ -63,6 +63,35 @@ test.describe('章節頁', () => {
     await expect(nav.getByRole('link', { name: /二元搜尋樹/ })).toHaveAttribute('href', '/zh-TW/data-structures/bst/');
   });
 
+  test('第 1 章：觀念說明、摘要、單元連到觀念說明的段落、10 題考題', async ({ page }) => {
+    await page.goto('/zh-TW/data-structures/basics/');
+    await expect(page.locator('main')).toContainText('用漸近符號描述演算法的成長率');
+    const concepts = page.locator('section[aria-labelledby="concepts"]');
+    for (const name of ['演算法與效能分析', '漸近符號', '遞迴與遞迴關係式', '主定理', '常見陷阱'])
+      await expect(concepts.getByRole('heading', { level: 3, name })).toBeVisible();
+    await expect(concepts).not.toContainText('準備中');
+
+    const units = page.locator('section[aria-labelledby="units"]');
+    await expect(units.getByRole('link')).toHaveCount(4);
+    await units.getByRole('link', { name: /主定理/ }).click();
+    await expect(page.getByRole('heading', { level: 3, name: '主定理' })).toBeInViewport();
+    // 頁內跳轉不新增瀏覽紀錄
+    expect(decodeURIComponent(new URL(page.url()).hash)).toBe('#主定理');
+
+    await expect(page.locator('li.question')).toHaveCount(10);
+    // 公式由 KaTeX 排版（含給螢幕閱讀器的 MathML）；觀念說明有 5 張圖，各有替代文字
+    await expect(page.locator('.katex').first()).toBeVisible();
+    expect(await page.locator('.katex math').count()).toBeGreaterThan(100);
+    await expect(page.locator('figure.fig')).toHaveCount(5);
+    for (const fig of await page.locator('figure.fig svg[role="img"]').all()) await expect(fig).toHaveAttribute('aria-label', /.+/);
+    await expect(page.locator('figure.fig figcaption').first()).toContainText('圖 1-1');
+    // 頁面本身不因公式或圖而橫向溢出
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBeLessThanOrEqual(0);
+    await expect(page.locator('section[aria-labelledby="checklist"] fieldset')).toHaveCount(5);
+    // 描述用觀念說明的摘要
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /漸近符號/);
+  });
+
   test('其他科目的章節頁也存在', async ({ request }) => {
     for (const url of ['/zh-TW/algorithms/dp/', '/zh-TW/operating-systems/deadlock/', '/zh-TW/intro-cs/security/']) {
       expect((await request.get(url)).status(), url).toBe(200);

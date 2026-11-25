@@ -1,0 +1,45 @@
+---
+// 圖：T(n) = 2T(n/2) + n 的遞迴樹。第 i 層有 2^i 個大小 n/2^i 的子問題，每層成本都是 n。
+const levels = [
+  { count: 1, label: 'n' },
+  { count: 2, label: 'n/2' },
+  { count: 4, label: 'n/4' },
+  { count: 8, label: 'n/8' },
+];
+const TREE_W = 400, COST_X = 424, W = 560, ROW = 64, TOP = 28, BOX_H = 26;
+const boxW = (count: number) => Math.min(72, TREE_W / count - 8);
+const cx = (count: number, k: number) => ((k + 0.5) * TREE_W) / count;
+const H = TOP + levels.length * ROW + 64;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="遞迴樹：第 0 層一個 n，第 1 層兩個 n/2，第 2 層四個 n/4，第 3 層八個 n/8；每層成本都是 n，共 log₂ n 層，總成本 n log n">
+  <text class="mono" x={COST_X} y="14">每層成本</text>
+  {
+    levels.map((lv, i) => {
+      const y = TOP + i * ROW;
+      const w = boxW(lv.count);
+      return (
+        <g>
+          {Array.from({ length: lv.count }, (_, k) => (
+            <>
+              {i > 0 && (
+                <path
+                  class="ink"
+                  d={`M${cx(levels[i - 1].count, Math.floor(k / 2))} ${y - ROW + BOX_H} L${cx(lv.count, k)} ${y}`}
+                />
+              )}
+              <rect x={cx(lv.count, k) - w / 2 + 0.5} y={y + 0.5} width={w - 1} height={BOX_H - 1} class="ink" fill="var(--color-paper)" />
+              <text class="mono" x={cx(lv.count, k)} y={y + 17} text-anchor="middle">{lv.label}</text>
+            </>
+          ))}
+          <text x={COST_X} y={y + 18}>{i === 0 ? 'n' : `${lv.count} × ${lv.label} = n`}</text>
+        </g>
+      );
+    })
+  }
+  <text class="mono" x={TREE_W / 2} y={TOP + levels.length * ROW - 14} text-anchor="middle">⋮</text>
+  <text class="mono" x={TREE_W / 2} y={TOP + levels.length * ROW + 8} text-anchor="middle">n 個 T(1)</text>
+  <text x={COST_X} y={TOP + levels.length * ROW + 8}>n</text>
+  <path class="axis" d={`M${COST_X} ${TOP + levels.length * ROW + 22} L${W - 8} ${TOP + levels.length * ROW + 22}`} />
+  <text x={COST_X} y={TOP + levels.length * ROW + 44}>log₂ n + 1 層 × n</text>
+</svg>

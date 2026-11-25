@@ -58,6 +58,11 @@
 @layer components {
   .prose-plate h2 { font-size: 22px; font-weight: 500; margin-top: 2.5rem; line-height: 1.3; }
   .prose-plate h2:first-child { margin-top: 0; }
+  .prose-plate h3 { font-size: 22px; font-weight: 500; margin-top: 2.5rem; line-height: 1.3; scroll-margin-top: 4.5rem; }
+  .prose-plate h3:first-child { margin-top: 0; }
+  .prose-plate ul { margin-top: 0.75rem; padding-left: 1.5rem; list-style: disc; }
+  .prose-plate pre { margin-top: 0.75rem; overflow-x: auto; border: 1px solid var(--color-hairline); padding: 0.75rem 1rem; font-family: var(--font-mono); font-size: 13px; line-height: 1.9; }
+  .prose-plate code { font-family: var(--font-mono); font-size: 0.9em; }
   .prose-plate p { margin-top: 0.75rem; font-size: 16px; line-height: 1.7; }
   .prose-plate ol { margin-top: 0.75rem; padding-left: 1.5rem; list-style: decimal; }
   .prose-plate li { margin-top: 0.4rem; font-size: 16px; line-height: 1.7; }
@@ -78,6 +83,18 @@
   [data-state='mastered'] .state-mark .box { fill: var(--color-ink); }
   [data-state='learning'] .state-mark .half { fill: var(--color-ink); }
   [data-state='blocked'] .state-mark .box { stroke: var(--color-hairline); }
+}
+
+/* 觀念說明的圖（src/components/content/figures）：文字一律墨色，標籤與數字等寬 */
+@layer components {
+  .fig svg { display: block; margin-inline: auto; }
+  .fig svg text { fill: var(--color-ink); font-size: 13px; }
+  .fig svg .mono { font-family: var(--font-mono); font-size: 11px; }
+  .fig svg .axis { stroke: var(--color-hairline); stroke-width: 1; fill: none; }
+  .fig svg .ink { stroke: var(--color-ink); fill: none; }
+  .fig details { margin-top: 0.5rem; font-size: 15px; }
+  .fig summary { cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+  .math-display { overflow-x: auto; margin: 0.75rem 0; }
 }
 
 /* 瀏覽器預設樣式也要帶設計：選取、控制項強調色、捲軸 */
