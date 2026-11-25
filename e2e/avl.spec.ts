@@ -253,15 +253,5 @@ test.describe('AVL 樹插入', () => {
     await page.goto('/zh-TW/avl-insert/');
     const d = await page.evaluate(() => getComputedStyle(document.querySelector('h1')!).transitionDuration);
     expect(parseFloat(d)).toBeLessThan(0.001);
-    const btn = await page.evaluate(() => getComputedStyle(document.querySelector('.projection-toggle')!).transitionDuration);
-    expect(parseFloat(btn)).toBeLessThan(0.001);
-  });
-
-  test('投影模式下樹仍完整可見', async ({ page }) => {
-    await page.goto('/zh-TW/avl-insert/');
-    await page.getByRole('button', { name: '投影模式' }).click();
-    await toEnd(page);
-    const box = await page.getByRole('img', { name: /目前的樹/ }).boundingBox();
-    expect(box!.width).toBeGreaterThan(400);
   });
 });

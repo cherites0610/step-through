@@ -9,7 +9,7 @@ related_targets: []
 
 Scope: every unit page with an interactive visualizer (sorting x5, AVL insert so far), reached from a chapter page. v2 adds a "← 回到章節" link at the top of the left rail, which now lists the units of the current chapter. Mode: Operate (the visualizer); the explanatory content below it is Read, inheriting the same world.
 
-Audience/job: exam takers practising hand-tracing (often arriving from a question's "open in the interactive unit" link with data preloaded) and teachers projecting. Task: enter data, step forward/back, understand why each step happens. Constraints: zh-TW, SVG stage, Tailwind, 50KB JS budget, projector-legible, no colour-only state.
+Audience/job: exam takers practising hand-tracing (often arriving from a question's "open in the interactive unit" link with data preloaded) and teachers demonstrating in class. Task: enter data, step forward/back, understand why each step happens. Constraints: zh-TW, SVG stage, Tailwind, 50KB JS budget, no colour-only state.
 
 ## Direction contract
 
@@ -19,6 +19,6 @@ STORY: The visitor sees the algorithm as one plate they can touch, grasps the cu
 FIRST VIEWPORT: Standard shell (56px top bar of topics, 220px chapter rail, 340px right column). Centre: plate title (44px display) over the stage framed by corner crosshairs; array/tree on dot matrix; below, a three-cell hairline stats row (比較, 位移, 已排序). Right column: step counter label, one-sentence explanation at 17px, pseudocode with the live line tinted periwinkle. Bottom 72px bar: reset, back, play (filled ink, the only filled control), next, timeline, step count, speed. Primary action is play.
 FORM: design annual plate section (challenger, catalogId design-annual-s-plate-section), seed:a0b44c9cd8ac4720. Signature move: the stage as a registered plate — crosshair corners and dot matrix — while the active element inverts to filled ink.
 
-Adaptations: a projection mode raises type scale and contrast (ink on #FFFFFF, hairlines to 2px); mobile moves controls to a fixed bottom bar; reduced motion stops all transitions except step changes. Risk to watch: reads cold; counter with warmth in the edge-drift grounds and a visible invitation to type your own data.
+Adaptations: mobile moves controls to a fixed bottom bar; reduced motion stops all transitions except step changes. Risk to watch: reads cold; counter with warmth in the edge-drift grounds and a visible invitation to type your own data.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

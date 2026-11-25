@@ -16,46 +16,7 @@
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
-/*
- * 髮絲線寬度由 --hair 驅動：一般 1px，投影模式 2px。
- * 以同名 @utility 覆寫邊框寬度，responsive／狀態變體（md:border-r、last:border-r-0…）照常運作。
- */
-@utility border {
-  border-width: var(--hair);
-}
-@utility border-t {
-  border-top-width: var(--hair);
-}
-@utility border-b {
-  border-bottom-width: var(--hair);
-}
-@utility border-r {
-  border-right-width: var(--hair);
-}
-@utility border-y {
-  border-top-width: var(--hair);
-  border-bottom-width: var(--hair);
-}
-@utility outline-1 {
-  outline-width: var(--hair);
-}
-
 @layer base {
-  :root {
-    --hair: 1px;
-    --zoom: 1;
-  }
-
-  /*
-   * 投影模式：字級與版面整體放大 1.25 倍、墨對純白提高對比、髮絲線 2px、隱藏章節欄。
-   * 這是 Never-Pure 規則唯一的例外，所以紙色改為 #FFFFFF。
-   */
-  html[data-mode='projection'] {
-    --color-paper: #ffffff;
-    --hair: 2px;
-    --zoom: 1.25;
-    zoom: 1.25;
-  }
   html {
     background: var(--color-paper);
     color: var(--color-ink);
@@ -63,19 +24,16 @@
   }
   /*
    * 紙面邊緣的細微漂移：左上偏暖、右下偏綠。幅度極小、只在紙角，
-   * 不形成可見色塊；投影模式不使用。這是整站唯一的漸層。
+   * 不形成可見色塊。這是整站唯一的漸層。
    */
   body {
     font-weight: 400;
     line-height: 1.65;
-    min-height: calc(100vh / var(--zoom));
+    min-height: 100vh;
     background-image:
       radial-gradient(ellipse 60% 40% at 0% 0%, var(--color-paper-warm), transparent),
       radial-gradient(ellipse 60% 40% at 100% 100%, var(--color-paper-green), transparent);
     background-repeat: no-repeat;
-  }
-  html[data-mode='projection'] body {
-    background-image: none;
   }
   :focus-visible {
     outline: 2px solid var(--color-ink);
@@ -104,7 +62,7 @@
   .prose-plate ol { margin-top: 0.75rem; padding-left: 1.5rem; list-style: decimal; }
   .prose-plate li { margin-top: 0.4rem; font-size: 16px; line-height: 1.7; }
   .prose-plate strong { font-weight: 500; }
-  .prose-plate table { width: 100%; margin-top: 0.75rem; border-top: var(--hair) solid var(--color-ink); border-bottom: var(--hair) solid var(--color-hairline); font-size: 15px; line-height: 1.6; }
+  .prose-plate table { width: 100%; margin-top: 0.75rem; border-top: 1px solid var(--color-ink); border-bottom: 1px solid var(--color-hairline); font-size: 15px; line-height: 1.6; }
   .prose-plate th, .prose-plate td { padding: 0.5rem 0.75rem 0.5rem 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-hairline); }
   .prose-plate th { font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; }
   .prose-plate tr:last-child td { border-bottom: 0; }
@@ -119,32 +77,5 @@
   html {
     accent-color: var(--color-ink);
     scrollbar-color: var(--color-hairline) var(--color-paper);
-  }
-}
-
-/*
- * 投影模式的版面覆寫刻意放在 layer 之外：要贏過 Tailwind 工具類別
- * （例如 md:grid-cols-[220px_1fr]）才能真正收起章節欄。
- */
-html[data-mode='projection'] .chapter-rail {
-  display: none;
-}
-html[data-mode='projection'] .topic-shell {
-  grid-template-columns: minmax(0, 1fr);
-}
-/*
- * 投影模式整體放大 1.25 倍後有效寬度變小：視窗不到 1440px 時首屏改為堆疊，
- * 讓兩行標題各自完整不折行；夠寬時標本欄收窄後仍並排。
- */
-html[data-mode='projection'] .home-hero {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 48px;
-}
-html[data-mode='projection'] .home-hero figure {
-  max-width: 560px;
-}
-@media (min-width: 1440px) {
-  html[data-mode='projection'] .home-hero {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
   }
 }
