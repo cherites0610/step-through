@@ -1,0 +1,48 @@
+---
+// 圖：刪除 Dept 的「資管」後，Student 在四種 ON DELETE 做法下的結果（2 × 2 小圖）。
+import Table from './rel/Table.astro';
+
+type Row = (string | null)[];
+const before: Row[] = [
+  ['S1', '王小明', '資管'],
+  ['S2', '李美華', '資工'],
+  ['S3', '陳志強', '資管'],
+];
+const hit = (r: Row) => r[2] === '資管';
+const panels = [
+  { title: 'RESTRICT：刪除失敗，不變', rows: before, strike: [] as number[], changed: false },
+  { title: 'CASCADE：S1、S3 一起刪除', rows: before, strike: before.flatMap((r, i) => (hit(r) ? [i] : [])), changed: false },
+  { title: 'SET NULL：dname 改為 NULL', rows: before.map((r) => (hit(r) ? [r[0], r[1], null] : r)), strike: [], changed: true },
+  { title: 'SET DEFAULT：改為預設值資工', rows: before.map((r) => (hit(r) ? [r[0], r[1], '資工'] : r)), strike: [], changed: true },
+];
+const colW = [40, 64, 56], CELL = 20;
+const PW = 260, GAP = 20, W = PW * 2 + GAP, PH = 16 + 16 + CELL * (before.length + 1) + 22;
+const H = PH * 2;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="刪除 Dept 的資管後：RESTRICT 拒絕刪除，Student 不變；CASCADE 刪除 S1 與 S3；SET NULL 把 S1、S3 的 dname 改為 NULL；SET DEFAULT 把它們改為預設值資工">
+  {
+    panels.map((p, k) => {
+      const x0 = (k % 2) * (PW + GAP);
+      const y0 = Math.floor(k / 2) * PH;
+      return (
+        <g>
+          <text x={x0} y={y0 + 14}>{p.title}</text>
+          <Table
+            x={x0}
+            y={y0 + 20}
+            name="Student"
+            cols={['sid', 'name', 'dname']}
+            rows={p.rows}
+            colW={colW}
+            cellH={CELL}
+            strike={p.strike}
+            mark={p.changed ? before.flatMap((r, i) => (hit(r) ? [[i, 2] as [number, number]] : [])) : []}
+          />
+        </g>
+      );
+    })
+  }
+  <path class="axis" d={`M${PW + GAP / 2} 0 L${PW + GAP / 2} ${H}`} />
+  <path class="axis" d={`M0 ${PH - 6} L${W} ${PH - 6}`} />
+</svg>

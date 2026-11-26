@@ -1,0 +1,33 @@
+---
+subject: databases
+chapter: relational
+order: 8
+kind: choice
+difficulty: 2
+---
+
+Student 的 dname 是參照 Dept 的外鍵。下列哪些操作**可能**違反參考完整性？（複選）
+
+(A) 在 Student 新增一列
+
+(B) 在 Dept 新增一列
+
+(C) 刪除 Student 的一列
+
+(D) 刪除 Dept 的一列
+
+(E) 修改 Student 某一列的 dname
+
+<Solution>
+
+**答案：(A)、(D)、(E)。**
+
+參考完整性要求「Student 的 dname 都能在 Dept 找到（或是 NULL）」。會破壞它的，只有兩種情況：Student 這邊出現了找不到的 dname，或 Dept 那邊被參照的列消失了。
+
+- **(A) 可能。** 新增的學生 dname 可能是不存在的系。
+- **(B) 不會。** Dept 多一個系，不會讓任何學生的 dname 找不到。
+- **(C) 不會。** 刪除**參照別人**的一方，不會破壞任何參考。
+- **(D) 可能。** 刪除**被參照**的系，參照它的學生就找不到了。這也是刪除唯一可能違反的限制。
+- **(E) 可能。** 改成不存在的系就違反。（修改 Dept 的 dname 也可能違反，但不在選項中。）
+
+</Solution>

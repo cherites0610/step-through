@@ -1,0 +1,45 @@
+---
+subject: databases
+chapter: relational
+order: 10
+kind: calc
+difficulty: 3
+---
+
+Employee(<u>eid</u>, name, boss) 中，boss 是參照 Employee 自己的外鍵（直屬主管的 eid）。目前的資料：
+
+| eid | name | boss |
+|---|---|---|
+| E1 | 總經理 | NULL |
+| E2 | 經理甲 | E1 |
+| E3 | 經理乙 | E1 |
+| E4 | 組長 | E2 |
+| E5 | 職員 | E4 |
+| E6 | 職員 | E3 |
+
+刪除 E2。分別在 boss 設為 (a) `ON DELETE CASCADE`、(b) `ON DELETE SET NULL` 時，寫出刪除後剩下的資料。
+
+<Solution>
+
+**(a) 剩 E1、E3、E6。(b) 剩 E1、E3、E4、E5、E6，其中 E4 的 boss 變成 NULL。**
+
+**(a) CASCADE**：刪除會沿著參照一路傳下去。
+
+1. 刪除 E2。
+2. boss 是 E2 的 E4 被串聯刪除。
+3. boss 是 E4 的 E5 被串聯刪除。
+4. 沒有人的 boss 是 E5，停止。
+
+E2 底下整個部門（E2、E4、E5）都被刪除，剩下 (E1, 總經理, NULL)、(E3, 經理乙, E1)、(E6, 職員, E3)。
+
+**(b) SET NULL**：只處理**直接**參照 E2 的列。
+
+1. 刪除 E2。
+2. boss 是 E2 的 E4，boss 改為 NULL。
+3. E5 參照的是 E4，E4 還在，不受影響。
+
+剩下 E1、E3、E4（boss 為 NULL）、E5（boss 仍是 E4）、E6。
+
+自我參照時 CASCADE 特別危險：刪掉一位主管，會刪掉他底下所有層級的員工。現實中通常用 RESTRICT（先把下屬轉給別人才能刪除）或 SET NULL。
+
+</Solution>

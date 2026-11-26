@@ -1,0 +1,40 @@
+---
+// 圖：Student.dname 參照 Dept.dname。找得到的畫箭頭，找不到的標出違反，NULL 允許。
+import Table from './rel/Table.astro';
+
+const dept = [['資管', '03-1234'], ['資工', '03-5678']];
+const students: (string | null)[][] = [
+  ['S1', '王小明', '資管'],
+  ['S2', '李美華', '資工'],
+  ['S4', '張大偉', '電機'],
+  ['S5', '黃小華', null],
+];
+const sColW = [40, 64, 56], dColW = [56, 72];
+const W = 540, CELL = 22, SX = 0, SY = 10, DX = 340, DY = 10;
+const sRight = SX + sColW.reduce((a, b) => a + b, 0);
+const rowY = (y: number, i: number) => y + 16 + CELL * (i + 1) + CELL / 2;
+const H = rowY(SY, students.length) + 4;
+const arrow = 'fk-arrow';
+const status = students.map((r) => (r[2] === null ? 'NULL：允許' : dept.some((d) => d[0] === r[2]) ? '' : '找不到：違反'));
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Student 的四列中，資管與資工都以箭頭指到 Dept 中存在的列；電機在 Dept 中找不到，違反參考完整性；dname 為 NULL 的一列是允許的">
+  <defs>
+    <marker id={arrow} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8 Z" fill="var(--color-ink)" />
+    </marker>
+  </defs>
+  <Table x={SX} y={SY} name="Student" cols={['sid', 'name', 'dname']} rows={students} colW={sColW} cellH={CELL} mark={students.flatMap((_, i) => (status[i].startsWith('找不到') ? [[i, 2] as [number, number]] : []))} />
+  <Table x={DX} y={DY} name="Dept" cols={['dname', 'phone']} rows={dept} colW={dColW} cellH={CELL} />
+  {
+    students.map((r, i) => {
+      const j = dept.findIndex((d) => d[0] === r[2]);
+      const y = rowY(SY, i);
+      return j >= 0 ? (
+        <path class="ink" d={`M${sRight + 4} ${y} L${DX - 4} ${rowY(DY, j)}`} marker-end={`url(#${arrow})`} />
+      ) : (
+        <text x={sRight + 10} y={y + 5}>{status[i]}</text>
+      );
+    })
+  }
+</svg>

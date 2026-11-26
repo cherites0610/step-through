@@ -1,0 +1,28 @@
+---
+subject: databases
+chapter: relational
+order: 3
+kind: choice
+difficulty: 1
+---
+
+Student(sid, idno, name, dept) 中，sid（學號）與 idno（身分證字號）都不會重複，其他屬性都可能重複。下列敘述何者**錯誤**？
+
+(A) \{sid, name\} 是超鍵
+
+(B) \{sid, name\} 是候選鍵
+
+(C) \{idno\} 是候選鍵
+
+(D) 若選 sid 為主鍵，idno 就是替代鍵
+
+<Solution>
+
+**答案：(B)。**
+
+- **(A) 對。** sid 已經不會重複，加上 name 之後當然也不會重複，所以是超鍵。
+- **(B) 錯。** 候選鍵必須是**最小**的超鍵。拿掉 name 之後剩下 \{sid\}，仍然是超鍵，所以 \{sid, name\} 不是最小，不是候選鍵。
+- **(C) 對。** \{idno\} 是超鍵，而且只有一個屬性，拿掉就什麼都不剩，所以是最小的。
+- **(D) 對。** 沒被選為主鍵的候選鍵就是替代鍵。
+
+</Solution>

@@ -1,0 +1,46 @@
+---
+subject: databases
+chapter: relational
+order: 11
+kind: essay
+difficulty: 3
+---
+
+某學校的需求如下，寫出 Dept、Student、Enroll 三個表的 `CREATE TABLE`，並說明每一個限制和外鍵動作的理由：
+
+- 每個系有唯一的系名 dname，以及電話 phone。
+- 每位學生有唯一的學號 sid，也有唯一的身分證字號 idno（不可空白），姓名 name 不可空白；學生可以暫時還沒有分系。系被裁撤時，學生保留，但改成未分系。
+- 每筆選課記錄學號 sid、課號 cid、成績 grade（0 到 100 的整數，可以還沒有成績）。同一位學生同一門課只能有一筆。學生的資料刪除時，他的選課紀錄一起刪除。
+
+<Solution>
+
+```
+CREATE TABLE Dept (
+    dname  VARCHAR(10) PRIMARY KEY,
+    phone  VARCHAR(12)
+);
+CREATE TABLE Student (
+    sid    CHAR(5)     PRIMARY KEY,
+    idno   CHAR(10)    UNIQUE NOT NULL,
+    name   VARCHAR(20) NOT NULL,
+    dname  VARCHAR(10) REFERENCES Dept(dname) ON DELETE SET NULL
+);
+CREATE TABLE Enroll (
+    sid    CHAR(5) REFERENCES Student(sid) ON DELETE CASCADE,
+    cid    CHAR(5),
+    grade  INT CHECK (grade BETWEEN 0 AND 100),
+    PRIMARY KEY (sid, cid)
+);
+```
+
+**理由**：
+
+- **Dept.dname 為主鍵**：系名唯一，用來識別系；主鍵自動不可重複、不可 NULL（鍵限制與實體完整性）。
+- **Student.sid 為主鍵、idno 為 `UNIQUE NOT NULL`**：兩者都是候選鍵，選 sid 為主鍵，idno 是替代鍵。`UNIQUE` 只保證不重複，不保證不是 NULL，需求說不可空白，所以要另外加 `NOT NULL`。
+- **Student.name `NOT NULL`**：需求規定，和鍵無關。
+- **Student.dname 可以是 NULL、`ON DELETE SET NULL`**：可以暫時未分系，所以不加 `NOT NULL`；系被裁撤時學生保留並改為未分系，正是 SET NULL 的效果。
+- **Enroll 主鍵 (sid, cid)**：同一位學生同一門課只能一筆，兩個屬性合起來才不重複。
+- **Enroll.sid `ON DELETE CASCADE`**：學生刪除時選課一起刪除。這裡也**不能**用 SET NULL，因為 sid 是主鍵的一部分。
+- **grade 的 `CHECK`**：定義域限制。沒有加 `NOT NULL`，所以可以還沒有成績；CHECK 遇到 NULL 不算違反。
+
+</Solution>

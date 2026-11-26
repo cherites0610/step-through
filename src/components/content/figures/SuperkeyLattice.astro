@@ -1,0 +1,47 @@
+---
+// 圖：R(A, B, C) 的所有屬性子集合（依大小分層），候選鍵為 {A} 與 {B, C}。超鍵塗黑，候選鍵加外框。
+import { line } from './shapes';
+
+const attrs = ['A', 'B', 'C'];
+const candidates = [['A'], ['B', 'C']];
+const subsets = Array.from({ length: 1 << attrs.length }, (_, m) => attrs.filter((_, i) => m & (1 << i)));
+const levels = Array.from({ length: attrs.length + 1 }, (_, k) => subsets.filter((s) => s.length === k));
+const isSuper = (s: string[]) => candidates.some((c) => c.every((a) => s.includes(a)));
+const isCandidate = (s: string[]) => candidates.some((c) => c.length === s.length && c.every((a) => s.includes(a)));
+const label = (s: string[]) => (s.length ? `{${s.join(', ')}}` : '∅');
+
+const W = 540, BOX_W = 72, BOX_H = 26, ROW = 64, TOP = 12;
+const H = TOP + (levels.length - 1) * ROW + BOX_H + 12;
+// 由下（空集合）往上（全部屬性）
+const pos = new Map<string, { x: number; y: number }>();
+levels.forEach((lv, k) => {
+  const y = TOP + (levels.length - 1 - k) * ROW;
+  lv.forEach((s, i) => pos.set(label(s), { x: ((i + 1) * W) / (lv.length + 1), y }));
+});
+const edges = subsets.flatMap((s) =>
+  attrs.filter((a) => !s.includes(a)).map((a) => [label(s), label(subsets.find((t) => t.length === s.length + 1 && s.every((x) => t.includes(x)) && t.includes(a))!)]),
+);
+const count = subsets.filter(isSuper).length;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`R(A, B, C) 的 8 個屬性子集合由下到上依大小排列。超鍵有 ${count} 個：{A}、{A, B}、{A, C}、{B, C}、{A, B, C}；其中 {A} 與 {B, C} 是候選鍵`}>
+  {
+    edges.map(([a, b]) => {
+      const p = pos.get(a)!, q = pos.get(b)!;
+      return <path class="axis" d={line(p.x, p.y, q.x, q.y + BOX_H)} />;
+    })
+  }
+  {
+    subsets.map((s) => {
+      const p = pos.get(label(s))!;
+      const sk = isSuper(s);
+      return (
+        <g>
+          {isCandidate(s) && <rect class="ink" x={p.x - BOX_W / 2 - 3.5} y={p.y - 3.5} width={BOX_W + 7} height={BOX_H + 7} stroke-width="2" />}
+          <rect class="ink" x={p.x - BOX_W / 2 + 0.5} y={p.y + 0.5} width={BOX_W - 1} height={BOX_H - 1} style={sk ? 'fill: var(--color-ink)' : 'fill: var(--color-paper)'} />
+          <text class="mono" x={p.x} y={p.y + 17} text-anchor="middle" style={sk ? 'fill: var(--color-paper)' : undefined}>{label(s)}</text>
+        </g>
+      );
+    })
+  }
+</svg>

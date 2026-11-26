@@ -1,0 +1,24 @@
+---
+subject: databases
+chapter: relational
+order: 1
+kind: fill
+difficulty: 1
+---
+
+關聯 Course(cid, title, credits, dname) 目前存有 12 門課。
+
+(a) 這個關聯的分支度是多少？
+
+(b) 這個關聯的基數是多少？
+
+(c) 再新增 3 門課之後，分支度與基數各變成多少？
+
+<Solution>
+
+**(a) 4。(b) 12。(c) 分支度仍是 4，基數變成 15。**
+
+- **分支度**是屬性的個數：cid、title、credits、dname，共 4 個。它屬於綱要，新增資料不會改變。
+- **基數**是值組（列）的個數：12 門課就是 12 個值組。它屬於實例，隨資料增減變動，新增 3 門後是 <M t="12 + 3 = 15" />。
+
+</Solution>

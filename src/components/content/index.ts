@@ -16,6 +16,10 @@ import SchoolER from './figures/SchoolER.astro';
 import MinMaxNotation from './figures/MinMaxNotation.astro';
 import WeakEntity from './figures/WeakEntity.astro';
 import Specialization from './figures/Specialization.astro';
+import RelationTerms from './figures/RelationTerms.astro';
+import SuperkeyLattice from './figures/SuperkeyLattice.astro';
+import ForeignKeyCheck from './figures/ForeignKeyCheck.astro';
+import DeleteActions from './figures/DeleteActions.astro';
 
 export const mdxComponents = {
   M,
@@ -35,4 +39,8 @@ export const mdxComponents = {
   MinMaxNotation,
   WeakEntity,
   Specialization,
+  RelationTerms,
+  SuperkeyLattice,
+  ForeignKeyCheck,
+  DeleteActions,
 };
