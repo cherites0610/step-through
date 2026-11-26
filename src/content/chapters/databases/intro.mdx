@@ -16,7 +16,7 @@ summary: 為什麼要用 DBMS 而不是各自存檔案、三層綱要架構與�
 
 檔案處理系統的問題會隨著單位變多而越來越嚴重。每一項問題後面接著寫 DBMS 怎麼解決：
 
-- **資料重複**（redundancy）**與不一致**（inconsistency）：學生轉系，註冊組改了，圖書館的檔案還是舊的系。DBMS 把資料集中存一份，所有程式看到同一份。
+- **資料重複**（redundancy）與**不一致**（inconsistency）：學生轉系，註冊組改了，圖書館的檔案還是舊的系。DBMS 把資料集中存一份，所有程式看到同一份。
 - **存取困難**：想要「資管系借書超過 10 本的學生」，就得寫一支新程式去讀兩個格式不同的檔案。DBMS 提供查詢語言（SQL），直接問就好，不必寫新程式。
 - **完整性**（integrity）**問題**：「學號不能重複」寫在每支程式裡，新程式忘了檢查，就會存進重複的學號。DBMS 把限制寫在資料庫的定義裡，統一檢查。
 - **原子性**（atomicity）**問題**：加選一門課要「扣名額」和「新增選課紀錄」兩步，做到一半當機，名額就少了一個。DBMS 提供交易（transaction）：要嘛全部完成，要嘛全部不做。
@@ -347,3 +347,52 @@ while 還有紀錄
 - **`DELETE` 是 DML、`DROP` 是 DDL**：一個刪資料，一個刪結構。
 - **DBMS 消除的是不受控的重複**，設計上刻意保留、由 DBMS 管理的受控冗餘仍然存在。
 - **階層式模型的子紀錄只有一個父紀錄**，多對多要重複紀錄；可以有多個「父」的是網路式模型。
+
+### 專有名詞
+
+| 名詞 | 英文 | 說明 |
+|---|---|---|
+| 檔案處理系統 | file-processing system | 每個程式各自存取自己的檔案 |
+| 資料重複 | redundancy | 同一份資料存在多個地方 |
+| 不一致 | inconsistency | 重複的資料只改了一部分，各處的值不同 |
+| 完整性 | integrity | 資料要滿足的限制，例如學號不能重複 |
+| 原子性 | atomicity | 一組操作要嘛全部完成，要嘛全部不做 |
+| 交易 | transaction | 視為一個整體執行的一組操作 |
+| 資料庫 | database | 一群彼此相關的資料的集合 |
+| 資料庫管理系統 | database management system，DBMS | 定義、建立、查詢、更新與維護資料庫的軟體 |
+| 資料庫系統 | database system | 資料庫加上 DBMS（與應用程式） |
+| 資料庫管理師 | database administrator，DBA | 負責綱要、授權、備份回復與效能調校的人 |
+| 受控的冗餘 | controlled redundancy | 刻意保留、由 DBMS 統一管理的重複 |
+| 綱要 | schema | 資料庫的結構描述，很少改變 |
+| 實例 | instance | 某一時刻實際存的資料，又叫資料庫狀態 |
+| 內涵／外延 | intension／extension | 綱要與實例的另一組說法 |
+| 三層綱要架構 | three-schema architecture | 把綱要分成外部、概念、內部三層（ANSI/SPARC） |
+| 外部層 | external level | 各使用者群看到的部分，可以有很多個；又叫視界層 |
+| 概念層 | conceptual level | 整個資料庫存了什麼與限制，只有一個；又叫邏輯層 |
+| 內部層 | internal level | 資料實際怎麼存，只有一個；又叫實體層 |
+| 對映 | mapping | 把上一層的請求翻譯成下一層的請求 |
+| 資料獨立性 | data independence | 改某一層的綱要時，不必改上一層 |
+| 實體資料獨立性 | physical data independence | 改內部綱要不影響概念綱要 |
+| 邏輯資料獨立性 | logical data independence | 改概念綱要不影響外部綱要；比較難達成 |
+| 檢視表 | view | 由查詢定義的虛擬表，SQL 用它來做外部綱要 |
+| 資料模型 | data model | 描述資料、關係、語意與限制的一組概念工具 |
+| 多對多 | M:N | 兩邊的一筆資料都可以對應到另一邊的多筆 |
+| 階層式模型 | hierarchical model | 樹狀，每筆紀錄最多一個父紀錄 |
+| 網路式模型 | network model | 圖狀，以擁有者與成員的集合型態表示關係 |
+| 集合型態 | set type | 網路式模型中的一對多關係 |
+| 擁有者／成員 | owner／member | 集合型態中「一」的一端與「多」的一端 |
+| 連結紀錄 | link record | 網路式模型用來表示多對多的中間紀錄 |
+| 關聯式模型 | relational model | 以表表示資料，用相同的值表示關係 |
+| SQL | Structured Query Language | 關聯式 DBMS 通用的資料庫語言 |
+| 資料定義語言 | data definition language，DDL | 定義與修改綱要：CREATE、ALTER、DROP |
+| 資料操作語言 | data manipulation language，DML | 查詢與修改資料：SELECT、INSERT、UPDATE、DELETE |
+| 資料控制語言 | data control language，DCL | 控制權限：GRANT、REVOKE |
+| 交易控制語言 | TCL | COMMIT、ROLLBACK；有些課本歸在 DCL |
+| 詮釋資料 | metadata | 描述資料的資料，例如表的欄位與型別 |
+| 資料字典／系統目錄 | data dictionary／system catalog | 存放詮釋資料的地方 |
+| 程序性 DML | procedural DML | 要指定怎麼找，一次處理一筆紀錄 |
+| 非程序性 DML | non-procedural DML | 只指定要什麼，一次處理一組資料；又叫宣告式（declarative） |
+| 查詢處理器 | query processor | 把查詢翻成執行計畫並執行 |
+| 查詢最佳化器 | query optimizer | 從多種執行方式中選成本最低的 |
+| 儲存管理員 | storage manager | 負責授權、交易、檔案與緩衝區，和磁碟打交道 |
+| 緩衝區管理員 | buffer manager | 決定哪些磁碟區塊放在記憶體裡 |

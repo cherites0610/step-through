@@ -73,6 +73,16 @@
   .prose-plate th, .prose-plate td { padding: 0.5rem 0.75rem 0.5rem 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--color-hairline); }
   .prose-plate th { font-family: var(--font-mono); font-size: 11px; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; }
   .prose-plate tr:last-child td { border-bottom: 0; }
+  /* 章末專有名詞表（content-guide 4.4）：窄螢幕改成「名詞＋英文」一行、說明一行，避免名詞被擠成直排 */
+  @media (max-width: 639px) {
+    .prose-plate [id='專有名詞'] + table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .prose-plate [id='專有名詞'] + table tr { display: grid; grid-template-columns: auto 1fr; column-gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-hairline); }
+    .prose-plate [id='專有名詞'] + table tr:last-child { border-bottom: 0; }
+    .prose-plate [id='專有名詞'] + table td { display: block; padding: 0; border: 0; }
+    .prose-plate [id='專有名詞'] + table td:first-child { font-weight: 500; }
+    .prose-plate [id='專有名詞'] + table td:nth-child(2) { font-family: var(--font-mono); font-size: 12px; align-self: center; }
+    .prose-plate [id='專有名詞'] + table td:nth-child(3) { grid-column: 1 / -1; }
+  }
 }
 
 /*
