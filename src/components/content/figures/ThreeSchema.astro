@@ -1,0 +1,65 @@
+---
+// 圖：ANSI/SPARC 三層綱要架構。外部綱要很多個，概念與內部綱要各一個，相鄰兩層之間各有一層對映。
+import { cylinder, line, spread } from './shapes';
+
+const views = [
+  { who: '圖書館', cols: 'sid, name' },
+  { who: '教務處', cols: 'sid, name, 平均成績' },
+  { who: '註冊組', cols: 'sid, name, dept' },
+];
+const LABEL_W = 64, W = 540, AREA = W - LABEL_W;
+const BOX_H = 44, ROW = 96;
+const EXT_W = 132, MID_W = 240;
+const rows = [
+  { name: '外部層', y: 8 },
+  { name: '概念層', y: 8 + ROW },
+  { name: '內部層', y: 8 + ROW * 2 },
+];
+const DB_Y = rows[2].y + BOX_H + 40, DB_W = 120, DB_H = 54;
+const H = DB_Y + DB_H + 6;
+const exs = spread(views.length, EXT_W, LABEL_W, AREA);
+const midX = LABEL_W + (AREA - MID_W) / 2;
+const midC = midX + MID_W / 2;
+const dbX = LABEL_W + (AREA - DB_W) / 2;
+const [dbOutline, dbLip] = cylinder(dbX, DB_Y, DB_W, DB_H);
+const mapLabelX = midX + MID_W + 16;
+const mid = [
+  { title: '概念綱要', sub: 'Student、Course、Enroll 與限制' },
+  { title: '內部綱要', sub: '檔案結構、索引、存放位置' },
+];
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="三層綱要架構：最上面是三個外部綱要（圖書館、教務處、註冊組），經過外部／概念對映連到唯一的概念綱要，再經過概念／內部對映連到唯一的內部綱要，最後是儲存的資料庫">
+  {rows.map((r) => <text x="0" y={r.y + BOX_H / 2 + 5}>{r.name}</text>)}
+
+  {
+    views.map((v, i) => (
+      <g>
+        <rect class="ink" x={exs[i] + 0.5} y={rows[0].y + 0.5} width={EXT_W - 1} height={BOX_H - 1} fill="var(--color-paper)" />
+        <text x={exs[i] + EXT_W / 2} y={rows[0].y + 18} text-anchor="middle">外部綱要：{v.who}</text>
+        <text class="mono" x={exs[i] + EXT_W / 2} y={rows[0].y + 35} text-anchor="middle">{v.cols}</text>
+        <path class="ink" d={line(exs[i] + EXT_W / 2, rows[0].y + BOX_H, midX + ((i + 1) * MID_W) / (views.length + 1), rows[1].y)} />
+      </g>
+    ))
+  }
+  <text x={mapLabelX} y={rows[0].y + BOX_H + 30}>外部／概念對映</text>
+  <text class="mono" x={mapLabelX} y={rows[0].y + BOX_H + 46}>每個外部綱要一個</text>
+
+  {
+    mid.map((m, i) => (
+      <g>
+        <rect class="ink" x={midX + 0.5} y={rows[i + 1].y + 0.5} width={MID_W - 1} height={BOX_H - 1} stroke-width="2" />
+        <text x={midC} y={rows[i + 1].y + 18} text-anchor="middle">{m.title}</text>
+        <text class="mono" x={midC} y={rows[i + 1].y + 35} text-anchor="middle">{m.sub}</text>
+      </g>
+    ))
+  }
+  <path class="ink" d={line(midC, rows[1].y + BOX_H, midC, rows[2].y)} />
+  <text x={mapLabelX} y={rows[1].y + BOX_H + 30}>概念／內部對映</text>
+  <text class="mono" x={mapLabelX} y={rows[1].y + BOX_H + 46}>只有一個</text>
+
+  <path class="ink" d={line(midC, rows[2].y + BOX_H, midC, DB_Y)} />
+  <path class="ink" d={dbOutline} fill="var(--color-paper)" />
+  <path class="ink" d={dbLip} />
+  <text x={dbX + DB_W / 2} y={DB_Y + 36} text-anchor="middle">儲存的資料庫</text>
+</svg>

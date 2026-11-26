@@ -1,0 +1,71 @@
+---
+// 圖：檔案處理系統（每個程式各自一份學生檔）與 DBMS（程式共用一個資料庫）
+import { cylinder, line, spread } from './shapes';
+
+const apps = ['註冊組', '教務處', '圖書館'];
+const PW = 260, GAP = 20, W = PW * 2 + GAP;
+const APP_W = 68, APP_H = 28, APP_Y = 30;
+const FILE_W = 78, FILE_H = 52, FILE_Y = 112;
+const DBMS_W = 180, DBMS_H = 30, DBMS_Y = 104;
+const DB_W = 120, DB_H = 60, DB_Y = 166;
+const H = DB_Y + DB_H + 30;
+const xs = spread(apps.length, APP_W, 0, PW);
+const right = PW + GAP;
+const dbmsX = right + (PW - DBMS_W) / 2;
+const dbX = right + (PW - DB_W) / 2;
+const [dbOutline, dbLip] = cylinder(dbX, DB_Y, DB_W, DB_H);
+const arrow = 'fvd-arrow';
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="左：註冊組、教務處、圖書館各自有自己的檔案，每個檔案都存了一份學號、姓名、系。右：三個程式都連到同一個 DBMS，DBMS 管理一個資料庫，學生資料只存一份。">
+  <defs>
+    <marker id={arrow} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8 Z" fill="var(--color-ink)" />
+    </marker>
+  </defs>
+  <text x={PW / 2} y="14" text-anchor="middle">檔案處理系統</text>
+  <text x={right + PW / 2} y="14" text-anchor="middle">資料庫系統</text>
+  <path class="axis" d={`M${PW + GAP / 2} 0 L${PW + GAP / 2} ${H}`} />
+
+  {
+    apps.map((a, i) => {
+      const ax = xs[i];
+      const fx = ax + (APP_W - FILE_W) / 2;
+      const cx = ax + APP_W / 2;
+      return (
+        <g>
+          <rect class="ink" x={ax + 0.5} y={APP_Y + 0.5} width={APP_W - 1} height={APP_H - 1} />
+          <text x={cx} y={APP_Y + 19} text-anchor="middle">{a}</text>
+          <path class="ink" d={line(cx, APP_Y + APP_H, cx, FILE_Y, 1)} marker-end={`url(#${arrow})`} />
+          <rect class="ink" x={fx + 0.5} y={FILE_Y + 0.5} width={FILE_W - 1} height={FILE_H - 1} stroke-dasharray="4 3" />
+          <text x={cx} y={FILE_Y + 20} text-anchor="middle">自己的檔案</text>
+          <text class="mono" x={cx} y={FILE_Y + 38} text-anchor="middle">學號 姓名 系</text>
+        </g>
+      );
+    })
+  }
+  <text x={PW / 2} y={FILE_Y + FILE_H + 26} text-anchor="middle">同一份學生資料存了 {apps.length} 次</text>
+
+  {
+    apps.map((a, i) => {
+      const ax = right + xs[i];
+      const cx = ax + APP_W / 2;
+      const tx = dbmsX + ((i + 1) * DBMS_W) / (apps.length + 1);
+      return (
+        <g>
+          <rect class="ink" x={ax + 0.5} y={APP_Y + 0.5} width={APP_W - 1} height={APP_H - 1} />
+          <text x={cx} y={APP_Y + 19} text-anchor="middle">{a}</text>
+          <path class="ink" d={line(cx, APP_Y + APP_H, tx, DBMS_Y, 1)} marker-end={`url(#${arrow})`} />
+        </g>
+      );
+    })
+  }
+  <rect class="ink" x={dbmsX + 0.5} y={DBMS_Y + 0.5} width={DBMS_W - 1} height={DBMS_H - 1} stroke-width="2" />
+  <text x={dbmsX + DBMS_W / 2} y={DBMS_Y + 20} text-anchor="middle">DBMS</text>
+  <path class="ink" d={line(dbmsX + DBMS_W / 2, DBMS_Y + DBMS_H, dbmsX + DBMS_W / 2, DB_Y, 1)} marker-end={`url(#${arrow})`} />
+  <path class="ink" d={dbOutline} fill="var(--color-paper)" />
+  <path class="ink" d={dbLip} />
+  <text x={dbX + DB_W / 2} y={DB_Y + 34} text-anchor="middle">資料庫</text>
+  <text class="mono" x={dbX + DB_W / 2} y={DB_Y + 50} text-anchor="middle">學號 姓名 系</text>
+  <text x={right + PW / 2} y={DB_Y + DB_H + 22} text-anchor="middle">學生資料只存 1 份</text>
+</svg>

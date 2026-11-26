@@ -1,0 +1,32 @@
+---
+subject: databases
+chapter: intro
+order: 4
+kind: choice
+difficulty: 1
+---
+
+學校的資料庫有 Student(sid, name, dept) 表。下列哪些動作改變的是資料庫的**綱要**？（複選）
+
+(A) 新增一位學生
+
+(B) 在 Student 加一個 email 欄位
+
+(C) 把某位學生的 dept 從「資管」改為「資工」
+
+(D) 新增一個 Dept(dept, phone) 表
+
+(E) 刪除 Student 中的所有資料列
+
+<Solution>
+
+**答案：(B)、(D)。**
+
+綱要是資料庫的結構描述（有哪些表、欄位、限制），實例是某一時刻存的資料。
+
+- **(A)、(C) 改的是實例。** 新增或修改資料列，表的結構不變。
+- **(B) 改的是綱要。** Student 多了一個欄位，結構改變。
+- **(D) 改的是綱要。** 多了一個表。
+- **(E) 改的是實例。** 即使刪光所有列，Student 表和它的欄位定義都還在，只是此刻的實例是空的。用的是 DML 的 `DELETE`，不是 DDL 的 `DROP TABLE`。
+
+</Solution>

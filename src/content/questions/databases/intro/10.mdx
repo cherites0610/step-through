@@ -1,0 +1,57 @@
+---
+subject: databases
+chapter: intro
+order: 10
+kind: calc
+difficulty: 3
+---
+
+學校原本的概念綱要是
+
+```
+Student(sid, name, dept, dept_phone)
+```
+
+教務處的程式透過下列外部綱要存取資料，並執行查詢 `SELECT name, dept_phone FROM Office WHERE sid = 'S2'`：
+
+```
+CREATE VIEW Office AS
+    SELECT sid, name, dept_phone
+    FROM Student;
+```
+
+因為同一系的系辦電話重複存了很多次，設計者把概念綱要改為 Student(sid, name, dept) 與 Dept(dept, phone)。
+
+(a) 寫出新的 Office 定義，使教務處的程式與查詢都不必修改。
+
+(b) 這次修改用到的是哪一種資料獨立性？修改的是哪一個對映？
+
+(c) 如果之後決定不再記錄系辦電話（刪除 Dept 的 phone 欄位），教務處的程式還能不修改嗎？為什麼？
+
+<Solution>
+
+**(a)**
+
+```
+CREATE VIEW Office AS
+    SELECT s.sid, s.name, d.phone AS dept_phone
+    FROM Student s JOIN Dept d ON s.dept = d.dept;
+```
+
+**(b) 邏輯資料獨立性；修改的是外部／概念對映。(c) 不能，因為 dept_phone 已經沒有任何來源。**
+
+**(a) 怎麼得到**：Office 要維持原本的三個欄位 sid、name、dept_phone，而且意義不變。
+
+1. sid、name 仍然在新的 Student 裡，直接取出。
+2. dept_phone 不在 Student 裡了，但「學生的系」在 Student.dept，「系的電話」在 Dept.phone，所以用 dept 把兩個表接起來：`s.dept = d.dept`。
+3. 把 Dept 的 phone 取別名 `AS dept_phone`，讓欄位名稱和原本一樣，程式裡的 `dept_phone` 才找得到。
+
+教務處的查詢照舊執行，S2 得到的姓名與電話和拆表之前相同。
+
+**(b)** 修改的是概念綱要（一個表拆成兩個），外部綱要 Office 的欄位與意義不變，所以是邏輯資料獨立性。改的是檢視表的定義，也就是外部／概念對映。
+
+**(c)** 不能。對映只能「重新說明資料從哪裡來」，資料本身不存在時就沒有東西可以對映，Office 的 dept_phone 沒有來源，教務處的程式一定要修改。這也是邏輯資料獨立性比實體資料獨立性難達成的原因之一。
+
+注意：(a) 的寫法假設每位學生的系都在 Dept 表裡。若有學生的 dept 在 Dept 中找不到，這種合併會讓他從 Office 中消失；要保留這種學生，需要第 5 章的外部合併。
+
+</Solution>
