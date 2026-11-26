@@ -1,0 +1,25 @@
+---
+subject: databases
+chapter: intro
+order: 3
+kind: fill
+difficulty: 1
+---
+
+把下列 SQL 敘述分類為 DDL、DML 或 DCL。
+
+`CREATE INDEX`、`UPDATE`、`GRANT`、`DROP TABLE`、`INSERT`、`ALTER TABLE`、`REVOKE`、`DELETE`
+
+<Solution>
+
+**DDL：`CREATE INDEX`、`DROP TABLE`、`ALTER TABLE`。DML：`UPDATE`、`INSERT`、`DELETE`。DCL：`GRANT`、`REVOKE`。**
+
+判斷時問：這個敘述改的是**結構**（綱要）、**資料**（實例），還是**權限**？
+
+- `CREATE INDEX` 建立一個存取結構，`DROP TABLE` 刪掉整個表的定義，`ALTER TABLE` 修改表的欄位或限制，都是改結構，屬於 DDL。
+- `UPDATE`、`INSERT`、`DELETE` 修改的是表裡的資料列，表的結構不變，屬於 DML。
+- `GRANT` 給予權限、`REVOKE` 收回權限，屬於 DCL。
+
+最容易錯的是 `DELETE`：它刪除資料列（DML），表還在；連表一起刪掉的是 `DROP TABLE`（DDL）。
+
+</Solution>

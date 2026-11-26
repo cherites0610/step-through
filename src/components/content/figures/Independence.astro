@@ -1,0 +1,63 @@
+---
+// 圖：兩種資料獨立性。被修改的那一層塗黑，唯一要跟著改的對映畫粗線，上面的各層標「不受影響」。
+const layers = ['外部綱要', '概念綱要', '內部綱要'];
+const panels = [
+  { title: '實體資料獨立性', changed: 2, example: '例：建索引、換檔案結構、搬硬碟' },
+  { title: '邏輯資料獨立性', changed: 1, example: '例：加欄位、加表、拆表' },
+];
+const PW = 260, GAP = 20, W = PW * 2 + GAP;
+const BOX_W = 120, BOX_H = 34, TOP = 30, ROW = 70;
+const H = TOP + (layers.length - 1) * ROW + BOX_H + 40;
+const mappings = ['外部／概念對映', '概念／內部對映'];
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="左：實體資料獨立性，修改內部綱要時只要改概念／內部對映，概念綱要與外部綱要不受影響。右：邏輯資料獨立性，修改概念綱要時只要改外部／概念對映，外部綱要不受影響。">
+  <path class="axis" d={`M${PW + GAP / 2} 0 L${PW + GAP / 2} ${H}`} />
+  {
+    panels.map((p, k) => {
+      const x0 = k * (PW + GAP);
+      const bx = x0 + 8;
+      const cx = bx + BOX_W / 2;
+      return (
+        <g>
+          <text x={x0 + 8} y="14">{p.title}</text>
+          {layers.map((name, i) => {
+            const y = TOP + i * ROW;
+            const changed = i === p.changed;
+            return (
+              <>
+                <rect
+                  x={bx + 0.5}
+                  y={y + 0.5}
+                  width={BOX_W - 1}
+                  height={BOX_H - 1}
+                  class="ink"
+                  style={changed ? 'fill: var(--color-ink)' : undefined}
+                />
+                <text x={cx} y={y + 22} text-anchor="middle" style={changed ? 'fill: var(--color-paper)' : undefined}>
+                  {name}
+                </text>
+                <text x={bx + BOX_W + 12} y={y + 22}>{changed ? '修改這一層' : i < p.changed ? '不受影響' : ''}</text>
+              </>
+            );
+          })}
+          {mappings.map((m, i) => {
+            const y1 = TOP + i * ROW + BOX_H;
+            const y2 = TOP + (i + 1) * ROW;
+            const absorbs = i + 1 === p.changed;
+            return (
+              <>
+                <path class="ink" d={`M${cx} ${y1} L${cx} ${y2}`} stroke-width={absorbs ? 4 : 1} />
+                <text class="mono" x={cx + 10} y={(y1 + y2) / 2 + 4}>
+                  {m}
+                  {absorbs ? '：要改' : ''}
+                </text>
+              </>
+            );
+          })}
+          <text x={x0 + 8} y={H - 10}>{p.example}</text>
+        </g>
+      );
+    })
+  }
+</svg>

@@ -1,0 +1,62 @@
+---
+// 圖：DBMS 的主要元件。查詢由上往下：使用者 → 查詢處理器 → 儲存管理員 → 磁碟。
+import { cylinder, line, spread } from './shapes';
+
+const W = 540, PAD = 10;
+const groups = [
+  { name: '查詢處理器', parts: ['DDL 直譯器', 'DML 編譯器', '查詢最佳化器', '查詢執行引擎'] },
+  { name: '儲存管理員', parts: ['授權與完整性', '交易管理員', '檔案管理員', '緩衝區管理員'] },
+];
+const disk = ['資料檔', '索引', '資料字典', '日誌'];
+const USER_W = 180, USER_H = 30, USER_Y = 0;
+const PART_W = 116, PART_H = 30, GROUP_H = 26 + PART_H + PAD, GROUP_GAP = 34;
+const groupY = (i: number) => USER_Y + USER_H + GROUP_GAP + i * (GROUP_H + GROUP_GAP);
+const DISK_Y = groupY(groups.length) - 4, DISK_W = 88, DISK_H = 50;
+const H = DISK_Y + DISK_H + 2;
+const partXs = spread(4, PART_W, 0, W);
+const diskXs = spread(disk.length, DISK_W, 0, W);
+const cx = W / 2;
+const arrow = 'dbms-arrow';
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="DBMS 的元件：使用者的查詢先進入查詢處理器（DDL 直譯器、DML 編譯器、查詢最佳化器、查詢執行引擎），再交給儲存管理員（授權與完整性、交易管理員、檔案管理員、緩衝區管理員），最後讀寫磁碟上的資料檔、索引、資料字典與日誌">
+  <defs>
+    <marker id={arrow} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="8" markerHeight="8" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8 Z" fill="var(--color-ink)" />
+    </marker>
+  </defs>
+  <rect class="ink" x={cx - USER_W / 2 + 0.5} y={USER_Y + 0.5} width={USER_W - 1} height={USER_H - 1} />
+  <text x={cx} y={USER_Y + 20} text-anchor="middle">使用者／應用程式（SQL）</text>
+  {
+    groups.map((g, i) => {
+      const y = groupY(i);
+      const from = i === 0 ? USER_Y + USER_H : groupY(i - 1) + GROUP_H;
+      return (
+        <g>
+          <path class="ink" d={line(cx, from, cx, y, 1)} marker-end={`url(#${arrow})`} />
+          <rect class="ink" x="0.5" y={y + 0.5} width={W - 1} height={GROUP_H - 1} stroke-width="2" fill="var(--color-paper)" />
+          <text x={PAD} y={y + 18}>{g.name}</text>
+          {g.parts.map((p, k) => (
+            <>
+              <rect class="ink" x={partXs[k] + 0.5} y={y + 26 + 0.5} width={PART_W - 1} height={PART_H - 1} />
+              <text x={partXs[k] + PART_W / 2} y={y + 26 + 20} text-anchor="middle">{p}</text>
+            </>
+          ))}
+        </g>
+      );
+    })
+  }
+  {
+    disk.map((d, k) => {
+      const [outline, lip] = cylinder(diskXs[k], DISK_Y, DISK_W, DISK_H);
+      return (
+        <g>
+          <path class="ink" d={line(diskXs[k] + DISK_W / 2, groupY(groups.length - 1) + GROUP_H, diskXs[k] + DISK_W / 2, DISK_Y, 1)} marker-end={`url(#${arrow})`} />
+          <path class="ink" d={outline} fill="var(--color-paper)" />
+          <path class="ink" d={lip} />
+          <text x={diskXs[k] + DISK_W / 2} y={DISK_Y + 33} text-anchor="middle">{d}</text>
+        </g>
+      );
+    })
+  }
+</svg>

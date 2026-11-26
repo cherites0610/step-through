@@ -1,0 +1,164 @@
+---
+// 圖：同一份選課資料（多對多）在階層式、網路式、關聯式模型中的樣子。
+import { line, spread } from './shapes';
+
+const courses = [
+  { id: 'C1', title: '資料庫' },
+  { id: 'C2', title: '資料結構' },
+];
+const students = [
+  { id: 'S1', name: '王小明' },
+  { id: 'S2', name: '李美華' },
+  { id: 'S3', name: '陳志強' },
+];
+const enroll = [
+  ['S1', 'C1'],
+  ['S3', 'C1'],
+  ['S1', 'C2'],
+  ['S2', 'C2'],
+];
+
+const W = 540, LABEL_W = 70, AREA = W - LABEL_W;
+const NODE_H = 24;
+const arrow = 'dm-arrow';
+
+// 階層式：每門課一棵樹，修課學生是子節點；同一位學生第二次出現時是重複的一份
+const H_TOP = 8, H_CHILD = H_TOP + 56;
+const treeW = AREA / courses.length;
+const seen = new Set<string>();
+const trees = courses.map((c, k) => {
+  const x0 = LABEL_W + k * treeW;
+  const kids = enroll.filter(([, cid]) => cid === c.id).map(([sid]) => sid);
+  const kxs = spread(kids.length, 48, x0, treeW);
+  return {
+    c,
+    rootX: x0 + treeW / 2,
+    kids: kids.map((sid, i) => {
+      const dup = seen.has(sid);
+      seen.add(sid);
+      return { sid, x: kxs[i], dup };
+    }),
+  };
+});
+const H_END = H_CHILD + NODE_H + 22;
+
+// 網路式：課程在上、連結紀錄在中間、學生在下
+const N_TOP = H_END + 20, N_LINK = N_TOP + 54, N_STU = N_LINK + 54;
+const LINK_W = 56, STU_W = 48, CRS_W = 48;
+const linkXs = spread(enroll.length, LINK_W, LABEL_W, AREA);
+const crsX = (cid: string) => {
+  const ks = enroll.flatMap(([, c], i) => (c === cid ? [linkXs[i] + LINK_W / 2] : []));
+  return ks.reduce((a, b) => a + b, 0) / ks.length;
+};
+// 學生依連到的連結紀錄的平均位置排序，減少交叉
+const bary = (sid: string) => {
+  const ks = enroll.flatMap(([s], i) => (s === sid ? [i] : []));
+  return ks.reduce((a, b) => a + b, 0) / ks.length;
+};
+const stuOrder = [...students].sort((a, b) => bary(a.id) - bary(b.id));
+const stuSlots = spread(students.length, STU_W, LABEL_W, AREA).map((x) => x + STU_W / 2);
+const stuX = (sid: string) => stuSlots[stuOrder.findIndex((s) => s.id === sid)];
+const N_END = N_STU + NODE_H + 14;
+
+// 關聯式：三個表並排
+const R_TOP = N_END + 24, CELL_H = 20;
+const tables = [
+  { name: 'Course', cols: ['cid', 'title'], rows: courses.map((c) => [c.id, c.title]), colW: [36, 70] },
+  { name: 'Enroll', cols: ['sid', 'cid'], rows: enroll, colW: [40, 40] },
+  { name: 'Student', cols: ['sid', 'name'], rows: students.map((s) => [s.id, s.name]), colW: [36, 60] },
+];
+const tW = tables.map((t) => t.colW.reduce((a, b) => a + b, 0));
+const tGap = (AREA - tW.reduce((a, b) => a + b, 0)) / (tables.length + 1);
+const tX = tables.map((_, i) => LABEL_W + tGap * (i + 1) + tW.slice(0, i).reduce((a, b) => a + b, 0));
+const maxRows = Math.max(...tables.map((t) => t.rows.length));
+const H = R_TOP + 16 + (maxRows + 1) * CELL_H + 8;
+const rowLabel = (y: number) => y + NODE_H / 2 + 5;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="同一份選課資料：S1 修 C1 與 C2，S2 修 C2，S3 修 C1。階層式以課程為根，S1 在兩棵樹下各存一份。網路式中 S1 只存一份，以四筆連結紀錄把課程和學生連起來。關聯式以 Course、Enroll、Student 三個表表示，Enroll 有四列。">
+  <defs>
+    <marker id={arrow} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8 Z" fill="var(--color-ink)" />
+    </marker>
+  </defs>
+
+  <text x="0" y={rowLabel(H_TOP + 28)}>階層式</text>
+  {
+    trees.map((t) => (
+      <g>
+        <rect class="ink" x={t.rootX - 50 + 0.5} y={H_TOP + 0.5} width="99" height={NODE_H - 1} stroke-width="2" />
+        <text x={t.rootX} y={H_TOP + 17} text-anchor="middle">{t.c.id} {t.c.title}</text>
+        {t.kids.map((k) => (
+          <>
+            <path class="ink" d={line(t.rootX, H_TOP + NODE_H, k.x + 24, H_CHILD)} />
+            <rect class="ink" x={k.x + 0.5} y={H_CHILD + 0.5} width="47" height={NODE_H - 1} stroke-dasharray={k.dup ? '4 3' : undefined} />
+            <text class="mono" x={k.x + 24} y={H_CHILD + 16} text-anchor="middle">{k.sid}</text>
+            {k.dup && <text class="mono" x={k.x + 24} y={H_CHILD + NODE_H + 14} text-anchor="middle">重複的一份</text>}
+          </>
+        ))}
+      </g>
+    ))
+  }
+  <path class="axis" d={`M0 ${H_END} L${W} ${H_END}`} />
+
+  <text x="0" y={rowLabel(N_LINK)}>網路式</text>
+  {
+    courses.map((c) => (
+      <g>
+        <rect class="ink" x={crsX(c.id) - CRS_W / 2 + 0.5} y={N_TOP + 0.5} width={CRS_W - 1} height={NODE_H - 1} stroke-width="2" />
+        <text class="mono" x={crsX(c.id)} y={N_TOP + 16} text-anchor="middle">{c.id}</text>
+      </g>
+    ))
+  }
+  {
+    enroll.map(([sid, cid], i) => {
+      const lx = linkXs[i];
+      const sx = stuX(sid);
+      return (
+        <g>
+          <path class="ink" d={line(crsX(cid), N_TOP + NODE_H, lx + LINK_W / 2, N_LINK, 1)} marker-end={`url(#${arrow})`} />
+          <path class="ink" d={line(sx, N_STU, lx + LINK_W / 2, N_LINK + NODE_H, 1)} marker-end={`url(#${arrow})`} />
+          <rect class="ink" x={lx + 0.5} y={N_LINK + 0.5} width={LINK_W - 1} height={NODE_H - 1} stroke-dasharray="4 3" />
+          <text class="mono" x={lx + LINK_W / 2} y={N_LINK + 16} text-anchor="middle">{cid}·{sid}</text>
+        </g>
+      );
+    })
+  }
+  {
+    students.map((s) => (
+      <g>
+        <rect class="ink" x={stuX(s.id) - STU_W / 2 + 0.5} y={N_STU + 0.5} width={STU_W - 1} height={NODE_H - 1} />
+        <text class="mono" x={stuX(s.id)} y={N_STU + 16} text-anchor="middle">{s.id}</text>
+      </g>
+    ))
+  }
+  <text class="mono" x={W} y={N_STU + 16} text-anchor="end">虛線＝連結紀錄</text>
+  <path class="axis" d={`M0 ${N_END} L${W} ${N_END}`} />
+
+  <text x="0" y={R_TOP + 16 + CELL_H}>關聯式</text>
+  {
+    tables.map((t, i) => (
+      <g>
+        <text class="mono" x={tX[i]} y={R_TOP + 10}>{t.name}</text>
+        {[t.cols, ...t.rows].map((r, ri) => {
+          const y = R_TOP + 16 + ri * CELL_H;
+          let x = tX[i];
+          return (
+            <>
+              {r.map((v, ci) => {
+                const cell = (
+                  <>
+                    <rect class={ri === 0 ? 'ink' : 'axis'} x={x + 0.5} y={y + 0.5} width={t.colW[ci] - 1} height={CELL_H - 1} />
+                    <text class="mono" x={x + 6} y={y + 14}>{v}</text>
+                  </>
+                );
+                x += t.colW[ci];
+                return cell;
+              })}
+            </>
+          );
+        })}
+      </g>
+    ))
+  }
+</svg>
