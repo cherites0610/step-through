@@ -57,7 +57,7 @@ const others: [string, string, number, number][] = [
   ['computer-organization', '計算機組織', 9, 0],
   ['discrete-math', '離散數學', 9, 0],
   ['linear-algebra', '線性代數', 9, 0],
-  ['databases', '資料庫', 10, 3],
+  ['databases', '資料庫', 10, 4],
   ['intro-cs', '計算機概論', 10, 0],
 ];
 for (const [id, title, chapters, written] of others) {

@@ -1,5 +1,5 @@
 ---
-// 圖中的小表格：表頭用墨線、內容用髮絲線。strike＝被刪除的列（畫刪除線），mark＝要強調的格子（黑底）。
+// 圖中的小表格：表頭用墨線、內容用髮絲線。strike＝被刪除的列（畫刪除線），mark＝要強調的格子（黑底），box／boxCol＝加粗框的列／欄。
 interface Props {
   x: number;
   y: number;
@@ -10,8 +10,12 @@ interface Props {
   cellH?: number;
   strike?: number[];
   mark?: [number, number][];
+  /** 加粗框的列（資料列的索引） */
+  box?: number[];
+  /** 加粗框的欄（含表頭） */
+  boxCol?: number;
 }
-const { x, y, name, cols, rows, colW, cellH = 20, strike = [], mark = [] } = Astro.props;
+const { x, y, name, cols, rows, colW, cellH = 20, strike = [], mark = [], box = [], boxCol } = Astro.props;
 const top = name ? y + 16 : y;
 const colX = colW.map((_, i) => x + colW.slice(0, i).reduce((a, b) => a + b, 0));
 const width = colW.reduce((a, b) => a + b, 0);
@@ -48,3 +52,5 @@ const isMarked = (r: number, c: number) => mark.some(([mr, mc]) => mr === r && m
     );
   })
 }
+{box.map((r) => <rect class="ink" x={x - 1} y={top + (r + 1) * cellH - 1} width={width + 2} height={cellH + 2} stroke-width="2" />)}
+{boxCol !== undefined && <rect class="ink" x={colX[boxCol] - 1} y={top - 1} width={colW[boxCol] + 2} height={(rows.length + 1) * cellH + 2} stroke-width="2" />}

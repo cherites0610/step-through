@@ -1,0 +1,29 @@
+---
+subject: databases
+chapter: algebra
+order: 3
+kind: calc
+difficulty: 1
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)。
+
+寫出下列運算式的結果。
+
+(a) <M t="\pi_{\text{dname}}(\text{Student})" />
+
+(b) <M t="\pi_{\text{sid}}(\sigma_{\text{grade} \ge 80}(\text{Enroll}))" />
+
+(c) <M t="\pi_{\text{credits}}(\text{Course})" />
+
+<Solution>
+
+**(a) 資管、資工、電機（3 列）。(b) S1、S3（2 列）。(c) 3、2（2 列）。**
+
+- **(a)** 四位學生的系是資管、資工、資管、電機，投影後重複的資管只留一個，剩 3 列。
+- **(b)** 先選擇：成績 ≥ 80 的選課有 (S1, C1, 85)、(S1, C2, 90)、(S3, C2, 95)。再投影 sid：S1、S1、S3，去掉重複後是 S1、S3。
+- **(c)** 三門課的學分是 3、3、2，去掉重複後剩 3、2。
+
+三題都是「投影會去掉重複」的練習：列數比直覺少。
+
+</Solution>

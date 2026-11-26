@@ -1,0 +1,29 @@
+---
+// 外部合併的符號 ⟕ ⟖ ⟗：KaTeX 沒有這些字，Unicode 又依賴裝置字型，所以畫成行內 SVG。
+// 用法：<OJ k="left" />、<OJ k="right" />、<OJ k="full" />
+interface Props {
+  k: 'left' | 'right' | 'full';
+}
+const { k } = Astro.props;
+const label = { left: '左外部合併', right: '右外部合併', full: '完全外部合併' }[k];
+// 合併符號 ⋈：兩個三角形尖端相接；外部合併在保留那一側的上下兩角各多一段橫線
+const ext = 8;
+const left = k === 'left' || k === 'full' ? ext : 0;
+const right = k === 'right' || k === 'full' ? ext : 0;
+const W = 16 + left + right;
+const x0 = left, x1 = left + 16;
+---
+
+<svg class="oj" width={`${W / 16}em`} height="0.75em" viewBox={`0 0 ${W} 12`} role="img" aria-label={label}>
+  <path d={`M${x0} 1 L${x0} 11 L${x1} 1 L${x1} 11 Z`} fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+  {left > 0 && <path d={`M0 1 L${x0} 1 M0 11 L${x0} 11`} stroke="currentColor" stroke-width="1.2" />}
+  {right > 0 && <path d={`M${x1} 1 L${W} 1 M${x1} 11 L${W} 11`} stroke="currentColor" stroke-width="1.2" />}
+</svg>
+
+<style>
+  .oj {
+    display: inline-block;
+    vertical-align: -0.08em;
+    margin-inline: 0.2em;
+  }
+</style>

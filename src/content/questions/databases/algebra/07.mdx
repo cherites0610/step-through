@@ -1,0 +1,29 @@
+---
+subject: databases
+chapter: algebra
+order: 7
+kind: calc
+difficulty: 2
+---
+
+<M t="R(\text{sid}, \text{cid})" /> 與 <M t="S(\text{cid})" /> 如下，求 <M t="R \div S" />，並寫出計算過程。
+
+R：(S1, C1)、(S1, C2)、(S2, C1)、(S2, C2)、(S2, C3)、(S3, C2)、(S4, C1)、(S4, C3)
+
+S：C1、C3
+
+<Solution>
+
+**\{S2, S4\}。**
+
+依觀念說明的步驟：
+
+1. <M t="T_1 = \pi_{\text{sid}}(R)" />：候選人 \{S1, S2, S3, S4\}。
+2. <M t="T_1 \times S" />：<M t="4 \times 2 = 8" /> 個組合，(S1, C1)、(S1, C3)、(S2, C1)、(S2, C3)、(S3, C1)、(S3, C3)、(S4, C1)、(S4, C3)。
+3. 減掉 <M t="R" />，缺少的組合：(S1, C3)、(S3, C1)、(S3, C3)。
+4. <M t="T_2" />：有缺的候選人 \{S1, S3\}。
+5. <M t="T_1 - T_2" /> = \{S2, S4\}。
+
+檢查：S2 修了 C1、C3（還多修了 C2，多修不影響）；S4 修了 C1、C3。S1 少了 C3，S3 兩門都沒修。
+
+</Solution>

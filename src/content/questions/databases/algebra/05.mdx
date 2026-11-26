@@ -1,0 +1,25 @@
+---
+subject: databases
+chapter: algebra
+order: 5
+kind: calc
+difficulty: 2
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)。
+
+(a) <M t="\text{Student} \bowtie \text{Enroll}" /> 有幾列？結果有哪些屬性？
+
+(b) 左外部合併 <M t="\text{Student}" /> <OJ k="left" /> <M t="\text{Enroll}" /> 有幾列？多出來的列長什麼樣子？
+
+(c) 右外部合併 <M t="\text{Student}" /> <OJ k="right" /> <M t="\text{Enroll}" /> 有幾列？為什麼？
+
+<Solution>
+
+**(a) 6 列，屬性是 sid、name、dname、cid、grade。(b) 7 列，多出 (S4, 林大同, 電機, NULL, NULL)。(c) 6 列，和自然合併相同。**
+
+- **(a)** 兩個關聯唯一同名的屬性是 sid。每一筆選課的 sid 都能在 Student 找到恰好一位學生，所以結果的列數等於 Enroll 的列數 6。同名的 sid 只留一欄，共 <M t="3 + 3 - 1 = 5" /> 個屬性。
+- **(b)** 保留左邊（Student）的所有值組。S4 沒有修課，在自然合併中消失；左外部合併把它補回來，右邊的 cid 與 grade 填 NULL，共 <M t="6 + 1 = 7" /> 列（見觀念說明的圖 4-3）。
+- **(c)** 保留右邊（Enroll）的所有值組。但每一筆選課本來就找得到學生（sid 是參照 Student 的外鍵），沒有任何選課會被丟掉，所以結果和自然合併一樣是 6 列。
+
+</Solution>

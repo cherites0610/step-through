@@ -1,0 +1,40 @@
+---
+subject: databases
+chapter: algebra
+order: 11
+kind: calc
+difficulty: 3
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)。
+
+(a) 用值組關聯演算寫出「至少修了一門 2 學分課程的學生姓名」。
+
+(b) 用值組關聯演算寫出「沒有修任何課的學生學號」，並寫出對應的關聯代數。
+
+(c) 下列演算式是否安全？為什麼？
+
+<M d t="\{\, t \mid \neg \text{Enroll}(t) \,\}" />
+
+<Solution>
+
+**(a)**
+
+<M d t="\begin{aligned} \{\, t.\text{name} \mid\ & \text{Student}(t) \wedge \exists e\, \exists c\, ( \\ & \quad \text{Enroll}(e) \wedge \text{Course}(c) \\ & \quad \wedge e.\text{sid} = t.\text{sid} \\ & \quad \wedge e.\text{cid} = c.\text{cid} \\ & \quad \wedge c.\text{credits} = 2 ) \,\} \end{aligned}" />
+
+結果：王小明（只有 C3 是 2 學分，只有 S1 修了 C3）。
+
+**(b)**
+
+<M d t="\begin{aligned} \{\, t.\text{sid} \mid\ & \text{Student}(t) \\ & \wedge \neg \exists e\, ( \text{Enroll}(e) \\ & \quad \wedge e.\text{sid} = t.\text{sid} ) \,\} \end{aligned}" />
+
+對應的關聯代數：<M t="\pi_{\text{sid}}(\text{Student}) - \pi_{\text{sid}}(\text{Enroll})" />。結果：S4。
+
+**(c)** 不安全。它要求「所有不是選課紀錄的值組」：任何不在 Enroll 裡的 (sid, cid, grade) 組合都符合，例如 (X9, Z7, 1000)，有無限多個，而且值不必來自資料庫。
+
+**怎麼寫**：
+
+- **(a)** 「至少一門」就是**存在**：存在一筆選課 <M t="e" /> 是這位學生的，而且存在一門課 <M t="c" /> 是那筆選課的課、學分是 2。<M t="e" />、<M t="c" /> 只在條件內使用，所以用 <M t="\exists" /> 引入。
+- **(b)** 「沒有」就是「**不存在**」：<M t="\neg \exists e" />。注意 <M t="\text{Student}(t)" /> 不能省略，它限制 <M t="t" /> 只能是學生，正是它讓這個演算式安全。對照 (c)，少了這個限制就變成無限多個。
+
+</Solution>

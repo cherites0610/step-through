@@ -1,0 +1,340 @@
+---
+subject: databases
+chapter: algebra
+summary: 關聯代數的八種運算：選擇、投影、集合運算、笛卡兒積、各種合併與除法，怎麼把查詢寫成運算式並一步一步算出結果；最後介紹非程序性的關聯演算。SQL 與查詢最佳化都建立在這一章上。
+---
+
+### 選擇與投影
+
+#### 為什麼需要關聯代數
+
+第 1 章說過，SQL 是非程序性語言：使用者只說「要什麼」。但 DBMS 總得知道「怎麼做」，所以 DML 編譯器會先把 SQL 翻成一串明確的運算，再由查詢最佳化器調整順序。這組運算就是**關聯代數**（relational algebra）。
+
+關聯代數的每一個運算，輸入是一或兩個關聯，**輸出也是一個關聯**。這個性質稱為**封閉性**（closure）：既然結果還是關聯，就可以再當成下一個運算的輸入，像四則運算一樣一層一層組合起來。
+
+本章都用同一份資料：
+
+**Student**（學生）
+
+| sid | name | dname |
+|---|---|---|
+| S1 | 王小明 | 資管 |
+| S2 | 李美華 | 資工 |
+| S3 | 陳志強 | 資管 |
+| S4 | 林大同 | 電機 |
+
+**Course**（課程，credits 是學分數）
+
+| cid | title | credits |
+|---|---|---|
+| C1 | 資料庫 | 3 |
+| C2 | 資料結構 | 3 |
+| C3 | 計算機概論 | 2 |
+
+**Enroll**（選課）
+
+| sid | cid | grade |
+|---|---|---|
+| S1 | C1 | 85 |
+| S1 | C2 | 90 |
+| S1 | C3 | 72 |
+| S2 | C2 | 78 |
+| S3 | C1 | 66 |
+| S3 | C2 | 95 |
+
+注意 S4 沒有修任何課，S1 修了全部三門課。
+
+#### 選擇：挑出列
+
+> **定義**：**選擇**（selection）<M t="\sigma_{c}(R)" /> 從關聯 <M t="R" /> 中挑出滿足條件 <M t="c" /> 的值組。條件由屬性、常數與比較運算（<M t="=, \ne, <, \le, >, \ge" />）組成，可以用 <M t="\wedge" />（且）、<M t="\vee" />（或）、<M t="\neg" />（非）連接。
+
+例如找出資管系的學生：
+
+<M d t="\sigma_{\text{dname} = \text{資管}}(\text{Student})" />
+
+逐列檢查條件：S1 是資管，留下；S2 是資工，不要；S3 留下；S4 不要。結果是 S1、S3 兩列，三個屬性都保留。
+
+選擇只挑列、不動欄，所以結果的**分支度不變**，**基數不會變多**（0 到原本的列數之間）。連續兩次選擇可以合併成一次，順序也可以交換：
+
+<M d t="\sigma_{c_1}(\sigma_{c_2}(R)) = \sigma_{c_2}(\sigma_{c_1}(R)) = \sigma_{c_1 \wedge c_2}(R)" />
+
+#### 投影：挑出欄
+
+> **定義**：**投影**（projection）<M t="\pi_{L}(R)" /> 只保留 <M t="R" /> 中屬於屬性串列 <M t="L" /> 的那些欄，並**去掉重複的值組**。
+
+例如列出學生所屬的系：
+
+<M d t="\pi_{\text{dname}}(\text{Student})" />
+
+四位學生的 dname 是資管、資工、資管、電機。只留這一欄之後，兩個「資管」變成完全相同的值組；關聯是集合，不能有重複，所以只留一個。結果是**3 列**：資管、資工、電機。
+
+這是考試最常見的陷阱：投影的結果基數**可能變少**。投影後的分支度等於 <M t="L" /> 的屬性個數。
+
+<Figure no="4-1" caption="選擇是橫著切（挑出 dname = 資管 的列），投影是直著切（挑出 dname 欄）。投影後兩個「資管」重複，只留一個，所以 4 列變成 3 列。">
+  <SelectProject />
+</Figure>
+
+#### 組合起來：運算式
+
+「資管系學生的姓名」要先選擇、再投影：
+
+<M d t="\pi_{\text{name}}(\sigma_{\text{dname} = \text{資管}}(\text{Student}))" />
+
+由內往外算：內層的選擇得到 S1、S3 兩列，外層的投影取出姓名，結果是王小明、陳志強。
+
+**順序不能隨便換**：如果先 <M t="\pi_{\text{name}}" />，結果只剩 name 一欄，就沒有 dname 可以拿來選擇了。一般規則是：投影的欄位裡**包含**選擇條件用到的屬性時，兩者才能交換。
+
+運算式很長時，可以用**指定**（<M t="\leftarrow" />）把中間結果取名，一步一步寫：
+
+<M d t="\begin{aligned} T &\leftarrow \sigma_{\text{dname} = \text{資管}}(\text{Student}) \\ \text{Result} &\leftarrow \pi_{\text{name}}(T) \end{aligned}" />
+
+需要改名時用**重新命名**（rename）<M t="\rho" />：<M t="\rho_{S}(R)" /> 把關聯 <M t="R" /> 改名為 <M t="S" />，<M t="\rho_{S(B_1, \ldots, B_n)}(R)" /> 連屬性也一起改名。同一個關聯要用兩次時（例如自己和自己合併），就靠它區分。
+
+### 集合運算與笛卡兒積
+
+#### 聯集、差集、交集
+
+關聯是值組的集合，所以集合的運算都可以用。但有一個前提：
+
+> **定義**：兩個關聯 <M t="R(A_1, \ldots, A_n)" /> 與 <M t="S(B_1, \ldots, B_n)" /> **聯集相容**（union compatible），是指它們的分支度相同，而且每一個 <M t="A_i" /> 與 <M t="B_i" /> 的定義域相同。
+
+只有聯集相容的兩個關聯，才能做**聯集**（union）<M t="R \cup S" />、**差集**（difference）<M t="R - S" />、**交集**（intersection）<M t="R \cap S" />。這很合理：把「學生」和「課程」放在同一個集合裡沒有意義。
+
+**例**：先求出修 C2 與修 C1 的學生學號（兩者都只有 sid 一欄，聯集相容）：
+
+<M d t="\begin{aligned} A &\leftarrow \pi_{\text{sid}}(\sigma_{\text{cid} = \text{C2}}(\text{Enroll})) = \{\text{S1}, \text{S2}, \text{S3}\} \\ B &\leftarrow \pi_{\text{sid}}(\sigma_{\text{cid} = \text{C1}}(\text{Enroll})) = \{\text{S1}, \text{S3}\} \end{aligned}" />
+
+- <M t="A \cup B = \{\text{S1}, \text{S2}, \text{S3}\}" />：修了 C2 **或** C1 的學生。
+- <M t="A \cap B = \{\text{S1}, \text{S3}\}" />：兩門都修的學生。
+- <M t="A - B = \{\text{S2}\}" />：修了 C2 但**沒有**修 C1 的學生。
+- <M t="B - A = \varnothing" />（空集合）：修 C1 的人都修了 C2。
+
+聯集與交集可以交換順序，**差集不行**：<M t="A - B" /> 和 <M t="B - A" /> 通常不同。交集也可以用差集寫出來，所以不是必要的運算：
+
+<M d t="R \cap S = R - (R - S)" />
+
+（<M t="R - S" /> 是 <M t="R" /> 中不在 <M t="S" /> 的部分，從 <M t="R" /> 扣掉它，剩下的就是兩者共有的。）
+
+差集最常用來表達「**沒有**」：沒修任何課的學生，就是「所有學生」減掉「出現在選課紀錄中的學生」：
+
+<M d t="\pi_{\text{sid}}(\text{Student}) - \pi_{\text{sid}}(\text{Enroll}) = \{\text{S4}\}" />
+
+#### 笛卡兒積
+
+> **定義**：**笛卡兒積**（Cartesian product）<M t="R \times S" /> 把 <M t="R" /> 的每一個值組和 <M t="S" /> 的每一個值組接在一起。兩個關聯不需要聯集相容。
+
+結果的大小可以直接算：分支度是兩者的**和**，基數是兩者的**乘積**。Student（3 個屬性、4 列）<M t="\times" /> Enroll（3 個屬性、6 列）的分支度是 <M t="3 + 3 = 6" />，基數是 <M t="4 \times 6 = 24" />。
+
+笛卡兒積本身很少是我們要的答案：24 列裡，大多是「王小明」接上「李美華的選課紀錄」這種沒有意義的組合。它的用處是當作合併的第一步（下一節）。
+
+#### 基本運算與衍生運算
+
+到目前為止的運算中，有六個是**基本運算**：選擇 <M t="\sigma" />、投影 <M t="\pi" />、聯集 <M t="\cup" />、差集 <M t="-" />、笛卡兒積 <M t="\times" />、重新命名 <M t="\rho" />。它們任何一個都不能用其他五個組合出來。其他運算（交集、合併、除法）都可以用基本運算寫出來，稱為**衍生運算**，存在是為了寫起來方便。
+
+### 合併（Join）
+
+#### 為什麼需要合併
+
+「修了資料庫的學生姓名」：姓名在 Student，修課在 Enroll，課名在 Course。答案散在三個關聯裡，必須把相關的值組接起來。
+
+笛卡兒積會把**所有**組合接起來；我們只要「學號相同」的那些組合。所以合併就是**笛卡兒積之後再選擇**。
+
+#### θ 合併與等值合併
+
+> **定義**：**θ 合併**（theta join）<M t="R \bowtie_{\theta} S = \sigma_{\theta}(R \times S)" />，其中 <M t="\theta" /> 是比較兩邊屬性的條件。條件只用等號時，稱為**等值合併**（equijoin）。
+
+以 S1、S2、S4 三位學生和 Dept(dname, building) 的兩個系（資管在管理大樓、資工在工程館）為例，條件是兩邊的 dname 相等：
+
+<Figure no="4-2" caption="Student × Dept 共 3 × 2 = 6 列；等值合併只留下兩邊 dname 相同的 2 列（黑框）。S4 是電機，Dept 裡沒有電機，所以沒有任何一列留下來。">
+  <JoinAsProduct />
+</Figure>
+
+等值合併的結果裡，兩個 dname 欄的值一定相同，有一欄是多餘的。
+
+#### 自然合併
+
+> **定義**：**自然合併**（natural join）<M t="R \bowtie S" /> 對兩個關聯中**所有同名的屬性**做等值合併，然後每個同名屬性只保留一欄。
+
+Student 與 Enroll 唯一同名的屬性是 sid，所以 <M t="\text{Student} \bowtie \text{Enroll}" /> 就是把每一筆選課接上那位學生的姓名與系：
+
+| sid | name | dname | cid | grade |
+|---|---|---|---|---|
+| S1 | 王小明 | 資管 | C1 | 85 |
+| S1 | 王小明 | 資管 | C2 | 90 |
+| S1 | 王小明 | 資管 | C3 | 72 |
+| S2 | 李美華 | 資工 | C2 | 78 |
+| S3 | 陳志強 | 資管 | C1 | 66 |
+| S3 | 陳志強 | 資管 | C2 | 95 |
+
+結果有 6 列，剛好等於 Enroll 的列數。這不是巧合：sid 是 Enroll 參照 Student 的外鍵，每一筆選課都恰好對到一位學生。
+
+自然合併有兩個要注意的地方：
+
+- **沒有同名屬性時，自然合併就是笛卡兒積**：沒有條件要比，所有組合都留下。
+- **同名但意義不同的屬性也會被拿來比**：如果 Student 和 Course 都有一個叫 name 的屬性（學生姓名、課名），自然合併會要求「學生姓名等於課名」，結果幾乎是空的。這時要先用 <M t="\rho" /> 改名。
+
+#### 例：一步一步寫出查詢
+
+**目標**：修了「資料庫」的學生姓名。
+
+**想法**：先把三個關聯接起來，再選出課名是資料庫的列，最後取出姓名。
+
+**步驟**：
+
+1. <M t="\text{Student} \bowtie \text{Enroll}" />：用 sid 接起來，得到上表的 6 列。
+2. 再 <M t="\bowtie \text{Course}" />：用 cid 接上課名，每一列多了 title 與 credits。
+3. <M t="\sigma_{\text{title} = \text{資料庫}}" />：C1 是資料庫，留下 (S1, C1) 與 (S3, C1) 兩列。
+4. <M t="\pi_{\text{name}}" />：王小明、陳志強。
+
+<M d t="\begin{aligned} &\pi_{\text{name}}(\sigma_{\text{title} = \text{資料庫}}( \\ &\quad \text{Student} \bowtie \text{Enroll} \bowtie \text{Course})) \end{aligned}" />
+
+**結論**：王小明、陳志強。同樣的結果也可以先選出資料庫這門課再合併，中間結果小很多；這種「先選擇、再合併」的改寫，就是第 8 章查詢最佳化的核心想法。
+
+#### 外部合併
+
+自然合併有一個副作用：**找不到配對的值組會消失**。S4 沒有修課，所以 <M t="\text{Student} \bowtie \text{Enroll}" /> 裡沒有 S4。如果要列出「每位學生和他的選課，沒修課的也要列出來」，就要用外部合併：
+
+- **左外部合併**（left outer join）<M t="R" /> <OJ k="left" /> <M t="S" />：保留左邊 <M t="R" /> 的**所有**值組，找不到配對的，右邊的屬性補 NULL。
+- **右外部合併**（right outer join）<M t="R" /> <OJ k="right" /> <M t="S" />：保留右邊的所有值組。
+- **完全外部合併**（full outer join）<M t="R" /> <OJ k="full" /> <M t="S" />：兩邊都保留。
+
+符號上多出來的橫線，畫在「要保留」的那一邊。
+
+<Figure no="4-3" caption="Student ⋈ Enroll 有 6 列，S4 沒有配對而消失；左外部合併多保留了 S4 一列，cid 與 grade 補 NULL，共 7 列。">
+  <OuterJoin />
+</Figure>
+
+相對地，前面的合併稱為**內部合併**（inner join）。外部合併不是基本運算，但它也不能只用前面的衍生運算寫出來，因為需要產生 NULL；SQL 直接提供它（第 5 章）。
+
+### 除法
+
+#### 為什麼需要除法
+
+「修了**所有**課的學生」這種包含「所有」的查詢，用前面的運算很難直接寫：選擇一次只看一列，但「所有」要看同一位學生的好幾列。除法就是為這種查詢設計的。
+
+> **定義**：設 <M t="R(A, B)" />、<M t="S(B)" />（<M t="A" />、<M t="B" /> 都可以是屬性集合）。**除法**（division）<M t="R \div S" /> 的結果是一個只有屬性 <M t="A" /> 的關聯，包含所有滿足下列條件的 <M t="a" />：對 <M t="S" /> 中的**每一個** <M t="b" />，<M t="(a, b)" /> 都在 <M t="R" /> 中。
+
+「修了所有課的學生」寫成：
+
+<M d t="\pi_{\text{sid}, \text{cid}}(\text{Enroll}) \div \pi_{\text{cid}}(\text{Course})" />
+
+被除數是「誰修了哪門課」，除數是「所有的課」\{C1, C2, C3\}。答案是和**每一門**課都有配對的學號。
+
+#### 用基本運算算出除法
+
+除法是衍生運算，可以用基本運算算出來。**想法**：先列出所有候選人，再找出「缺了某門課」的人，把他們刪掉。
+
+<M d t="\begin{aligned} T_1 &\leftarrow \pi_{A}(R) \\ T_2 &\leftarrow \pi_{A}((T_1 \times S) - R) \\ R \div S &= T_1 - T_2 \end{aligned}" />
+
+<M t="T_1" /> 是所有候選人，<M t="T_2" /> 是缺了某個 <M t="b" /> 的候選人。
+
+<M t="T_1 \times S" /> 是「如果每位候選人都修了每一門課」應該有的所有組合，減掉實際的 <M t="R" />，剩下的就是**缺少**的組合。
+
+照著做一次「修了所有課的學生」：
+
+1. <M t="T_1" />：Enroll 中出現過的學號，\{S1, S2, S3\}。（S4 沒有修課，根本不是候選人。）
+2. <M t="T_1 \times S" />：3 位 × 3 門課，共 9 個組合。
+3. 減掉實際的選課（6 筆），缺少的組合是 (S2, C1)、(S2, C3)、(S3, C3)。
+4. <M t="T_2" />：缺了課的學生，\{S2, S3\}。
+5. <M t="T_1 - T_2 = \{\text{S1}\}" />。
+
+<Figure no="4-4" caption="除法的計算：候選人 × 所有課程共 9 個組合，扣掉實際的 6 筆選課，剩下 3 個缺少的組合；有缺的 S2、S3 被刪掉，答案是 S1。">
+  <Division />
+</Figure>
+
+把除數換成「所有 3 學分的課」<M t="\pi_{\text{cid}}(\sigma_{\text{credits} = 3}(\text{Course})) = \{\text{C1}, \text{C2}\}" />：缺少的組合只剩 (S2, C1)，答案是 \{S1, S3\}。除數越小，條件越寬鬆。
+
+#### 限制
+
+- **除數是空集合時**，「對每一個 <M t="b" /> 都成立」沒有任何要檢查的，條件自動成立，結果是**所有候選人** <M t="\pi_{A}(R)" />。例如「修了所有 4 學分課的學生」，沒有 4 學分的課，答案是 S1、S2、S3。
+- 除數的屬性必須是被除數屬性的一部分，否則沒有定義。
+- 候選人只來自被除數：S4 雖然是學生，但不在 Enroll 裡，所以不會出現在任何除法的結果中。
+
+### 關聯演算
+
+#### 程序性與非程序性
+
+關聯代數是**程序性**的：運算式寫出了「先做什麼、再做什麼」。**關聯演算**（relational calculus）則是**非程序性**的，只用邏輯條件描述結果「長什麼樣子」，和 SQL 的精神相同。它有兩種形式。
+
+#### 值組關聯演算
+
+**值組關聯演算**（tuple relational calculus，TRC）的查詢寫成
+
+<M d t="\{\, t \mid P(t) \,\}" />
+
+意思是「所有滿足條件 <M t="P" /> 的值組 <M t="t" />」。<M t="t" /> 是一個**值組變數**，代表某個關聯中的一列；<M t="t.\text{name}" /> 表示這一列的 name 屬性。條件可以用：
+
+- <M t="\text{Student}(t)" />：<M t="t" /> 是 Student 的一個值組（也寫成 <M t="t \in \text{Student}" />）。
+- 比較、<M t="\wedge" />、<M t="\vee" />、<M t="\neg" />。
+- **存在量詞** <M t="\exists" />（「存在某個……」）與**全稱量詞** <M t="\forall" />（「對每一個……」）。
+
+「資管系學生的姓名」：
+
+<M d t="\{\, t.\text{name} \mid \text{Student}(t) \wedge t.\text{dname} = \text{資管} \,\}" />
+
+「修了資料庫的學生姓名」：需要說「存在一筆選課 <M t="e" /> 和一門課 <M t="c" />」把三個關聯接起來：
+
+<M d t="\begin{aligned} \{\, t.\text{name} \mid\ & \text{Student}(t) \wedge \exists e\, \exists c\, ( \\ & \quad \text{Enroll}(e) \wedge \text{Course}(c) \\ & \quad \wedge e.\text{sid} = t.\text{sid} \\ & \quad \wedge e.\text{cid} = c.\text{cid} \\ & \quad \wedge c.\text{title} = \text{資料庫} ) \,\} \end{aligned}" />
+
+「修了所有課的學生」用全稱量詞，直接照著中文寫，不需要除法：
+
+<M d t="\begin{aligned} \{\, t.\text{sid} \mid\ & \text{Student}(t) \wedge \forall c\, ( \text{Course}(c) \rightarrow \\ & \quad \exists e\, ( \text{Enroll}(e) \\ & \quad\quad \wedge e.\text{sid} = t.\text{sid} \\ & \quad\quad \wedge e.\text{cid} = c.\text{cid} ) ) \,\} \end{aligned}" />
+
+讀法：學生 <M t="t" />，對每一門課 <M t="c" />，**如果** <M t="c" /> 是課程，**就**存在一筆 <M t="t" /> 修 <M t="c" /> 的選課。
+
+#### 定義域關聯演算
+
+**定義域關聯演算**（domain relational calculus，DRC）的變數不是整列，而是**單一屬性的值**（定義域中的元素）。「資管系學生的姓名」寫成：
+
+<M d t="\{\, \langle n \rangle \mid \exists s\, \exists d\, ( \text{Student}(s, n, d) \wedge d = \text{資管} ) \,\}" />
+
+<M t="\text{Student}(s, n, d)" /> 表示 <M t="\langle s, n, d \rangle" /> 是 Student 的一個值組，變數依屬性的順序排列。QBE（Query By Example，在表格中填範例來查詢）就是以 DRC 為基礎。
+
+#### 安全性與表達能力
+
+不是每個演算式都有意義。<M t="\{\, t \mid \neg \text{Student}(t) \,\}" />「所有不是學生的值組」有無限多個，無法算出來。只會產生有限結果、而且結果的值都來自資料庫中的演算式，稱為**安全的**（safe）。
+
+**Codd 定理**：關聯代數與**安全的**關聯演算（TRC、DRC）表達能力相同，能用其中一種寫的查詢，都能用另一種寫出來。一個查詢語言如果至少能表達關聯代數的所有查詢，就稱為**關聯完備**（relationally complete）；SQL 是關聯完備的。
+
+### 常見陷阱
+
+- **投影會去掉重複**，結果的列數可能變少；選擇不會改變分支度。
+- **先投影再選擇時**，被投影掉的屬性就不能再拿來當條件。
+- **聯集、差集、交集需要聯集相容**；笛卡兒積與合併不需要。
+- **差集沒有交換律**：<M t="R - S" /> 和 <M t="S - R" /> 不同。
+- **基本運算是 σ、π、∪、−、×、ρ**；交集、合併、除法是衍生運算。
+- **沒有同名屬性的自然合併就是笛卡兒積**；同名但意義不同的屬性要先改名。
+- **自然合併會丟掉沒有配對的值組**，要保留就用外部合併。
+- **除數是空集合時，除法的結果是所有候選人**；候選人只來自被除數。
+
+### 專有名詞
+
+| 名詞 | 英文 | 說明 |
+|---|---|---|
+| 關聯代數 | relational algebra | 一組以關聯為輸入與輸出的運算，程序性 |
+| 封閉性 | closure | 運算結果仍是關聯，可以繼續組合 |
+| 選擇 | selection | <M t="\sigma_c(R)" />：挑出滿足條件的列 |
+| 投影 | projection | <M t="\pi_L(R)" />：挑出指定的欄並去掉重複 |
+| 指定 | assignment | <M t="\leftarrow" />：把中間結果取名 |
+| 重新命名 | rename | <M t="\rho" />：改關聯或屬性的名稱 |
+| 聯集相容 | union compatible | 分支度相同、對應屬性的定義域相同 |
+| 聯集 | union | <M t="R \cup S" />：在 R 或在 S 的值組 |
+| 差集 | difference | <M t="R - S" />：在 R 但不在 S 的值組 |
+| 交集 | intersection | <M t="R \cap S" />：同時在兩者的值組 |
+| 笛卡兒積 | Cartesian product | <M t="R \times S" />：所有值組的組合 |
+| 基本運算 | fundamental operation | σ、π、∪、−、×、ρ，不能互相組合出來 |
+| 衍生運算 | derived operation | 可以由基本運算組合出來，例如交集、合併、除法 |
+| θ 合併 | theta join | <M t="\sigma_\theta(R \times S)" /> |
+| 等值合併 | equijoin | 條件只用等號的 θ 合併 |
+| 自然合併 | natural join | 所有同名屬性相等，同名屬性只留一欄 |
+| 內部合併 | inner join | 只留下有配對的值組 |
+| 左外部合併 | left outer join | 保留左邊所有值組，沒配對的補 NULL |
+| 右外部合併 | right outer join | 保留右邊所有值組 |
+| 完全外部合併 | full outer join | 兩邊的值組都保留 |
+| 除法 | division | <M t="R \div S" />：和 S 的每個值都有配對的值 |
+| 關聯演算 | relational calculus | 用邏輯條件描述結果，非程序性 |
+| 值組關聯演算 | tuple relational calculus，TRC | 變數代表一整個值組 |
+| 定義域關聯演算 | domain relational calculus，DRC | 變數代表單一屬性的值 |
+| 存在量詞／全稱量詞 | existential／universal quantifier | <M t="\exists" />「存在某個」／<M t="\forall" />「對每一個」 |
+| 安全的演算式 | safe expression | 結果有限、值都來自資料庫的演算式 |
+| 關聯完備 | relationally complete | 至少能表達關聯代數的所有查詢 |
