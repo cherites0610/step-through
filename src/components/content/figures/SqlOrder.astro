@@ -1,0 +1,48 @@
+---
+// 圖：SQL 子句寫的順序與概念上執行的順序。兩列各六格，連線表示同一個子句的位置。
+import { line } from './shapes';
+
+const written = ['SELECT', 'FROM', 'WHERE', 'GROUP BY', 'HAVING', 'ORDER BY'];
+const executed = ['FROM', 'WHERE', 'GROUP BY', 'HAVING', 'SELECT', 'ORDER BY'];
+const notes = ['資料來源', '篩選列', '分組', '篩選組', '輸出欄', '排序'];
+const W = 540, BOX_W = 80, BOX_H = 28, LABEL_W = 0;
+const n = written.length;
+const gap = (W - LABEL_W - n * BOX_W) / (n - 1);
+const bx = (i: number) => LABEL_W + i * (BOX_W + gap);
+const Y1 = 22, Y2 = 140, H = Y2 + BOX_H + 26;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="寫的順序是 SELECT、FROM、WHERE、GROUP BY、HAVING、ORDER BY；概念上執行的順序是 FROM、WHERE、GROUP BY、HAVING、SELECT、ORDER BY。SELECT 從第一個移到第五個">
+  <text x="0" y="12">寫的順序</text>
+  <text x="0" y={Y2 - 10}>執行的順序</text>
+  {
+    written.map((w, i) => {
+      const j = executed.indexOf(w);
+      return (
+        <path
+          class="ink"
+          d={line(bx(i) + BOX_W / 2, Y1 + BOX_H, bx(j) + BOX_W / 2, Y2)}
+          stroke-width={w === 'SELECT' ? 2 : 1}
+          stroke-dasharray={w === 'SELECT' ? undefined : '3 3'}
+        />
+      );
+    })
+  }
+  {
+    written.map((w, i) => (
+      <g>
+        <rect class="ink" x={bx(i) + 0.5} y={Y1 + 0.5} width={BOX_W - 1} height={BOX_H - 1} style={w === 'SELECT' ? 'fill: var(--color-ink)' : 'fill: var(--color-paper)'} />
+        <text class="mono" x={bx(i) + BOX_W / 2} y={Y1 + 18} text-anchor="middle" style={w === 'SELECT' ? 'fill: var(--color-paper)' : undefined}>{w}</text>
+      </g>
+    ))
+  }
+  {
+    executed.map((w, i) => (
+      <g>
+        <rect class="ink" x={bx(i) + 0.5} y={Y2 + 0.5} width={BOX_W - 1} height={BOX_H - 1} style={w === 'SELECT' ? 'fill: var(--color-ink)' : 'fill: var(--color-paper)'} />
+        <text class="mono" x={bx(i) + BOX_W / 2} y={Y2 + 18} text-anchor="middle" style={w === 'SELECT' ? 'fill: var(--color-paper)' : undefined}>{w}</text>
+        <text class="mono" x={bx(i) + BOX_W / 2} y={Y2 + BOX_H + 16} text-anchor="middle">{notes[i]}</text>
+      </g>
+    ))
+  }
+</svg>

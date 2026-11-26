@@ -1,0 +1,45 @@
+---
+// 圖：GROUP BY sid 把 Enroll 分組，每組算出平均（NULL 不計），HAVING AVG >= 80 刪掉未達的組。
+import Table from './rel/Table.astro';
+
+const enroll: [string, string, number | null][] = [
+  ['S1', 'C1', 85],
+  ['S1', 'C2', 90],
+  ['S1', 'C3', 72],
+  ['S2', 'C1', null],
+  ['S2', 'C2', 78],
+  ['S3', 'C1', 66],
+  ['S3', 'C2', 95],
+];
+const groups = [...new Set(enroll.map((e) => e[0]))].map((sid) => {
+  const gs = enroll.filter((e) => e[0] === sid).map((e) => e[2]).filter((g): g is number => g !== null);
+  const avg = gs.reduce((a, b) => a + b, 0) / gs.length;
+  return { sid, rows: enroll.filter((e) => e[0] === sid), avg, keep: avg >= 80 };
+});
+const CELL = 20, colW = [36, 36, 48], X = 0, TOP = 22, GROUP_GAP = 10;
+const groupTop = (k: number) => TOP + CELL + k * GROUP_GAP + groups.slice(0, k).reduce((a, g) => a + g.rows.length * CELL, 0);
+const H = groupTop(groups.length) + 8;
+const AX = 190, RX = 380;
+const fmt = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
+---
+
+<svg width={540} height={H} viewBox={`0 0 540 ${H}`} role="img" aria-label={`Enroll 依 sid 分成三組：S1 三列平均約 82.3，S2 兩列中一個成績為 NULL，平均 78，S3 兩列平均 80.5。HAVING 平均至少 80，刪掉 S2，留下 S1 與 S3`}>
+  <text x={X} y="14">GROUP BY sid</text>
+  <text x={AX} y="14">每組算 AVG(grade)</text>
+  <text x={RX} y="14">HAVING AVG ≥ 80</text>
+  <Table x={X} y={TOP} cols={['sid', 'cid', 'grade']} rows={[]} colW={colW} cellH={CELL} />
+  {
+    groups.map((g, k) => {
+      const y = groupTop(k);
+      const mid = y + (g.rows.length * CELL) / 2;
+      return (
+        <g>
+          <Table x={X} y={y} cols={['sid', 'cid', 'grade']} rows={g.rows.map((r) => [r[0], r[1], r[2] === null ? null : String(r[2])])} colW={colW} cellH={CELL} header={false} />
+          <rect class="ink" x={X - 1} y={y - 1} width={colW.reduce((a, b) => a + b, 0) + 2} height={g.rows.length * CELL + 2} stroke-width="2" />
+          <text class="mono" x={AX} y={mid + 4}>{g.sid}：{fmt(g.avg)}</text>
+          <text x={RX} y={mid + 5}>{g.keep ? '留下' : '整組刪掉'}</text>
+        </g>
+      );
+    })
+  }
+</svg>

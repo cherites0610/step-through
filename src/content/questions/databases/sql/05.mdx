@@ -1,0 +1,33 @@
+---
+subject: databases
+chapter: sql
+order: 5
+kind: calc
+difficulty: 2
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)，其中 Enroll 有 7 列，(S2, C1) 的 grade 是 NULL。
+
+寫出下列查詢的結果：
+
+```
+SELECT COUNT(*), COUNT(grade), COUNT(DISTINCT cid), AVG(grade), SUM(grade)
+FROM   Enroll
+WHERE  sid IN ('S1', 'S2');
+```
+
+<Solution>
+
+**5、4、3、81.25、325。**
+
+`WHERE` 留下 S1 與 S2 的選課，共 5 列：(S1, C1, 85)、(S1, C2, 90)、(S1, C3, 72)、(S2, C1, NULL)、(S2, C2, 78)。
+
+- `COUNT(*)`：列數，5。
+- `COUNT(grade)`：grade 不是 NULL 的列，4。
+- `COUNT(DISTINCT cid)`：C1、C2、C3，3。
+- `SUM(grade)`：忽略 NULL，<M t="85 + 90 + 72 + 78 = 325" />。
+- `AVG(grade)`：同樣忽略 NULL，分母是 4 不是 5，<M t="325 \div 4 = 81.25" />。
+
+常見的錯誤是算成 <M t="325 \div 5 = 65" />：NULL 不是 0，它不參與平均。
+
+</Solution>

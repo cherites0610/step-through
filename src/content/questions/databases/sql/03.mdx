@@ -1,0 +1,32 @@
+---
+subject: databases
+chapter: sql
+order: 3
+kind: choice
+difficulty: 1
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)，其中 Enroll 有 7 列，(S2, C1) 的 grade 是 NULL。
+
+下列查詢的結果，何者正確？
+
+(A) `SELECT * FROM Enroll WHERE grade = NULL` 回傳 1 列
+
+(B) `SELECT * FROM Enroll WHERE grade IS NULL` 回傳 1 列
+
+(C) `SELECT * FROM Enroll WHERE grade > 80 OR grade <= 80` 回傳 7 列
+
+(D) `SELECT * FROM Enroll WHERE NOT (grade > 80)` 回傳 4 列
+
+<Solution>
+
+**答案：(B)。**
+
+和 NULL 比較的結果是 UNKNOWN，`WHERE` 只留下 TRUE 的列。
+
+- **(A) 錯。** `grade = NULL` 對每一列都是 UNKNOWN（連 NULL = NULL 也是），回傳 0 列。
+- **(B) 對。** 找空值要用 `IS NULL`，回傳 (S2, C1, NULL)。
+- **(C) 錯。** 對 (S2, C1) 來說，兩個比較都是 UNKNOWN，UNKNOWN OR UNKNOWN 仍是 UNKNOWN，被丟掉。回傳 6 列。
+- **(D) 錯。** `grade > 80` 為 TRUE 的有 3 列，NOT 之後為 FALSE；為 FALSE 的 3 列變成 TRUE；NULL 那一列是 NOT UNKNOWN = UNKNOWN，被丟掉。回傳 3 列。
+
+</Solution>

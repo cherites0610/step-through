@@ -1,0 +1,37 @@
+---
+subject: databases
+chapter: sql
+order: 10
+kind: calc
+difficulty: 2
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)，其中 Enroll 有 7 列，(S2, C1) 的 grade 是 NULL。
+
+Enroll 上定義了兩個觸發程序：
+
+```
+CREATE TRIGGER t_row  AFTER UPDATE ON Enroll FOR EACH ROW
+    INSERT INTO Log VALUES ('row');
+
+CREATE TRIGGER t_stmt AFTER UPDATE ON Enroll FOR EACH STATEMENT
+    INSERT INTO Log VALUES ('stmt');
+```
+
+Log 原本是空的。依序執行下列兩個敘述之後，Log 中有幾列 'row'、幾列 'stmt'？
+
+```
+UPDATE Enroll SET grade = grade + 5 WHERE cid = 'C1';
+UPDATE Enroll SET grade = 100 WHERE cid = 'C9';
+```
+
+<Solution>
+
+**'row' 3 列，'stmt' 2 列。**
+
+- **第一個敘述**：cid = 'C1' 的有 (S1, C1)、(S2, C1)、(S3, C1) 三列。列層級的 t_row 每一列執行一次，寫入 3 列 'row'；敘述層級的 t_stmt 只執行一次，寫入 1 列 'stmt'。（S2 的成績是 NULL，NULL + 5 仍是 NULL，但這一列仍然被 UPDATE 影響，所以也會觸發。）
+- **第二個敘述**：沒有 C9 的選課，影響 0 列。t_row 一次都不執行；t_stmt 仍然執行一次，因為敘述層級的觸發程序是對「這個 UPDATE 敘述」觸發，不管影響幾列。
+
+合計 'row' <M t="3 + 0 = 3" /> 列，'stmt' <M t="1 + 1 = 2" /> 列。
+
+</Solution>

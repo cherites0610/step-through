@@ -1,0 +1,512 @@
+---
+subject: databases
+chapter: sql
+summary: 用 SQL 寫查詢：SELECT 的各個子句與執行順序、NULL 的三值邏輯、合併與外部合併、聚合與分組、各種子查詢（包含用雙重 NOT EXISTS 寫「所有」），以及檢視表與觸發程序。資管所必考，常要求寫出 SQL 或判斷結果。
+---
+
+### 基本查詢
+
+#### SQL 與關聯代數
+
+SQL（Structured Query Language）是關聯式 DBMS 共通的語言，第 1 章介紹過它包含 DDL、DML、DCL 三類。本章重點是查詢，也就是 `SELECT`。最基本的查詢有三個子句：
+
+```
+SELECT name          -- 要哪些欄：投影 π
+FROM   Student       -- 從哪些表：多個表就是笛卡兒積 ×
+WHERE  dname = '資管'; -- 要哪些列：選擇 σ
+```
+
+它對應第 4 章的 <M t="\pi_{\text{name}}(\sigma_{\text{dname} = \text{資管}}(\text{Student}))" />。但有一個重要的差別：**SQL 預設不去掉重複**。
+
+本章使用第 4 章的資料，另外多一筆 S2 修 C1、還沒有成績（grade 是 NULL）的選課，Enroll 共 7 列：
+
+| sid | cid | grade |
+|---|---|---|
+| S1 | C1 | 85 |
+| S1 | C2 | 90 |
+| S1 | C3 | 72 |
+| S2 | C1 | NULL |
+| S2 | C2 | 78 |
+| S3 | C1 | 66 |
+| S3 | C2 | 95 |
+
+Student 仍是 S1 王小明（資管）、S2 李美華（資工）、S3 陳志強（資管）、S4 林大同（電機）；Course 仍是 C1 資料庫（3 學分）、C2 資料結構（3 學分）、C3 計算機概論（2 學分）。
+
+#### DISTINCT：去掉重複
+
+`SELECT dname FROM Student` 會得到 4 列：資管、資工、資管、電機。SQL 的表是多重集合（第 3 章），重複的列會保留。要和關聯代數的投影一樣去掉重複，要加 `DISTINCT`：
+
+```
+SELECT DISTINCT dname FROM Student;   -- 資管、資工、電機，3 列
+```
+
+為什麼不預設去重複？去重複要排序或雜湊，代價不小；而且計算平均、總和時，重複的值本來就要算進去。
+
+#### SELECT 與 WHERE 的常用寫法
+
+`SELECT` 可以寫 `*`（所有欄）、運算式，並用 `AS` 取別名：
+
+```
+SELECT sid, cid, grade * 1.1 AS adjusted   -- 調整後的成績
+FROM   Enroll
+WHERE  cid = 'C1';
+```
+
+`WHERE` 除了比較運算（`=`、`<>` 不等於、`<`、`<=`、`>`、`>=`）與 `AND`、`OR`、`NOT`，還有：
+
+| 寫法 | 意思 | 例子與結果 |
+|---|---|---|
+| `BETWEEN a AND b` | 介於 a 與 b 之間（**包含**兩端） | `grade BETWEEN 80 AND 90`：85、90 |
+| `IN (…)` | 等於其中之一 | `dname IN ('資管', '電機')`：王小明、陳志強、林大同 |
+| `LIKE` | 字串比對：`%` 是任意長度（含 0 個字），`_` 是恰好一個字 | `title LIKE '資料%'`：資料庫、資料結構 |
+| `IS NULL` | 是空值 | `grade IS NULL`：(S2, C1) |
+
+`name LIKE '_小%'` 表示「第二個字是小」：王小明符合，李美華不符合。
+
+#### NULL 與三值邏輯
+
+NULL 表示「不知道」或「不適用」。和 NULL 比較會怎樣？S2 的 C1 成績是 NULL，`grade > 80` 是真還是假？都不是：不知道成績，就不知道有沒有大於 80。所以 SQL 用**三值邏輯**（three-valued logic）：比較的結果可以是 TRUE、FALSE 或 **UNKNOWN**。
+
+**任何值和 NULL 比較（包括 `NULL = NULL`），結果都是 UNKNOWN**。`AND`、`OR`、`NOT` 遇到 UNKNOWN 的規則，可以把 TRUE 想成 1、FALSE 想成 0、UNKNOWN 想成 0.5：`AND` 取較小、`OR` 取較大、`NOT` 是 1 減它。下表以「真、假、未知」代表 TRUE、FALSE、UNKNOWN：
+
+| A | B | A AND B | A OR B |
+|---|---|---|---|
+| 真 | 未知 | 未知 | 真 |
+| 假 | 未知 | 假 | 未知 |
+| 未知 | 未知 | 未知 | 未知 |
+
+`NOT` 未知仍是未知。
+
+`WHERE` **只留下條件為 TRUE 的列**，FALSE 與 UNKNOWN 都會被丟掉。所以：
+
+- `WHERE grade > 80` 得到 3 列，`WHERE grade <= 80` 也是 3 列，加起來 6 列，**不是** 7 列：(S2, C1) 兩邊都不出現。
+- `WHERE grade = NULL` 永遠是 UNKNOWN，**一列都不會回傳**。要找空值必須寫 `grade IS NULL`。
+- 算術遇到 NULL 結果也是 NULL：`NULL * 1.1` 還是 NULL。
+
+#### ORDER BY 與集合運算
+
+`ORDER BY grade DESC` 依成績由高到低排列（`ASC` 是由低到高，預設）。多個欄位時先依第一個排，相同再依第二個。NULL 排在最前或最後依 DBMS 而定。
+
+兩個查詢的結果可以用 `UNION`、`INTERSECT`、`EXCEPT`（有些 DBMS 叫 `MINUS`）合併，對應關聯代數的 <M t="\cup" />、<M t="\cap" />、<M t="-" />，兩邊同樣要聯集相容。和 `SELECT` 相反，**集合運算預設會去掉重複**；要保留重複就寫 `UNION ALL`：
+
+```
+SELECT sid FROM Enroll WHERE cid = 'C1'   -- S1、S2、S3
+UNION
+SELECT sid FROM Enroll WHERE cid = 'C3';  -- S1
+```
+
+`UNION` 得到 S1、S2、S3 共 3 列；`UNION ALL` 得到 4 列（S1 出現兩次）；`INTERSECT` 得到 S1；`EXCEPT` 得到 S2、S3。
+
+#### 子句的執行順序
+
+一個完整的查詢最多有六個子句。**寫的順序**和**概念上執行的順序**不一樣，這是理解 SQL 最重要的一件事：
+
+<Figure no="5-1" caption="上：寫的順序。下：概念上執行的順序。SELECT 寫在最前面，卻幾乎最後才執行，所以 WHERE 不能使用 SELECT 裡取的別名，也不能用聚合函數。">
+  <SqlOrder />
+</Figure>
+
+1. `FROM`：決定資料來源，多個表先做笛卡兒積或合併。
+2. `WHERE`：一列一列篩選。
+3. `GROUP BY`：把剩下的列分組（第 3 節）。
+4. `HAVING`：一組一組篩選。
+5. `SELECT`：計算要輸出的欄、取別名；有 `DISTINCT` 就去重複。
+6. `ORDER BY`：排序。
+
+很多錯誤都能用這個順序解釋：`WHERE adjusted > 90` 不行，因為執行 `WHERE` 時 `SELECT` 還沒算出 adjusted；而 `ORDER BY adjusted` 可以，因為那時已經算好了。實際上 DBMS 會調整做法（第 8 章），但結果一定和照這個順序做的一樣。
+
+### 合併與外部合併
+
+#### 兩種寫法
+
+把 Student 和 Enroll 用學號接起來，有兩種寫法：
+
+```
+-- 寫法一：FROM 列出多個表（笛卡兒積），條件寫在 WHERE
+SELECT name, cid
+FROM   Student, Enroll
+WHERE  Student.sid = Enroll.sid;
+
+-- 寫法二：JOIN … ON
+SELECT name, cid
+FROM   Student JOIN Enroll ON Student.sid = Enroll.sid;
+```
+
+兩者結果相同，都是 7 列（S4 沒修課，不出現）。兩個表都有 sid，所以要寫成 `Student.sid` 指明是哪一個。表名太長時取**別名**：`FROM Student s JOIN Enroll e ON s.sid = e.sid`，之後用 `s.name`、`e.grade`。
+
+三個表也是一樣接下去，例如「修了資料庫的學生姓名與成績」：
+
+```
+SELECT s.name, e.grade
+FROM   Student s
+JOIN   Enroll e ON s.sid = e.sid
+JOIN   Course c ON e.cid = c.cid
+WHERE  c.title = '資料庫';
+```
+
+結果是王小明 85、李美華 NULL、陳志強 66。另外還有 `NATURAL JOIN`，自動以所有同名欄位相等來合併，對應第 4 章的自然合併；但同名不同義的欄位會被誤用，實務上較少用。
+
+#### 自我合併
+
+同一個表也可以和自己合併，用兩個不同的別名區分。「同一系的兩位學生」：
+
+```
+SELECT a.name, b.name
+FROM   Student a JOIN Student b ON a.dname = b.dname AND a.sid < b.sid;
+```
+
+結果只有一列：王小明、陳志強。為什麼條件要寫 `a.sid < b.sid`？如果不寫，每位學生都會和自己配成一對（王小明、王小明）；如果寫成 `a.sid <> b.sid`，同一對會出現兩次（王小明、陳志強 與 陳志強、王小明）。用 `<` 只留下前小後大的那一種順序。
+
+#### 外部合併
+
+`LEFT JOIN`（完整寫法 `LEFT OUTER JOIN`）保留左邊所有的列，找不到配對的補 NULL，對應第 4 章的左外部合併。另外還有 `RIGHT JOIN` 與 `FULL JOIN`。
+
+```
+SELECT s.sid, s.name, e.cid
+FROM   Student s LEFT JOIN Enroll e ON s.sid = e.sid;
+```
+
+結果 8 列：7 筆選課，加上 (S4, 林大同, NULL)。
+
+#### 陷阱：條件寫在 ON 還是 WHERE
+
+外部合併時，同一個條件寫在 `ON` 和寫在 `WHERE`，結果不同。想列出「每位學生，以及他是否修了 C3」：
+
+```
+-- 寫法一：條件放在 ON
+SELECT s.sid, e.cid
+FROM   Student s LEFT JOIN Enroll e ON s.sid = e.sid AND e.cid = 'C3';
+
+-- 寫法二：條件放在 WHERE
+SELECT s.sid, e.cid
+FROM   Student s LEFT JOIN Enroll e ON s.sid = e.sid
+WHERE  e.cid = 'C3';
+```
+
+照執行順序想：
+
+- **寫法一**：`ON` 是「配對的條件」。每位學生只和他的 C3 選課配對；配不到的（S2、S3、S4）因為是左外部合併，仍然保留，cid 補 NULL。結果 4 列。
+- **寫法二**：先做完整的左外部合併（8 列），**再**用 `WHERE` 篩選。補出來的 NULL 和 `'C3'` 比較是 UNKNOWN，被丟掉。結果只剩 (S1, C3) 一列，外部合併白做了。
+
+<Figure no="5-2" caption="同一個條件 e.cid = 'C3'：放在 ON 是配對條件，沒配到的學生仍以 NULL 保留，共 4 列；放在 WHERE 是合併之後的篩選，NULL 不等於 'C3'，只剩 1 列。">
+  <OnVsWhere />
+</Figure>
+
+規則：外部合併時，**限制右邊表的條件要寫在 `ON`**；寫在 `WHERE` 會把補出來的列刪掉。
+
+### 聚合與分組
+
+#### 聚合函數
+
+**聚合函數**（aggregate function）把很多列算成一個值：
+
+| 函數 | 意思 | 對 Enroll 的結果 |
+|---|---|---|
+| `COUNT(*)` | 列數 | 7 |
+| `COUNT(grade)` | grade **不是 NULL** 的列數 | 6 |
+| `COUNT(DISTINCT sid)` | 不重複的 sid 個數 | 3 |
+| `SUM(grade)` | 總和 | 486 |
+| `AVG(grade)` | 平均 | 81 |
+| `MAX(grade)`／`MIN(grade)` | 最大／最小 | 95／66 |
+
+關鍵規則：**除了 `COUNT(*)` 之外，聚合函數都會忽略 NULL**。所以 `AVG(grade)` 是 <M t="486 \div 6 = 81" />，分母是 6 不是 7：還沒有成績的那一筆既不算在分子，也不算在分母。只看 C1：`COUNT(*)` 是 3，`COUNT(grade)` 是 2，`AVG(grade)` 是 <M t="(85 + 66) \div 2 = 75.5" />。
+
+#### GROUP BY：分組
+
+「每門課的修課人數與平均成績」要對**每一組**分別計算。`GROUP BY` 把指定欄位值相同的列分成一組，聚合函數對每一組各算一次：
+
+```
+SELECT   cid, COUNT(*), AVG(grade)
+FROM     Enroll
+GROUP BY cid;
+```
+
+| cid | COUNT(*) | AVG(grade) |
+|---|---|---|
+| C1 | 3 | 75.5 |
+| C2 | 3 | 87.67 |
+| C3 | 1 | 72 |
+
+分組之後，每一組只輸出**一列**。所以 `SELECT` 裡只能放兩種東西：`GROUP BY` 的欄位（同一組裡的值都一樣），或聚合函數。寫 `SELECT cid, grade … GROUP BY cid` 是錯的：C1 這一組有 85、NULL、66 三個成績，不知道該輸出哪一個。
+
+#### HAVING：篩選組
+
+「平均成績至少 80 的學生」，條件是對**組**的，不能寫在 `WHERE`（`WHERE` 執行時還沒分組，也還沒算出平均）。對組的條件寫在 `HAVING`：
+
+```
+SELECT   sid, AVG(grade)
+FROM     Enroll
+GROUP BY sid
+HAVING   AVG(grade) >= 80;
+```
+
+<Figure no="5-3" caption="GROUP BY sid 把 7 列分成 3 組，每組算出一個平均（NULL 不計入）；HAVING 再把平均未滿 80 的 S2 這一組整組刪掉。">
+  <GroupHaving />
+</Figure>
+
+S1 的平均是 <M t="(85 + 90 + 72) \div 3 \approx 82.3" />，S2 是 78（NULL 不計，只有 78 一個成績），S3 是 <M t="(66 + 95) \div 2 = 80.5" />。結果是 S1、S3。
+
+`WHERE` 和 `HAVING` 可以一起用：先用 `WHERE` 刪掉個別的列，再分組，再用 `HAVING` 刪掉組。「至少有兩門成績 70 分以上的學生」：
+
+```
+SELECT   sid, COUNT(*)
+FROM     Enroll
+WHERE    grade >= 70          -- 先刪掉 66 分與 NULL 的列
+GROUP BY sid
+HAVING   COUNT(*) >= 2;       -- 再刪掉不到兩列的組
+```
+
+`WHERE` 之後剩 S1 的三筆、S2 的 78、S3 的 95；分組後 S1 有 3 列、S2 與 S3 各 1 列，結果只有 S1。
+
+### 子查詢
+
+#### 子查詢放在哪裡
+
+查詢裡可以再放查詢，稱為**子查詢**（subquery）。最常放在 `WHERE` 裡，依子查詢回傳的東西分成幾種用法。
+
+**回傳一個值**，可以直接比較。「最高分的選課」：
+
+```
+SELECT sid, cid, grade
+FROM   Enroll
+WHERE  grade = (SELECT MAX(grade) FROM Enroll);   -- (S3, C2, 95)
+```
+
+這裡不能寫 `WHERE grade = MAX(grade)`：聚合函數不能出現在 `WHERE`。
+
+**回傳一欄多個值**，用 `IN`、`NOT IN`，或比較加 `ANY`／`ALL`：
+
+- `x IN (子查詢)`：x 等於其中某一個。
+- `x > ALL (子查詢)`：x 比**每一個**都大，等於比最大值大。
+- `x > ANY (子查詢)`（也寫 `SOME`）：x 比**某一個**大，等於比最小值大。
+
+例如 C1 的成績（不計 NULL）是 85 與 66：`grade > ALL (…)` 要大於 85，結果是 90、95 兩筆；`grade > ANY (…)` 只要大於 66，結果是 85、90、72、78、95 五筆。
+
+#### EXISTS 與相關子查詢
+
+`EXISTS (子查詢)` 只問子查詢**有沒有回傳任何列**，有就是 TRUE。它通常和外層的列有關：
+
+```
+SELECT name
+FROM   Student s
+WHERE  NOT EXISTS (SELECT * FROM Enroll e WHERE e.sid = s.sid);
+```
+
+子查詢裡用到了外層的 `s.sid`。這種子查詢稱為**相關子查詢**（correlated subquery）：它的結果隨外層的每一列而不同，概念上要對外層的**每一列**各執行一次。對 S1，找得到 S1 的選課，`NOT EXISTS` 是 FALSE；對 S4，找不到，是 TRUE。結果是林大同。
+
+前面「最高分」的子查詢和外層無關，只要執行一次，稱為**非相關子查詢**。
+
+另一個相關子查詢的例子：「成績高於自己平均的選課」，每一列都要和**該生自己的**平均比：
+
+```
+SELECT sid, cid, grade
+FROM   Enroll e1
+WHERE  grade > (SELECT AVG(grade) FROM Enroll e2 WHERE e2.sid = e1.sid);
+```
+
+結果是 (S1, C1, 85)、(S1, C2, 90)、(S3, C2, 95)。S2 的平均是 78，唯一的成績 78 沒有「高於」。
+
+#### 同一個查詢的三種寫法
+
+「沒有修任何課的學生」可以用三種方式寫，結果都是林大同：
+
+```
+-- 1. NOT IN
+SELECT name FROM Student WHERE sid NOT IN (SELECT sid FROM Enroll);
+
+-- 2. NOT EXISTS（上一段）
+
+-- 3. 左外部合併後找出補 NULL 的列
+SELECT s.name
+FROM   Student s LEFT JOIN Enroll e ON s.sid = e.sid
+WHERE  e.sid IS NULL;
+```
+
+#### 用 SQL 寫除法：雙重 NOT EXISTS
+
+SQL 沒有除法運算子。「修了**所有**課的學生」要換句話說：
+
+> 修了所有課 ＝ **不存在**一門課，是他**沒有**修的。
+
+照著這句話寫，就是兩層 `NOT EXISTS`：
+
+```
+SELECT name
+FROM   Student s
+WHERE  NOT EXISTS (                 -- 不存在
+         SELECT * FROM Course c
+         WHERE  NOT EXISTS (        -- 一門他沒有修的課
+                  SELECT * FROM Enroll e
+                  WHERE  e.sid = s.sid AND e.cid = c.cid));
+```
+
+一步一步看，以李美華（S2）為例：
+
+1. 外層取出 S2，問「存不存在一門 S2 沒修的課」。
+2. 中層逐一看每門課。C1：最內層找得到 (S2, C1)，`NOT EXISTS` 是 FALSE，C1 不算「沒修的課」。C2 也一樣。
+3. C3：最內層找不到 (S2, C3)，`NOT EXISTS` 是 TRUE，C3 是 S2 沒修的課。
+4. 中層回傳了 C3，外層的 `NOT EXISTS` 是 FALSE，S2 不在結果中。
+
+只有王小明三門課都修了，中層找不到任何沒修的課，所以結果是王小明。把中層改成 `WHERE c.credits = 3 AND NOT EXISTS (…)`，就是「修了所有 3 學分課的學生」：王小明、李美華、陳志強（李美華的 C1 雖然還沒有成績，但已經選了）。
+
+也可以用計數：
+
+```
+SELECT   sid FROM Enroll
+GROUP BY sid
+HAVING   COUNT(*) = (SELECT COUNT(*) FROM Course);
+```
+
+但這要求 Enroll 裡不會出現 Course 以外的課號（有參考完整性就成立）。
+
+#### 陷阱：NOT IN 遇到 NULL
+
+如果子查詢的結果含有 NULL，`NOT IN` 會出問題。假設子查詢回傳 S1 與 NULL，`sid NOT IN ('S1', NULL)` 等於 `sid <> 'S1' AND sid <> NULL`。後半永遠是 UNKNOWN，整個條件最好也只是 UNKNOWN，`WHERE` 把它丟掉，**結果一列都沒有**。`NOT EXISTS` 沒有這個問題，所以子查詢的欄位可能有 NULL 時，用 `NOT EXISTS`，或在子查詢加上 `WHERE sid IS NOT NULL`。
+
+### 資料定義與檢視表
+
+#### 修改綱要與資料
+
+第 3 章已經介紹 `CREATE TABLE` 與各種限制。修改綱要用 `ALTER TABLE`，刪除整個表用 `DROP TABLE`：
+
+```
+ALTER TABLE Student ADD email VARCHAR(50);   -- 加一欄，既有的列填 NULL
+ALTER TABLE Student DROP COLUMN email;       -- 刪一欄
+DROP TABLE Enroll;                           -- 刪掉表（結構與資料）
+```
+
+修改資料用 `INSERT`、`UPDATE`、`DELETE`，條件裡同樣可以放子查詢：
+
+```
+INSERT INTO Enroll VALUES ('S4', 'C3', NULL);
+UPDATE Enroll SET grade = grade + 5 WHERE cid = 'C1';   -- NULL + 5 仍是 NULL
+DELETE FROM Enroll
+WHERE  sid IN (SELECT sid FROM Student WHERE dname = '電機');
+```
+
+`DELETE FROM Enroll` 沒有 `WHERE` 會刪掉**所有列**，但表還在；`DROP TABLE Enroll` 連表一起刪掉（第 1 章）。
+
+#### 檢視表
+
+**檢視表**（view）是用一個查詢定義的**虛擬表**：
+
+```
+CREATE VIEW MisStudent AS
+    SELECT sid, name FROM Student WHERE dname = '資管';
+```
+
+檢視表本身**不存資料**，只存定義。查詢它時，DBMS 把定義代進去，這個動作稱為**檢視表展開**（view expansion）：
+
+```
+SELECT name FROM MisStudent
+WHERE  sid IN (SELECT sid FROM Enroll WHERE cid = 'C2');
+
+-- DBMS 實際執行的是
+SELECT name FROM Student
+WHERE  dname = '資管'
+  AND  sid IN (SELECT sid FROM Enroll WHERE cid = 'C2');
+```
+
+兩者結果都是王小明、陳志強。因為每次都重新查詢，基底表的資料一改，檢視表看到的就跟著變。
+
+檢視表的用途：
+
+- **簡化查詢**：把常用的複雜合併包起來。
+- **安全**：只讓圖書館看到 sid、name，看不到成績（第 1 章的外部綱要）。
+- **邏輯資料獨立性**：基底表拆開或改名時，改檢視表的定義就好（第 1 章的例子）。
+
+把結果真的存下來、定期更新的檢視表，稱為**實體化檢視表**（materialized view），用空間換查詢速度。
+
+#### 哪些檢視表可以更新
+
+對檢視表做 `INSERT`、`UPDATE`、`DELETE`，DBMS 要把它翻譯成對基底表的修改。翻譯得出來才能更新。SQL 標準大致要求：
+
+1. `FROM` 只有**一個**基底表（沒有合併）。
+2. 沒有 `DISTINCT`、`GROUP BY`、`HAVING`、聚合函數。
+3. 基底表中沒有出現在檢視表、又不允許 NULL 且沒有預設值的欄位（特別是主鍵）必須包含在檢視表中，否則新增時那些欄位無值可填。
+
+例如 `CourseStat(cid, n, avg_grade)` 是 `GROUP BY cid` 加上 `COUNT`、`AVG` 定義的。把 C1 的 `avg_grade` 改成 80，是要改哪幾位學生的成績、改成多少？無法決定，所以不能更新。
+
+`MisStudent` 符合三個條件，可以更新。但有一個怪現象：透過它新增 `('S5', '張三')`，基底表的 dname 是 NULL，這位學生**不是**資管，新增完立刻從 MisStudent 中消失。在定義最後加上 `WITH CHECK OPTION`，DBMS 就會拒絕「透過檢視表做出不符合檢視表條件的列」的修改。
+
+### 觸發程序
+
+#### 為什麼需要觸發程序
+
+第 2、3 章提過，有些規則無法用主鍵、外鍵、`CHECK` 表達，例如「每位學生最多修 3 門課」，或「Course 上的修課人數要跟著選課自動更新」。**觸發程序**（trigger）讓 DBMS 在某個事件發生時，自動執行一段動作。
+
+觸發程序由三部分組成，稱為 **ECA 規則**：
+
+- 事件（event）：什麼操作會觸發它，`INSERT`、`UPDATE`、`DELETE`，以及在哪個表。
+- 條件（condition）：觸發時要不要執行，可以省略。
+- 動作（action）：要做什麼。
+
+#### 例：自動維護修課人數
+
+Course 多一欄 num 記錄修課人數。每新增一筆選課，該課的 num 加 1：
+
+```
+CREATE TRIGGER enroll_added
+AFTER INSERT ON Enroll                 -- 事件：Enroll 新增之後
+REFERENCING NEW ROW AS n
+FOR EACH ROW                           -- 每新增一列執行一次
+BEGIN
+    UPDATE Course SET num = num + 1 WHERE cid = n.cid;   -- 動作
+END;
+```
+
+`NEW ROW`（新的那一列）與 `OLD ROW`（修改或刪除前的那一列）讓動作讀到被影響的資料。原本 C3 的 num 是 1；S4 加選 C3 後，觸發程序把它改成 2。刪除時再寫一個 `AFTER DELETE` 的觸發程序，把 `OLD ROW` 的課 num 減 1。
+
+#### 時間與層級
+
+**BEFORE 或 AFTER**：
+
+- `BEFORE`：在修改**生效之前**執行，常用來檢查並拒絕修改（「這位學生已經修了 3 門課，拒絕這次新增」），或調整要寫入的值。
+- `AFTER`：在修改**生效之後**執行，常用來連帶更新其他表，或寫入稽核紀錄。
+
+**列層級或敘述層級**：
+
+- `FOR EACH ROW`（列層級）：受影響的**每一列**執行一次。
+- `FOR EACH STATEMENT`（敘述層級，預設）：整個敘述只執行**一次**，不管影響幾列，甚至影響 0 列也會執行。
+
+例如 `UPDATE Enroll SET grade = grade + 5 WHERE cid = 'C1'` 影響 3 列（S1、S2、S3 的 C1）：列層級的觸發程序執行 3 次，敘述層級的執行 1 次。
+
+#### 限制
+
+觸發程序在背後自動執行，使用者看不到，很容易造成意外：一個觸發程序修改了另一個表，又觸發那個表的觸發程序，形成連鎖，甚至無限循環。能用宣告式限制（主鍵、外鍵、`CHECK`）表達的規則，就不要用觸發程序。另外，各 DBMS 觸發程序的語法差異很大（上面是 SQL 標準的寫法），考試以標準的概念為主。
+
+### 常見陷阱
+
+- **`SELECT` 預設不去重複**，要加 `DISTINCT`；`UNION` 等集合運算則預設去重複，要保留就用 `UNION ALL`。
+- **和 NULL 比較的結果是 UNKNOWN**，`WHERE` 只留 TRUE；找空值要用 `IS NULL`，不能用 `= NULL`。
+- **聚合函數忽略 NULL，`COUNT(*)` 除外**：`AVG` 的分母不含 NULL 的列。
+- **`SELECT` 裡只能有 `GROUP BY` 的欄位或聚合函數**；對組的條件寫在 `HAVING`，聚合函數不能出現在 `WHERE`。
+- **`WHERE` 不能用 `SELECT` 裡取的別名**，因為 `WHERE` 先執行。
+- **外部合併時，限制右邊表的條件要寫在 `ON`**，寫在 `WHERE` 會把補 NULL 的列刪掉。
+- **自我合併用 `a.sid < b.sid`** 避免自己配自己與重複的配對。
+- **`NOT IN` 的子查詢有 NULL 時結果是空的**，改用 `NOT EXISTS`。
+- **含合併、`GROUP BY`、聚合、`DISTINCT` 的檢視表不能更新**。
+- **敘述層級的觸發程序只執行一次**，列層級的依受影響的列數執行。
+
+### 專有名詞
+
+| 名詞 | 英文 | 說明 |
+|---|---|---|
+| 三值邏輯 | three-valued logic | 比較結果有 TRUE、FALSE、UNKNOWN 三種 |
+| 未知 | UNKNOWN | 和 NULL 比較的結果；WHERE 會丟掉 |
+| 別名 | alias | 用 AS 或直接接在後面，替欄位或表取的短名 |
+| 自我合併 | self-join | 同一個表以兩個別名和自己合併 |
+| 聚合函數 | aggregate function | COUNT、SUM、AVG、MAX、MIN，把多列算成一個值 |
+| 分組 | GROUP BY | 把指定欄位值相同的列分成一組 |
+| 組的條件 | HAVING | 在分組之後篩選組 |
+| 子查詢 | subquery | 放在另一個查詢裡的查詢 |
+| 相關子查詢 | correlated subquery | 用到外層的值，概念上對外層每一列各執行一次 |
+| 非相關子查詢 | uncorrelated subquery | 和外層無關，只執行一次 |
+| 檢視表 | view | 用查詢定義的虛擬表，不存資料 |
+| 檢視表展開 | view expansion | 查詢檢視表時把定義代入 |
+| 實體化檢視表 | materialized view | 把結果實際存下來的檢視表 |
+| 可更新的檢視表 | updatable view | 能把修改翻譯成對基底表修改的檢視表 |
+| WITH CHECK OPTION | WITH CHECK OPTION | 拒絕做出不符合檢視表條件的修改 |
+| 觸發程序 | trigger | 事件發生時由 DBMS 自動執行的動作 |
+| ECA 規則 | event-condition-action rule | 觸發程序的三部分：事件、條件、動作 |
+| 列層級觸發 | row-level trigger | FOR EACH ROW：每一列執行一次 |
+| 敘述層級觸發 | statement-level trigger | FOR EACH STATEMENT：每個敘述執行一次 |

@@ -1,0 +1,37 @@
+---
+subject: databases
+chapter: sql
+order: 6
+kind: calc
+difficulty: 2
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)，其中 Enroll 有 7 列，(S2, C1) 的 grade 是 NULL。
+
+寫出下列查詢的結果，並說明每一個子句做了什麼。
+
+```
+SELECT   e.sid, SUM(c.credits) AS total
+FROM     Enroll e JOIN Course c ON e.cid = c.cid
+WHERE    e.grade IS NOT NULL
+GROUP BY e.sid
+HAVING   SUM(c.credits) >= 6
+ORDER BY total DESC;
+```
+
+<Solution>
+
+**(S1, 8)、(S3, 6)。**
+
+照執行順序：
+
+1. **FROM … JOIN**：每筆選課接上課程的學分，7 列。
+2. **WHERE**：刪掉 grade 是 NULL 的 (S2, C1)，剩 6 列。
+3. **GROUP BY e.sid**：S1 三列（C1、C2、C3），S2 一列（C2），S3 兩列（C1、C2）。
+4. 每組算 `SUM(c.credits)`：S1 是 <M t="3 + 3 + 2 = 8" />，S2 是 3，S3 是 <M t="3 + 3 = 6" />。
+5. **HAVING ≥ 6**：刪掉 S2 這一組。
+6. **SELECT** 輸出 sid 與 total，**ORDER BY total DESC** 由大到小：S1 8、S3 6。
+
+注意 `ORDER BY` 可以用別名 total，因為它在 `SELECT` 之後執行。若拿掉 `WHERE`，S2 會有 C1、C2 兩門共 6 學分，也會出現在結果中。
+
+</Solution>

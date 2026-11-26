@@ -1,0 +1,30 @@
+---
+subject: databases
+chapter: sql
+order: 4
+kind: calc
+difficulty: 1
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)，其中 Enroll 有 7 列，(S2, C1) 的 grade 是 NULL。
+
+下列查詢各回傳幾列？
+
+(a) `SELECT dname FROM Student`
+
+(b) `SELECT DISTINCT dname FROM Student`
+
+(c) `SELECT sid FROM Enroll WHERE cid = 'C2' UNION SELECT sid FROM Enroll WHERE cid = 'C1'`
+
+(d) `SELECT sid FROM Enroll WHERE cid = 'C2' UNION ALL SELECT sid FROM Enroll WHERE cid = 'C1'`
+
+<Solution>
+
+**(a) 4。(b) 3。(c) 3。(d) 6。**
+
+- **(a)** `SELECT` 不去重複：資管、資工、資管、電機，4 列。
+- **(b)** 加上 `DISTINCT`：資管、資工、電機，3 列。
+- **(c)** 修 C2 的是 S1、S2、S3，修 C1 的是 S1、S2、S3（S2 的 C1 雖然沒有成績，但有選課）。集合運算預設去重複，合起來是 S1、S2、S3，3 列。
+- **(d)** `UNION ALL` 保留重複：<M t="3 + 3 = 6" /> 列。
+
+</Solution>

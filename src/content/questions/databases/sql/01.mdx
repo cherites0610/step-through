@@ -1,0 +1,25 @@
+---
+subject: databases
+chapter: sql
+order: 1
+kind: fill
+difficulty: 1
+---
+
+寫出下列 SQL 對應的關聯代數運算式，並說明兩者的結果是否一定相同。
+
+```
+SELECT title
+FROM   Course
+WHERE  credits = 3;
+```
+
+<Solution>
+
+**<M t="\pi_{\text{title}}(\sigma_{\text{credits} = 3}(\text{Course}))" />；不一定相同。**
+
+`FROM` 對應資料來源，`WHERE` 對應選擇 <M t="\sigma" />，`SELECT` 對應投影 <M t="\pi" />。
+
+差別在重複：關聯代數的投影會去掉重複，SQL 的 `SELECT` 不會。如果有兩門不同課號的 3 學分課剛好同名，SQL 會輸出兩列相同的課名，關聯代數只有一列。要完全對應，SQL 要寫 `SELECT DISTINCT title`。
+
+</Solution>

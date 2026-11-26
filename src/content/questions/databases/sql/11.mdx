@@ -1,0 +1,60 @@
+---
+subject: databases
+chapter: sql
+order: 11
+kind: calc
+difficulty: 3
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)，其中 Enroll 有 7 列，(S2, C1) 的 grade 是 NULL。
+
+(a) 用雙重 `NOT EXISTS` 寫出「修了**所有** 3 學分課程的學生姓名」，寫出結果。
+
+(b) 有人改寫成下面的查詢，它的意思是什麼？結果是什麼？
+
+```
+SELECT DISTINCT s.name
+FROM   Student s JOIN Enroll e ON s.sid = e.sid
+JOIN   Course c ON e.cid = c.cid
+WHERE  c.credits = 3;
+```
+
+(c) 用 `GROUP BY` 與 `HAVING` 寫出 (a)。
+
+<Solution>
+
+**(a)**
+
+```
+SELECT name
+FROM   Student s
+WHERE  NOT EXISTS (
+         SELECT * FROM Course c
+         WHERE  c.credits = 3
+           AND  NOT EXISTS (
+                  SELECT * FROM Enroll e
+                  WHERE  e.sid = s.sid AND e.cid = c.cid));
+```
+
+結果：王小明、李美華、陳志強。
+
+**(b)** 意思是「**至少**修了一門 3 學分課程的學生」，結果也是王小明、李美華、陳志強。
+
+**(c)**
+
+```
+SELECT   s.name
+FROM     Student s JOIN Enroll e ON s.sid = e.sid
+JOIN     Course c ON e.cid = c.cid
+WHERE    c.credits = 3
+GROUP BY s.sid, s.name
+HAVING   COUNT(*) = (SELECT COUNT(*) FROM Course WHERE credits = 3);
+```
+
+**說明**：
+
+- **(a)** 「修了所有 3 學分課」＝「不存在一門 3 學分課是他沒修的」。3 學分的課是 C1、C2。S1、S2、S3 都選了 C1 與 C2（S2 的 C1 雖然沒有成績，仍有選課紀錄），中層找不到沒修的課，所以三人都在結果中；S4 沒有選課，中層找到 C1、C2 都沒修，被排除。
+- **(b)** 這個查詢只要找到**一筆** 3 學分的選課就成立，是「存在」而不是「所有」。在這份資料中兩者剛好相同，但只要有學生只修了 C1、沒修 C2，(b) 會包含他、(a) 不會。用這種「剛好相同」的資料測試，看不出查詢寫錯。
+- **(c)** 每位學生的 3 學分選課數，等於 3 學分課的總數（2 門），就表示全部都修了。`GROUP BY` 要寫 sid 與 name：只寫 name 的話，同名的兩位學生會被併成一組。
+
+</Solution>

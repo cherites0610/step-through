@@ -14,8 +14,11 @@ interface Props {
   box?: number[];
   /** 加粗框的欄（含表頭） */
   boxCol?: number;
+  /** false＝不畫表頭（接在另一個表格下方） */
+  header?: boolean;
 }
-const { x, y, name, cols, rows, colW, cellH = 20, strike = [], mark = [], box = [], boxCol } = Astro.props;
+const { x, y, name, cols, rows, colW, cellH = 20, strike = [], mark = [], box = [], boxCol, header = true } = Astro.props;
+const lead = header ? 1 : 0;
 const top = name ? y + 16 : y;
 const colX = colW.map((_, i) => x + colW.slice(0, i).reduce((a, b) => a + b, 0));
 const width = colW.reduce((a, b) => a + b, 0);
@@ -24,17 +27,18 @@ const isMarked = (r: number, c: number) => mark.some(([mr, mc]) => mr === r && m
 
 {name && <text class="mono" x={x} y={y + 10}>{name}</text>}
 {
-  [cols, ...rows].map((r, ri) => {
+  (header ? [cols, ...rows] : rows).map((r, ri) => {
     const ry = top + ri * cellH;
-    const dataRow = ri - 1;
+    const dataRow = ri - lead;
+    const isHead = header && ri === 0;
     return (
       <>
         {r.map((v, ci) => {
-          const marked = ri > 0 && isMarked(dataRow, ci);
+          const marked = !isHead && isMarked(dataRow, ci);
           return (
             <>
               <rect
-                class={ri === 0 || marked ? 'ink' : 'axis'}
+                class={isHead || marked ? 'ink' : 'axis'}
                 x={colX[ci] + 0.5}
                 y={ry + 0.5}
                 width={colW[ci] - 1}
@@ -47,10 +51,10 @@ const isMarked = (r: number, c: number) => mark.some(([mr, mc]) => mr === r && m
             </>
           );
         })}
-        {ri > 0 && strike.includes(dataRow) && <path class="ink" d={`M${x} ${ry + cellH / 2} L${x + width} ${ry + cellH / 2}`} />}
+        {!isHead && strike.includes(dataRow) && <path class="ink" d={`M${x} ${ry + cellH / 2} L${x + width} ${ry + cellH / 2}`} />}
       </>
     );
   })
 }
-{box.map((r) => <rect class="ink" x={x - 1} y={top + (r + 1) * cellH - 1} width={width + 2} height={cellH + 2} stroke-width="2" />)}
-{boxCol !== undefined && <rect class="ink" x={colX[boxCol] - 1} y={top - 1} width={colW[boxCol] + 2} height={(rows.length + 1) * cellH + 2} stroke-width="2" />}
+{box.map((r) => <rect class="ink" x={x - 1} y={top + (r + lead) * cellH - 1} width={width + 2} height={cellH + 2} stroke-width="2" />)}
+{boxCol !== undefined && <rect class="ink" x={colX[boxCol] - 1} y={top - 1} width={colW[boxCol] + 2} height={(rows.length + lead) * cellH + 2} stroke-width="2" />}

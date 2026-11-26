@@ -25,6 +25,9 @@ import SelectProject from './figures/SelectProject.astro';
 import JoinAsProduct from './figures/JoinAsProduct.astro';
 import OuterJoin from './figures/OuterJoin.astro';
 import Division from './figures/Division.astro';
+import SqlOrder from './figures/SqlOrder.astro';
+import OnVsWhere from './figures/OnVsWhere.astro';
+import GroupHaving from './figures/GroupHaving.astro';
 
 export const mdxComponents = {
   M,
@@ -53,4 +56,7 @@ export const mdxComponents = {
   JoinAsProduct,
   OuterJoin,
   Division,
+  SqlOrder,
+  OnVsWhere,
+  GroupHaving,
 };
