@@ -1,0 +1,37 @@
+---
+subject: databases
+chapter: algebra
+order: 10
+kind: calc
+difficulty: 3
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)。
+
+(a) 用除法寫出「修了所有 3 學分課程的學生姓名」，並一步一步算出結果。
+
+(b) 只用基本運算（不用除法）寫出 (a) 中除法的部分。
+
+(c) 如果改成「修了所有 4 學分課程的學生學號」，結果是什麼？為什麼？
+
+<Solution>
+
+**(a) 王小明、陳志強。(b) 見下。(c) S1、S2、S3。**
+
+**(a)** 令 <M t="R = \pi_{\text{sid}, \text{cid}}(\text{Enroll})" />、<M t="S = \pi_{\text{cid}}(\sigma_{\text{credits} = 3}(\text{Course}))" />：
+
+<M d t="\pi_{\text{name}}(\text{Student} \bowtie (R \div S))" />
+
+1. <M t="S" /> = \{C1, C2\}（資料庫、資料結構都是 3 學分）。
+2. 候選人 <M t="T_1 = \pi_{\text{sid}}(R)" /> = \{S1, S2, S3\}。
+3. <M t="T_1 \times S" /> 有 6 個組合，減掉實際的選課，缺少的只有 (S2, C1)。
+4. <M t="R \div S" /> = \{S1, S2, S3\} − \{S2\} = \{S1, S3\}。
+5. 和 Student 合併取姓名：王小明、陳志強。
+
+**(b)**
+
+<M d t="\pi_{\text{sid}}(R) - \pi_{\text{sid}}((\pi_{\text{sid}}(R) \times S) - R)" />
+
+**(c)** 沒有 4 學分的課，除數 <M t="S" /> 是空集合。<M t="T_1 \times S" /> 也是空集合，沒有任何「缺少的組合」，所以 <M t="T_2" /> 是空集合，結果是全部候選人 \{S1, S2, S3\}。邏輯上，「對每一門 4 學分的課都修了」在沒有這種課時自動成立。S4 不在結果中，因為候選人只來自 Enroll，而 S4 沒有修課。
+
+</Solution>

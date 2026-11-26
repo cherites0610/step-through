@@ -1,0 +1,43 @@
+---
+// 圖：自然合併丟掉沒有配對的 S4；左外部合併保留 S4，右邊的屬性補 NULL。
+import Table from './rel/Table.astro';
+
+type Row = (string | null)[];
+const students = [
+  ['S1', '王小明'],
+  ['S2', '李美華'],
+  ['S3', '陳志強'],
+  ['S4', '林大同'],
+];
+const enroll = [
+  ['S1', 'C1', '85'],
+  ['S1', 'C2', '90'],
+  ['S1', 'C3', '72'],
+  ['S2', 'C2', '78'],
+  ['S3', 'C1', '66'],
+  ['S3', 'C2', '95'],
+];
+const inner: Row[] = students.flatMap(([sid, name]) => enroll.filter((e) => e[0] === sid).map((e) => [sid, name, e[1], e[2]]));
+const unmatched = students.filter(([sid]) => !enroll.some((e) => e[0] === sid));
+const outer: Row[] = [...inner, ...unmatched.map(([sid, name]) => [sid, name, null, null])];
+const colW = [40, 64, 44, 52], CELL = 20;
+const PW = 260, GAP = 20, W = PW * 2 + GAP, TOP = 22;
+const H = TOP + 16 + CELL * (outer.length + 1) + 8;
+const cols = ['sid', 'name', 'cid', 'grade'];
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`左：Student 自然合併 Enroll，共 ${inner.length} 列，沒有修課的 S4 不見了。右：左外部合併，共 ${outer.length} 列，多出 S4 一列，cid 與 grade 為 NULL`}>
+  <text x="0" y="14">自然合併：{inner.length} 列，S4 不見了</text>
+  <Table x={0} y={TOP} cols={cols} rows={inner} colW={colW} cellH={CELL} />
+  <path class="axis" d={`M${PW + GAP / 2} 0 L${PW + GAP / 2} ${H}`} />
+  <text x={PW + GAP} y="14">左外部合併：{outer.length} 列，保留 S4</text>
+  <Table
+    x={PW + GAP}
+    y={TOP}
+    cols={cols}
+    rows={outer}
+    colW={colW}
+    cellH={CELL}
+    mark={[[outer.length - 1, 2], [outer.length - 1, 3]]}
+  />
+</svg>

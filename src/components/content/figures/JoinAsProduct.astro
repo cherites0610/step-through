@@ -1,0 +1,29 @@
+---
+// 圖：Student × Dept 的 6 列，等值合併（兩邊 dname 相同）只留其中 2 列。
+import Table from './rel/Table.astro';
+
+const student = [
+  ['S1', '王小明', '資管'],
+  ['S2', '李美華', '資工'],
+  ['S4', '林大同', '電機'],
+];
+const dept = [
+  ['資管', '管理大樓'],
+  ['資工', '工程館'],
+];
+const rows = student.flatMap((s) => dept.map((d) => [...s, ...d]));
+const matched = rows.flatMap((r, i) => (r[2] === r[3] ? [i] : []));
+const colW = [40, 64, 52, 52, 72], CELL = 20, X = 60;
+const W = 540, TOP = 44;
+const H = TOP + CELL * (rows.length + 1) + 8;
+const right = X + colW.reduce((a, b) => a + b, 0);
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Student 的 3 列乘上 Dept 的 2 列，共 ${rows.length} 列；其中兩邊 dname 相同的只有 S1 資管與 S2 資工兩列，就是等值合併的結果；S4 電機沒有任何一列留下`}>
+  <text x={X} y="14">Student × Dept：{student.length} × {dept.length} = {rows.length} 列</text>
+  <Table x={X} y={TOP} cols={['sid', 'name', 'dname', 'dname', 'building']} rows={rows} colW={colW} cellH={CELL} box={matched} />
+  {matched.map((i) => <text x={right + 12} y={TOP + CELL * (i + 1) + 14}>← 兩邊 dname 相同</text>)}
+  <text x={X} y={TOP - 6} class="mono">來自 Student</text>
+  <text x={X + colW[0] + colW[1] + colW[2] + 4} y={TOP - 6} class="mono">來自 Dept</text>
+  <path class="ink" d={`M${X + colW[0] + colW[1] + colW[2]} ${TOP - 16} L${X + colW[0] + colW[1] + colW[2]} ${TOP + CELL * (rows.length + 1)}`} stroke-width="2" />
+</svg>

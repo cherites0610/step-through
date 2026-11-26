@@ -1,0 +1,31 @@
+---
+subject: databases
+chapter: algebra
+order: 8
+kind: choice
+difficulty: 2
+---
+
+下列關於關聯代數的敘述，哪些正確？（複選）
+
+(A) <M t="\sigma_{c_1}(\sigma_{c_2}(R)) = \sigma_{c_1 \wedge c_2}(R)" />
+
+(B) <M t="R - S = S - R" />
+
+(C) <M t="R \cap S = R - (R - S)" />
+
+(D) <M t="R" /> 與 <M t="S" /> 沒有同名屬性時，<M t="R \bowtie S = R \times S" />
+
+(E) <M t="\pi_{\text{name}}(\sigma_{\text{dname} = \text{資管}}(\text{Student})) = \sigma_{\text{dname} = \text{資管}}(\pi_{\text{name}}(\text{Student}))" />
+
+<Solution>
+
+**答案：(A)、(C)、(D)。**
+
+- **(A) 對。** 先後用兩個條件篩選，等於一次用「兩個條件都成立」篩選。
+- **(B) 錯。** 差集沒有交換律。例如修 C2 的 \{S1, S2, S3\} 減修 C1 的 \{S1, S3\} 是 \{S2\}，反過來是空集合。
+- **(C) 對。** <M t="R - S" /> 是 R 中不在 S 的部分；從 R 扣掉它，剩下的就是兩者共有的。
+- **(D) 對。** 自然合併要求所有同名屬性相等；沒有同名屬性就沒有條件，所有組合都留下，等於笛卡兒積。
+- **(E) 錯。** 右邊先投影只剩 name，選擇時已經沒有 dname 可以比較，這個運算式沒有定義。
+
+</Solution>

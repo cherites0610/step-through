@@ -1,0 +1,33 @@
+---
+subject: databases
+chapter: algebra
+order: 6
+kind: calc
+difficulty: 2
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)。
+
+用關聯代數寫出下列查詢，並寫出結果。
+
+(a) 修了「資料結構」的學生姓名。
+
+(b) 沒有修任何課的學生姓名。
+
+(c) 修了 C1 但沒有修 C3 的學生學號。
+
+<Solution>
+
+**(a)** <M t="\pi_{\text{name}}(\sigma_{\text{title} = \text{資料結構}}(\text{Student} \bowtie \text{Enroll} \bowtie \text{Course}))" />，結果：王小明、李美華、陳志強。
+
+**(b)** <M t="\pi_{\text{name}}(\text{Student} \bowtie (\pi_{\text{sid}}(\text{Student}) - \pi_{\text{sid}}(\text{Enroll})))" />，結果：林大同。
+
+**(c)** <M t="\pi_{\text{sid}}(\sigma_{\text{cid} = \text{C1}}(\text{Enroll})) - \pi_{\text{sid}}(\sigma_{\text{cid} = \text{C3}}(\text{Enroll}))" />，結果：S3。
+
+**(a)** 三個關聯合併後，選出課名是資料結構（C2）的列：(S1, C2)、(S2, C2)、(S3, C2)，再取姓名。
+
+**(b)** 「沒有」用差集：所有學號 \{S1, S2, S3, S4\} 減掉出現在 Enroll 中的學號 \{S1, S2, S3\}，得到 \{S4\}。但題目要姓名，學號 S4 的姓名在 Student 裡，所以再和 Student 自然合併（共同屬性 sid），取出 name。
+
+**(c)** 修 C1 的學號是 \{S1, S3\}，修 C3 的是 \{S1\}，相減得 \{S3\}。注意不能寫成 <M t="\sigma_{\text{cid} = \text{C1} \wedge \text{cid} \ne \text{C3}}(\text{Enroll})" />：選擇一次只看一列，這個條件只要 cid 是 C1 就成立，得到 S1、S3，S1 其實有修 C3。
+
+</Solution>

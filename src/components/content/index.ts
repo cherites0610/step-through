@@ -1,6 +1,7 @@
 /** 觀念說明與考題的 MDX 可以直接使用的元件（由章節頁傳給 <Content components={...} />） */
 import M from './M.astro';
 import Figure from './Figure.astro';
+import OJ from './OJ.astro';
 import LoopTriangle from './figures/LoopTriangle.astro';
 import BigODefinition from './figures/BigODefinition.astro';
 import GrowthChart from './figures/GrowthChart.astro';
@@ -20,10 +21,15 @@ import RelationTerms from './figures/RelationTerms.astro';
 import SuperkeyLattice from './figures/SuperkeyLattice.astro';
 import ForeignKeyCheck from './figures/ForeignKeyCheck.astro';
 import DeleteActions from './figures/DeleteActions.astro';
+import SelectProject from './figures/SelectProject.astro';
+import JoinAsProduct from './figures/JoinAsProduct.astro';
+import OuterJoin from './figures/OuterJoin.astro';
+import Division from './figures/Division.astro';
 
 export const mdxComponents = {
   M,
   Figure,
+  OJ,
   LoopTriangle,
   BigODefinition,
   GrowthChart,
@@ -43,4 +49,8 @@ export const mdxComponents = {
   SuperkeyLattice,
   ForeignKeyCheck,
   DeleteActions,
+  SelectProject,
+  JoinAsProduct,
+  OuterJoin,
+  Division,
 };

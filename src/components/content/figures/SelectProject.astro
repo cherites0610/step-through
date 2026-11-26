@@ -1,0 +1,34 @@
+---
+// 圖：選擇（橫切，挑列）與投影（直切，挑欄並去重複）。
+import Table from './rel/Table.astro';
+
+type Row = string[];
+const cols = ['sid', 'name', 'dname'];
+const student: Row[] = [
+  ['S1', '王小明', '資管'],
+  ['S2', '李美華', '資工'],
+  ['S3', '陳志強', '資管'],
+  ['S4', '林大同', '電機'],
+];
+const colW = [40, 64, 56], CELL = 20;
+const picked = student.flatMap((r, i) => (r[2] === '資管' ? [i] : []));
+const selected = picked.map((i) => student[i]);
+const projected = [...new Set(student.map((r) => r[2]))].map((d) => [d]);
+const PW = 260, GAP = 20, W = PW * 2 + GAP;
+const T1 = 22, T2 = T1 + 16 + CELL * (student.length + 1) + 30;
+const H = T2 + 16 + CELL * (Math.max(selected.length, projected.length) + 1) + 6;
+const arrowY = T2 - 18;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`左：選擇 dname = 資管，從 Student 的 4 列中挑出 S1、S3 兩列，三個屬性都保留。右：投影 dname，只留 dname 一欄，資管重複只留一個，結果 ${projected.length} 列：資管、資工、電機`}>
+  <text x="0" y="14">選擇 σ dname = 資管：挑列</text>
+  <Table x={0} y={T1} name="Student" cols={cols} rows={student} colW={colW} cellH={CELL} box={picked} />
+  <text x="0" y={arrowY}>↓ 結果 {selected.length} 列，分支度不變</text>
+  <Table x={0} y={T2} cols={cols} rows={selected} colW={colW} cellH={CELL} />
+
+  <path class="axis" d={`M${PW + GAP / 2} 0 L${PW + GAP / 2} ${H}`} />
+  <text x={PW + GAP} y="14">投影 π dname：挑欄</text>
+  <Table x={PW + GAP} y={T1} name="Student" cols={cols} rows={student} colW={colW} cellH={CELL} boxCol={2} />
+  <text x={PW + GAP} y={arrowY}>↓ 去掉重複，剩 {projected.length} 列</text>
+  <Table x={PW + GAP} y={T2} cols={['dname']} rows={projected} colW={[56]} cellH={CELL} />
+</svg>

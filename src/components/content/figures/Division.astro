@@ -1,0 +1,37 @@
+---
+// 圖：除法的計算。T1 × S 是「每位候選人都修了每門課」該有的組合，扣掉實際的選課，剩下缺少的組合（黑底）。
+import Table from './rel/Table.astro';
+
+const enroll = [
+  ['S1', 'C1'],
+  ['S1', 'C2'],
+  ['S1', 'C3'],
+  ['S2', 'C2'],
+  ['S3', 'C1'],
+  ['S3', 'C2'],
+];
+const courses = ['C1', 'C2', 'C3'];
+const cand = [...new Set(enroll.map((e) => e[0]))];
+const all = cand.flatMap((s) => courses.map((c) => [s, c]));
+const has = (s: string, c: string) => enroll.some((e) => e[0] === s && e[1] === c);
+const missing = all.flatMap((r, i) => (has(r[0], r[1]) ? [] : [i]));
+const t2 = [...new Set(missing.map((i) => all[i][0]))];
+const answer = cand.filter((s) => !t2.includes(s));
+const colW = [44, 44], CELL = 20, X = 40, TOP = 22, W = 540;
+const H = TOP + 16 + CELL * (all.length + 1) + 8;
+const NX = X + 88 + 40;
+const lines = [
+  `T₁ = π sid(Enroll) = {${cand.join(', ')}}`,
+  `T₁ × S：${cand.length} × ${courses.length} = ${all.length} 個組合`,
+  `扣掉實際的 ${enroll.length} 筆選課，`,
+  `缺少 ${missing.length} 個組合（黑底）`,
+  `T₂ = 有缺的學生 = {${t2.join(', ')}}`,
+  `答案 T₁ − T₂ = {${answer.join(', ')}}`,
+];
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`候選人 ${cand.join('、')} 乘上 3 門課共 ${all.length} 個組合；扣掉實際的 ${enroll.length} 筆選課，缺少的是 S2 的 C1、C3 與 S3 的 C3；有缺的 S2、S3 被刪掉，答案是 S1`}>
+  <text class="mono" x={X} y="14">T₁ × S</text>
+  <Table x={X} y={TOP} cols={['sid', 'cid']} rows={all} colW={colW} cellH={CELL} mark={missing.flatMap((i) => [[i, 0], [i, 1]] as [number, number][])} />
+  {lines.map((l, i) => <text x={NX} y={TOP + 40 + i * 30}>{l}</text>)}
+</svg>
