@@ -71,8 +71,31 @@ describe('觀念說明（src/content/chapters）', () => {
         const h3 = [...body.matchAll(/^### (.+)$/gm)].map((m) => m[1].trim());
         const expected = chapter!.units.filter((u) => !u.topic).map((u) => u.title);
         expect(h3.filter((h) => expected.includes(h))).toEqual(expected);
-        for (const h of h3) expect([...chapter!.units.map((u) => u.title), '常見陷阱'], `多出的 ### 段落：${h}`).toContain(h);
+        for (const h of h3) expect([...chapter!.units.map((u) => u.title), '常見陷阱', '專有名詞'], `多出的 ### 段落：${h}`).toContain(h);
         expect(body.match(/^## /m), '觀念說明不用 ## 標題').toBeNull();
+      });
+
+      it('最後一段是「專有名詞」表；正文用粗體加英文引入的名詞都收在表裡', () => {
+        const h3 = [...body.matchAll(/^### (.+)$/gm)].map((m) => m[1].trim());
+        expect(h3.at(-1), '最後一個 ### 要是「專有名詞」').toBe('專有名詞');
+        if (h3.includes('常見陷阱')) expect(h3.at(-2), '「常見陷阱」緊接在「專有名詞」之前').toBe('常見陷阱');
+
+        const [main, glossary] = body.split(/^### 專有名詞$/m);
+        const rows = glossary
+          .split('\n')
+          .filter((l) => l.startsWith('|'))
+          .map((l) => l.slice(1, -1).split(' | ').map((c) => c.trim()));
+        expect(rows[0], '表頭是「名詞 | 英文 | 說明」').toEqual(['名詞', '英文', '說明']);
+        const terms = rows.slice(2);
+        expect(terms.length).toBeGreaterThanOrEqual(5);
+        for (const r of terms) {
+          expect(r.length, r.join(' | ')).toBe(3);
+          for (const c of r) expect(c.length, r.join(' | ')).toBeGreaterThan(0);
+        }
+
+        const names = terms.map((r) => r[0]);
+        for (const [, term] of prose(main).matchAll(/\*\*([^*]+)\*\*（[A-Za-z]/g))
+          expect(names.some((n) => n.includes(term)), `「${term}」沒有收進專有名詞表`).toBe(true);
       });
 
       it('章末檢核 4～6 條，都以「能」開頭', () => {
