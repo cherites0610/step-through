@@ -1,0 +1,30 @@
+---
+// 圖：關聯的術語。屬性（表頭）、值組（列）、分支度＝屬性個數、基數＝值組個數。
+import Table from './rel/Table.astro';
+
+const cols = ['sid', 'name', 'dname', 'level'];
+const rows = [
+  ['S1', '王小明', '資管', '大學部'],
+  ['S2', '李美華', '資工', '研究所'],
+  ['S3', '陳志強', '資管', '大學部'],
+];
+const colW = [48, 72, 60, 72];
+const W = 540, X = 130, Y = 50, CELL = 24;
+const tableW = colW.reduce((a, b) => a + b, 0);
+const bodyTop = Y + 16 + CELL;
+const bodyBottom = bodyTop + rows.length * CELL;
+const right = X + tableW;
+const H = bodyBottom + 40;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Student 關聯有 sid、name、dname、level 四個屬性，分支度 4；有三個值組，基數 3；每一列是一個值組，每一欄是一個屬性">
+  <Table x={X} y={Y} name="Student" cols={cols} rows={rows} colW={colW} cellH={CELL} />
+  <path class="ink" d={`M${X} ${Y - 14} L${X} ${Y - 20} L${right} ${Y - 20} L${right} ${Y - 14}`} />
+  <text x={X + tableW / 2} y={Y - 28} text-anchor="middle">屬性（{cols.length} 個）：分支度 = {cols.length}</text>
+  <path class="ink" d={`M${right + 8} ${bodyTop} L${right + 14} ${bodyTop} L${right + 14} ${bodyBottom} L${right + 8} ${bodyBottom}`} />
+  <text x={right + 22} y={(bodyTop + bodyBottom) / 2 - 4}>值組（{rows.length} 個）</text>
+  <text x={right + 22} y={(bodyTop + bodyBottom) / 2 + 14}>基數 = {rows.length}</text>
+  <path class="ink" d={`M${X - 8} ${bodyTop + CELL / 2} L${X - 30} ${bodyTop + CELL / 2}`} />
+  <text x={X - 34} y={bodyTop + CELL / 2 + 5} text-anchor="end">一個值組</text>
+  <text x={X + colW[0] + colW[1] + colW[2] / 2} y={bodyBottom + 26} text-anchor="middle">每一格的值都來自屬性的定義域，例如 dom(dname) = {'{'}資管, 資工, 電機{'}'}</text>
+</svg>

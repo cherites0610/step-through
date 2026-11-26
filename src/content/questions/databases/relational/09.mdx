@@ -1,0 +1,31 @@
+---
+subject: databases
+chapter: relational
+order: 9
+kind: calc
+difficulty: 2
+---
+
+資料庫的定義與資料如下：
+
+- Dept：資管、資工
+- Student(<u>sid</u>, name, dname)：(S1, 王小明, 資管)、(S2, 李美華, 資工)、(S3, 陳志強, 資管)，dname 參照 Dept，`ON DELETE SET NULL`
+- Enroll(<u>sid, cid</u>, grade)：(S1, C1, 85)、(S1, C2, 90)、(S2, C2, 78)、(S3, C1, 66)，sid 參照 Student，`ON DELETE CASCADE`
+
+(a) 刪除 Dept 的「資管」之後，Student 與 Enroll 各是什麼樣子？
+
+(b) 接著刪除 Student 的 S1，Enroll 剩下哪些列？
+
+(c) 有人建議把 Enroll.sid 也改成 `ON DELETE SET NULL`，可行嗎？
+
+<Solution>
+
+**(a) Student：S1、S3 的 dname 變成 NULL，S2 不變；Enroll 4 列都不變。(b) 剩 (S2, C2, 78) 與 (S3, C1, 66)。(c) 不可行。**
+
+**(a)** 參照資管的是 S1 與 S3，Student 的外鍵設定是 SET NULL，所以兩人的 dname 改為 NULL，學生本身沒有被刪除。Enroll 參照的是 Student，學生都還在，所以 Enroll 不受影響。
+
+**(b)** 刪除 S1，Enroll 的外鍵設定是 CASCADE，參照 S1 的 (S1, C1, 85)、(S1, C2, 90) 一起刪除，剩下 2 列。
+
+**(c)** 不可行。sid 是 Enroll 主鍵 (sid, cid) 的一部分，設為 NULL 會違反實體完整性，DBMS 會拒絕這個刪除。外鍵是主鍵的一部分時，只能用 RESTRICT 或 CASCADE。
+
+</Solution>

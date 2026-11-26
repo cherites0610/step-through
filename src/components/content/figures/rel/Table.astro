@@ -1,0 +1,50 @@
+---
+// 圖中的小表格：表頭用墨線、內容用髮絲線。strike＝被刪除的列（畫刪除線），mark＝要強調的格子（黑底）。
+interface Props {
+  x: number;
+  y: number;
+  name?: string;
+  cols: string[];
+  rows: (string | null)[][];
+  colW: number[];
+  cellH?: number;
+  strike?: number[];
+  mark?: [number, number][];
+}
+const { x, y, name, cols, rows, colW, cellH = 20, strike = [], mark = [] } = Astro.props;
+const top = name ? y + 16 : y;
+const colX = colW.map((_, i) => x + colW.slice(0, i).reduce((a, b) => a + b, 0));
+const width = colW.reduce((a, b) => a + b, 0);
+const isMarked = (r: number, c: number) => mark.some(([mr, mc]) => mr === r && mc === c);
+---
+
+{name && <text class="mono" x={x} y={y + 10}>{name}</text>}
+{
+  [cols, ...rows].map((r, ri) => {
+    const ry = top + ri * cellH;
+    const dataRow = ri - 1;
+    return (
+      <>
+        {r.map((v, ci) => {
+          const marked = ri > 0 && isMarked(dataRow, ci);
+          return (
+            <>
+              <rect
+                class={ri === 0 || marked ? 'ink' : 'axis'}
+                x={colX[ci] + 0.5}
+                y={ry + 0.5}
+                width={colW[ci] - 1}
+                height={cellH - 1}
+                style={marked ? 'fill: var(--color-ink)' : undefined}
+              />
+              <text class="mono" x={colX[ci] + 6} y={ry + 14} style={marked ? 'fill: var(--color-paper)' : undefined}>
+                {v ?? 'NULL'}
+              </text>
+            </>
+          );
+        })}
+        {ri > 0 && strike.includes(dataRow) && <path class="ink" d={`M${x} ${ry + cellH / 2} L${x + width} ${ry + cellH / 2}`} />}
+      </>
+    );
+  })
+}
