@@ -25,6 +25,7 @@ pnpm smoke [網址]  # 對已部署的網站做冒煙測試（預設正式站）
 
 - **新增主題**：在 `src/content/topics/<主題>/` 加 `zh-TW.mdx`，並在 `src/data/subjects.ts` 對應章節的單元加上 `topic`（沒登記會在建置時報錯）。科目、章節、先修關係也都在這個檔案；學習地圖由先修關係自動排版（`src/core/map/layout.ts`），先修不存在或有環時建置會失敗。接著執行 `pnpm build && pnpm og` 產生 OG 圖；vitest 會檢查每個主題都有圖。主題若曾在 v1 以 `/zh-TW/<主題>/` 上線，`public/_redirects` 要有轉到新網址的一行（vitest 會檢查）。
 - **新增考題**：在 `src/content/questions/<科目>/<章節>/` 加一個 MDX（frontmatter 見 `src/content.config.ts`：出處、題型、難度、章內順序；省略出處＝自編題）。內文是題目，詳解寫在 `<Solution>…</Solution>` 裡，章節頁會把它收合起來。指到不存在的章節時建置會失敗。
+- **撰寫章節內容**：先讀 [docs/content-guide.md](docs/content-guide.md)（章節撰寫守則，以資料結構第 1 章為範本）；部分規則由 `src/content.test.ts` 與 `e2e/content.spec.ts` 自動檢查。
 - **章節的觀念說明**：在 `src/content/chapters/<科目>/<章節>.mdx` 寫一篇（frontmatter 有 `summary`，顯示在章節頁標題下方，也當作頁面描述）。內文用 `###` 分段；標題與單元名稱相同時，章節頁的單元清單會連到那一段。程式碼區塊不上色（偽代碼）。
 - **公式與圖**：觀念說明與考題的 MDX 用 `<M t="\frac{n}{2}" />` 寫行內公式、`<M d t="..." />` 寫獨立一行的公式（MDX 會把 `{}` 當成 JavaScript，所以不能用 `$…$`）；建置時由 KaTeX 排好，TeX 寫錯時建置失敗。圖放在 `src/components/content/figures/`（以函數計算座標的 SVG），用 `<Figure no="1-2" caption="…"><BigODefinition /></Figure>` 放進內文，並在 `src/components/content/index.ts` 登記。
 - **章末自我檢核**：在 `src/data/subjects.ts` 該章的 `checklist` 寫「能……」的具體能力描述。

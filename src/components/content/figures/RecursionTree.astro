@@ -6,7 +6,7 @@ const levels = [
   { count: 4, label: 'n/4' },
   { count: 8, label: 'n/8' },
 ];
-const TREE_W = 400, COST_X = 424, W = 560, ROW = 64, TOP = 28, BOX_H = 26;
+const TREE_W = 384, COST_X = 404, W = 540, ROW = 64, TOP = 28, BOX_H = 26;
 const boxW = (count: number) => Math.min(72, TREE_W / count - 8);
 const cx = (count: number, k: number) => ((k + 0.5) * TREE_W) / count;
 const H = TOP + levels.length * ROW + 64;

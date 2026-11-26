@@ -1,7 +1,7 @@
 ---
 // 圖：Big-O 的定義。f(n) = n² + 6n + 10、c·g(n) = 2n²；
 // 兩者相等於 n² = 6n + 10 的正根 n₀ = 3 + √19 ≈ 7.36，之後 f(n) 一直在 c·g(n) 下方。
-const W = 560, H = 300, L = 48, R = 150, T = 16, B = 36;
+const W = 540, H = 300, L = 48, R = 150, T = 16, B = 36;
 const XMAX = 14, YMAX = 400;
 const pw = W - L - R, ph = H - T - B;
 const X = (x: number) => +(L + (x / XMAX) * pw).toFixed(1);
