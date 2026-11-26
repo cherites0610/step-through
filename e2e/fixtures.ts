@@ -11,6 +11,8 @@ export const test = base.extend({
     page.goto = async (url, options) => {
       const response = await goto(url, options);
       await page.waitForFunction(() => !document.querySelector('astro-island[ssr]'));
+      // 等「新頁面從最上方開始」的保護結束（Base.astro），之後的捲動才不會被拉回頂端
+      await page.waitForFunction(() => document.documentElement.dataset.scrollGuard !== 'on');
       return response;
     };
     await use(page);

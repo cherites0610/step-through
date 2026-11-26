@@ -40,6 +40,64 @@ const siteName = t(lang).siteName;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#F5F4F6" />
+    <!--
+      點連結進入的新頁面一律從最上方開始。iPhone Safari 會把新頁面停在上一頁的捲動高度
+      （在章節頁底部點「接著可以讀」時遇到），而且是在載入之後才捲過去，所以：
+      1. 在首次繪製前就先關掉這一頁的捲動還原並回到頂端；
+      2. 載入期間只要被捲離頂端就拉回來，直到 load 之後 400ms 內都沒有再被捲動（最多 1.5 秒）；
+         使用者一碰觸、捲動或按鍵就立刻停止；
+      3. 結束後恢復 auto，讓之後按「上一頁」回到這一頁時仍保留閱讀位置。
+      只處理一般的連結導覽（不含上一頁／下一頁、重新整理），網址有 #錨點 時交給錨點。
+    -->
+    <script is:inline>
+      (function () {
+        var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+        if (!nav || nav.type !== 'navigate' || location.hash) return;
+        var root = document.documentElement;
+        root.dataset.scrollGuard = 'on';
+        var hist = window.history;
+        if ('scrollRestoration' in hist) hist.scrollRestoration = 'manual';
+        var stopped = false;
+        var finish = function () {
+          if (root.dataset.scrollGuard === 'done') return;
+          stopped = true;
+          if ('scrollRestoration' in hist) hist.scrollRestoration = 'auto';
+          root.dataset.scrollGuard = 'done';
+        };
+        var lastPull = performance.now();
+        ['touchstart', 'wheel', 'keydown', 'mousedown'].forEach(function (ev) {
+          window.addEventListener(ev, finish, { once: true, passive: true, capture: true });
+        });
+        var toTop = function () {
+          if (!stopped && window.scrollY !== 0) {
+            lastPull = performance.now();
+            window.scrollTo(0, 0);
+          }
+        };
+        toTop();
+        window.addEventListener('scroll', function () {
+          if (!stopped) toTop();
+        }, { passive: true });
+        document.addEventListener('DOMContentLoaded', function () {
+          toTop();
+        });
+        window.addEventListener('pageshow', function () {
+          toTop();
+        });
+        window.addEventListener('load', function () {
+          toTop();
+          var start = performance.now();
+          lastPull = start;
+          (function tick() {
+            if (stopped) return;
+            toTop();
+            var now = performance.now();
+            if (now - lastPull > 400 || now - start > 1500) finish();
+            else requestAnimationFrame(tick);
+          })();
+        });
+      })();
+    </script>
     <title>{title}</title>
     <meta name="description" content={desc} />
     {noindex && <meta name="robots" content="noindex" />}
