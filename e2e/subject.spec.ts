@@ -50,23 +50,24 @@ test.describe('科目頁：資料結構學習地圖', () => {
   });
 });
 
-const others: [string, string, number][] = [
-  ['algorithms', '演算法', 11],
-  ['operating-systems', '作業系統', 9],
-  ['computer-organization', '計算機組織', 9],
-  ['discrete-math', '離散數學', 9],
-  ['linear-algebra', '線性代數', 9],
-  ['databases', '資料庫', 10],
-  ['intro-cs', '計算機概論', 10],
+// [科目, 名稱, 章節數, 已寫好觀念說明的章節數]
+const others: [string, string, number, number][] = [
+  ['algorithms', '演算法', 11, 0],
+  ['operating-systems', '作業系統', 9, 0],
+  ['computer-organization', '計算機組織', 9, 0],
+  ['discrete-math', '離散數學', 9, 0],
+  ['linear-algebra', '線性代數', 9, 0],
+  ['databases', '資料庫', 10, 1],
+  ['intro-cs', '計算機概論', 10, 0],
 ];
-for (const [id, title, chapters] of others) {
+for (const [id, title, chapters, written] of others) {
   test(`${title}：學習地圖與章節清單`, async ({ page }) => {
     await page.goto(`/zh-TW/${id}/`);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
     const map = page.getByRole('group', { name: `${title}的章節先修關係圖` });
     await expect(map.getByRole('link')).toHaveCount(chapters);
-    // 還沒有單元頁：全部是即將推出
-    await expect(map.locator('a.is-soon')).toHaveCount(chapters);
+    // 沒有互動單元；還沒寫內容的章節是即將推出
+    await expect(map.locator('a.is-soon')).toHaveCount(chapters - written);
     await expect(page.locator('section[aria-labelledby="list-heading"] ol > li')).toHaveCount(chapters);
     await expect(page.locator('main')).toContainText('0 個互動單元已上線');
   });

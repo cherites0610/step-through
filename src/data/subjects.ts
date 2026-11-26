@@ -30,12 +30,13 @@ export type Subject = {
 };
 
 /** 還沒有單元頁的章節：單元只有名稱 */
-const ch = (id: string, no: number, title: string, prereqs: string[], units: string[]): Chapter => ({
+const ch = (id: string, no: number, title: string, prereqs: string[], units: string[], checklist?: string[]): Chapter => ({
   id,
   no,
   title,
   prereqs,
   units: units.map((title) => ({ title })),
+  ...(checklist && { checklist }),
 });
 
 export const subjects: Subject[] = [
@@ -323,16 +324,29 @@ export const subjects: Subject[] = [
     scope: 'ER 模型、關聯模型與代數、SQL、正規化、索引、查詢處理與交易。',
     exams: ['資管所'],
     chapters: [
-      ch('intro', 1, '資料庫概論', [], ['資料庫系統架構', '資料獨立性', '資料模型']),
-      ch('er', 2, 'ER 模型', ['intro'], ['實體與關係', '基數與參與限制', '弱實體', 'ER 圖轉關聯綱要']),
-      ch('relational', 3, '關聯模型', ['intro'], ['鍵', '完整性限制']),
-      ch('algebra', 4, '關聯代數', ['relational'], ['選擇與投影', '合併（Join）', '除法', '關聯演算']),
-      ch('sql', 5, 'SQL', ['algebra'], ['基本查詢', '子查詢', '聚合與分組', '檢視表', '觸發程序']),
-      ch('normalization', 6, '正規化', ['relational'], ['函數相依', '屬性閉包與候選鍵', '1NF 到 BCNF', '多值相依與 4NF', '無損分解與保持相依']),
-      ch('storage', 7, '儲存與索引', ['relational'], ['檔案組織', 'B+ 樹索引', '雜湊索引']),
-      ch('query', 8, '查詢處理與最佳化', ['algebra', 'storage'], ['合併演算法', '成本估計', '查詢最佳化']),
-      ch('transactions', 9, '交易與並行控制', ['intro'], ['ACID', '可序列化', '兩階段鎖定', '時間戳記排序']),
-      ch('recovery', 10, '回復', ['transactions'], ['日誌', '檢查點', 'ARIES']),
+      ch(
+        'intro',
+        1,
+        '資料庫概論',
+        [],
+        ['檔案系統與 DBMS', '三層綱要架構', '資料獨立性', '資料模型', '資料庫語言'],
+        [
+          '能說明檔案系統的缺點，以及 DBMS 如何解決每一項',
+          '能畫出三層綱要架構，說明每一層與兩個對映的用途，並區分綱要與實例',
+          '能判斷一項變更由哪一種資料獨立性吸收、要修改哪一個對映',
+          '能比較階層式、網路式與關聯式模型表示同一份資料的方式',
+          '能把 SQL 敘述分類為 DDL、DML、DCL，並區分程序性與非程序性 DML',
+        ],
+      ),
+      ch('er', 2, 'ER 模型', ['intro'], ['實體與屬性', '關係與基數限制', '弱實體', '特殊化與一般化', 'ER 圖轉關聯綱要']),
+      ch('relational', 3, '關聯模型', ['intro'], ['基本術語', '鍵', '完整性限制', '參考完整性的維護']),
+      ch('algebra', 4, '關聯代數', ['relational'], ['選擇與投影', '集合運算與笛卡兒積', '合併（Join）', '除法', '關聯演算']),
+      ch('sql', 5, 'SQL', ['algebra'], ['基本查詢', '合併與外部合併', '聚合與分組', '子查詢', '資料定義與檢視表', '觸發程序']),
+      ch('normalization', 6, '正規化', ['relational'], ['函數相依', '屬性閉包與最小覆蓋', '1NF 到 BCNF', '無損分解與保持相依', '多值相依與 4NF']),
+      ch('storage', 7, '儲存與索引', ['relational'], ['檔案組織', '索引的種類', 'B+ 樹索引', '雜湊索引']),
+      ch('query', 8, '查詢處理與最佳化', ['algebra', 'storage'], ['外部排序', '合併演算法', '成本估計', '查詢最佳化']),
+      ch('transactions', 9, '交易與並行控制', ['intro'], ['ACID 與並行問題', '可序列化', '可回復排程', '兩階段鎖定與死結', '時間戳記排序', '隔離等級']),
+      ch('recovery', 10, '回復', ['transactions'], ['日誌與 WAL', '延遲更新與立即更新', '檢查點', 'ARIES']),
     ],
   },
   {
