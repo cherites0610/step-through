@@ -48,30 +48,10 @@ const siteName = t(lang).siteName;
          使用者一碰觸、捲動或按鍵就立刻停止；
       3. 結束後恢復 auto，讓之後按「上一頁」回到這一頁時仍保留閱讀位置。
       只處理一般的連結導覽（不含上一頁／下一頁、重新整理），網址有 #錨點 時交給錨點。
-      網址加上 ?debug=scroll 會在右下角列出捲動紀錄（暫時的診斷工具）。
     -->
     <script is:inline>
       (function () {
         var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
-        var debug = /[?&]debug=scroll\b/.test(location.search);
-        var log = [];
-        var t0 = performance.now();
-        var note = function (what) {
-          if (!debug) return;
-          log.push(Math.round(performance.now() - t0) + 'ms ' + what + ' y=' + Math.round(window.scrollY));
-          var box = document.getElementById('scroll-debug');
-          if (box) box.textContent = log.join('\n');
-        };
-        if (debug) {
-          document.addEventListener('DOMContentLoaded', function () {
-            var box = document.createElement('pre');
-            box.id = 'scroll-debug';
-            box.style.cssText = 'position:fixed;left:4px;top:60px;z-index:99;max-height:40vh;overflow:hidden;margin:0;padding:6px;background:#16181a;color:#f5f4f6;font:11px/1.4 monospace;white-space:pre;opacity:.9;pointer-events:none';
-            document.body.appendChild(box);
-            note('dom');
-          });
-          note('start type=' + (nav ? nav.type : '?') + ' hash=' + (location.hash || '-'));
-        }
         if (!nav || nav.type !== 'navigate' || location.hash) return;
         var root = document.documentElement;
         root.dataset.scrollGuard = 'on';
@@ -83,37 +63,34 @@ const siteName = t(lang).siteName;
           stopped = true;
           if ('scrollRestoration' in hist) hist.scrollRestoration = 'auto';
           root.dataset.scrollGuard = 'done';
-          note('done');
         };
-        var stop = finish;
         var lastPull = performance.now();
         ['touchstart', 'wheel', 'keydown', 'mousedown'].forEach(function (ev) {
-          window.addEventListener(ev, stop, { once: true, passive: true, capture: true });
+          window.addEventListener(ev, finish, { once: true, passive: true, capture: true });
         });
-        var toTop = function (why) {
+        var toTop = function () {
           if (!stopped && window.scrollY !== 0) {
-            note('pull (' + why + ')');
             lastPull = performance.now();
             window.scrollTo(0, 0);
           }
         };
-        toTop('head');
+        toTop();
         window.addEventListener('scroll', function () {
-          if (!stopped) toTop('scroll');
+          if (!stopped) toTop();
         }, { passive: true });
         document.addEventListener('DOMContentLoaded', function () {
-          toTop('dom');
+          toTop();
         });
         window.addEventListener('pageshow', function () {
-          toTop('pageshow');
+          toTop();
         });
         window.addEventListener('load', function () {
-          toTop('load');
+          toTop();
           var start = performance.now();
           lastPull = start;
           (function tick() {
             if (stopped) return;
-            toTop('frame');
+            toTop();
             var now = performance.now();
             if (now - lastPull > 400 || now - start > 1500) finish();
             else requestAnimationFrame(tick);
