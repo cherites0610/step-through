@@ -1,0 +1,10 @@
+---
+// ER 圖的關係型態：菱形；識別關係是雙菱形。(cx, cy) 是中心。
+import { diamond } from '../shapes';
+interface Props { cx: number; cy: number; w?: number; h?: number; label: string; identifying?: boolean }
+const { cx, cy, w = 72, h = 40, label, identifying = false } = Astro.props;
+---
+
+<path class="ink" d={diamond(cx, cy, w, h)} style="fill: var(--color-paper)" />
+{identifying && <path class="ink" d={diamond(cx, cy, w - 12, h - 8)} />}
+<text x={cx} y={cy + 5} text-anchor="middle">{label}</text>

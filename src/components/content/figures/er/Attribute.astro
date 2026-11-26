@@ -1,0 +1,16 @@
+---
+// ER 圖的屬性：橢圓。key＝底線、partial＝虛線底線（部分鍵）、multi＝雙橢圓、derived＝虛線橢圓。
+import { monoWidth } from '../shapes';
+interface Props { cx: number; cy: number; label: string; kind?: 'plain' | 'key' | 'partial' | 'multi' | 'derived'; rx?: number }
+const { cx, cy, label, kind = 'plain' } = Astro.props;
+const rx = Astro.props.rx ?? Math.max(30, monoWidth(label) / 2 + 12);
+const ry = 14;
+const uw = monoWidth(label);
+---
+
+<ellipse class="ink" cx={cx} cy={cy} rx={rx} ry={ry} style="fill: var(--color-paper)" stroke-dasharray={kind === 'derived' ? '4 3' : undefined} />
+{kind === 'multi' && <ellipse class="ink" cx={cx} cy={cy} rx={rx - 4} ry={ry - 4} />}
+<text class="mono" x={cx} y={cy + 4} text-anchor="middle">{label}</text>
+{(kind === 'key' || kind === 'partial') && (
+  <path class="ink" d={`M${cx - uw / 2} ${cy + 7} L${cx + uw / 2} ${cy + 7}`} stroke-dasharray={kind === 'partial' ? '3 2' : undefined} />
+)}

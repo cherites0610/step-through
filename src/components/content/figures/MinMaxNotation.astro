@@ -1,0 +1,34 @@
+---
+// 圖：同一個「屬於」關係的基數比畫法與 (min, max) 畫法，N 出現在相反的兩端。
+import Entity from './er/Entity.astro';
+import Relationship from './er/Relationship.astro';
+import { doubleLine, line } from './shapes';
+
+const W = 540, ROW = 90, TOP = 50;
+const xs = { 系: 110, 屬於: 270, 學生: 430 };
+const rows = [
+  { title: '基數比：一個系對應 N 個學生', left: '1', right: 'N' },
+  { title: '(min, max)：每位學生參與 (1, 1) 次，每個系參與 (0, N) 次', left: '(0, N)', right: '(1, 1)' },
+];
+const H = TOP + ROW * rows.length - 10;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="上：基數比畫法，系那端標 1、學生那端標 N。下：(min, max) 畫法，系那端標 (0, N)、學生那端標 (1, 1)。N 出現在相反的兩端。">
+  {
+    rows.map((r, i) => {
+      const y = TOP + i * ROW;
+      return (
+        <g>
+          <text x="0" y={y - 30}>{r.title}</text>
+          <path class="ink" d={line(xs.系, y, xs.屬於, y)} />
+          <path class="ink" d={doubleLine(xs.屬於, y, xs.學生, y)} />
+          <Entity cx={xs.系} cy={y} label="系" />
+          <Relationship cx={xs.屬於} cy={y} w={76} label="屬於" />
+          <Entity cx={xs.學生} cy={y} label="學生" />
+          <text class="mono" x={xs.系 + 44} y={y - 8}>{r.left}</text>
+          <text class="mono" x={xs.學生 - 44} y={y - 8} text-anchor="end">{r.right}</text>
+        </g>
+      );
+    })
+  }
+</svg>

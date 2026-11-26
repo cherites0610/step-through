@@ -1,0 +1,9 @@
+---
+// ER 圖的實體型態：矩形；弱實體是雙矩形。(cx, cy) 是中心。
+interface Props { cx: number; cy: number; w?: number; h?: number; label: string; weak?: boolean }
+const { cx, cy, w = 72, h = 30, label, weak = false } = Astro.props;
+---
+
+<rect class="ink" x={cx - w / 2 + 0.5} y={cy - h / 2 + 0.5} width={w - 1} height={h - 1} style="fill: var(--color-paper)" />
+{weak && <rect class="ink" x={cx - w / 2 + 4.5} y={cy - h / 2 + 4.5} width={w - 9} height={h - 9} />}
+<text x={cx} y={cy + 5} text-anchor="middle">{label}</text>

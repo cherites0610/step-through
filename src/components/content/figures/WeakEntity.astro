@@ -1,0 +1,32 @@
+---
+// 圖：弱實體「眷屬」、識別關係「扶養」與部分鍵 dep_name。
+import Entity from './er/Entity.astro';
+import Relationship from './er/Relationship.astro';
+import Attribute from './er/Attribute.astro';
+import { doubleLine, line } from './shapes';
+
+const W = 540, H = 170, Y = 100;
+const xs = { 教師: 80, 扶養: 270, 眷屬: 460 };
+const attrs = [
+  { owner: '教師', label: 'iid', kind: 'key', dx: -40 },
+  { owner: '教師', label: 'name', kind: 'plain', dx: 40 },
+  { owner: '眷屬', label: 'dep_name', kind: 'partial', dx: -40 },
+  { owner: '眷屬', label: 'relation', kind: 'plain', dx: 44 },
+] as const;
+const AY = 28;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="教師（鍵屬性 iid）透過雙菱形的識別關係「扶養」連到雙矩形的弱實體「眷屬」；教師那端標 1，眷屬那端標 N 且為雙線完全參與；眷屬的 dep_name 有虛線底線，是部分鍵">
+  {attrs.map((a) => <path class="ink" d={line(xs[a.owner], Y, xs[a.owner] + a.dx, AY)} />)}
+  <path class="ink" d={line(xs.教師, Y, xs.扶養, Y)} />
+  <path class="ink" d={doubleLine(xs.扶養, Y, xs.眷屬, Y)} />
+  {attrs.map((a) => <Attribute cx={xs[a.owner] + a.dx} cy={AY} label={a.label} kind={a.kind} />)}
+  <Entity cx={xs.教師} cy={Y} label="教師" />
+  <Relationship cx={xs.扶養} cy={Y} w={80} h={44} label="扶養" identifying />
+  <Entity cx={xs.眷屬} cy={Y} w={80} h={34} label="眷屬" weak />
+  <text class="mono" x={xs.教師 + 46} y={Y - 8}>1</text>
+  <text class="mono" x={xs.眷屬 - 48} y={Y - 8} text-anchor="end">N</text>
+  <text x={xs.教師} y={Y + 46} text-anchor="middle">強實體</text>
+  <text x={xs.扶養} y={Y + 46} text-anchor="middle">識別關係</text>
+  <text x={xs.眷屬} y={Y + 46} text-anchor="middle">弱實體</text>
+</svg>
