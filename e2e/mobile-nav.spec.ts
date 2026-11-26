@@ -65,3 +65,32 @@ test('桌機：頂列保留站名與科目，單元欄有返回章節的連結',
   await page.evaluate(() => scrollTo(0, 1500));
   await expect(header).toBeInViewport();
 });
+
+test.describe('點連結進入的新頁面從最上方開始', () => {
+  test.use({ viewport: devices['iPhone 13'].viewport, hasTouch: true, isMobile: true });
+
+  test('在章節頁底部點「接著可以讀」：新頁面在最上方；上一頁回到原本的位置', async ({ page }) => {
+    await page.goto('/zh-TW/data-structures/basics/');
+    const link = page.locator('aside').getByRole('link', { name: /陣列與矩陣/ });
+    await link.scrollIntoViewIfNeeded();
+    const before = await page.evaluate(() => scrollY);
+    expect(before).toBeGreaterThan(1000);
+    await link.tap();
+    await expect(page).toHaveURL(/\/zh-TW\/data-structures\/arrays\/$/);
+    await page.waitForLoadState('load');
+    expect(await page.evaluate(() => scrollY)).toBe(0);
+    await expect(page.getByRole('heading', { level: 1 })).toBeInViewport();
+
+    await page.goBack();
+    await expect(page).toHaveURL(/\/basics\/$/);
+    await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(1000);
+  });
+
+  test('有 #錨點 的連結仍然捲到錨點', async ({ page }) => {
+    await page.goto('/zh-TW/data-structures/sorting/');
+    await page.locator('aside').getByRole('link', { name: /在完整地圖中查看/ }).tap();
+    await expect(page).toHaveURL(/#ch-sorting$/);
+    await page.waitForLoadState('load');
+    await expect(page.locator('#ch-sorting')).toBeInViewport();
+  });
+});

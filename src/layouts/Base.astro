@@ -73,6 +73,19 @@ const siteName = t(lang).siteName;
       import '../lib/progress-dom';
     </script>
     <script>
+      // 點連結進入的新頁面一律從最上方開始。iPhone Safari 有時會把新頁面停在上一頁的捲動位置
+      // （在章節頁底部點「接著可以讀」時遇到）。只處理一般的連結導覽：上一頁／下一頁與重新整理
+      // 保留瀏覽器原本的捲動還原，網址有 #錨點 時交給錨點。
+      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+      if (nav?.type === 'navigate' && !location.hash) {
+        const toTop = () => {
+          if (scrollY !== 0) scrollTo(0, 0);
+        };
+        toTop();
+        addEventListener('load', () => requestAnimationFrame(toTop), { once: true });
+      }
+    </script>
+    <script>
       // 同一頁內的錨點連結（地圖節點、建議先讀、瀏覽科目）不新增瀏覽紀錄：
       // 否則手機的「上一頁」會先在頁內的錨點之間來回，回不到上一頁。
       document.addEventListener('click', (e) => {
