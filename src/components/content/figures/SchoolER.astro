@@ -1,0 +1,74 @@
+---
+// 圖：學校的 ER 圖。基數比標在靠近實體的線端，完全參與畫雙線。
+import Entity from './er/Entity.astro';
+import Relationship from './er/Relationship.astro';
+import Attribute from './er/Attribute.astro';
+import { along, doubleLine, line } from './shapes';
+
+const W = 540, H = 350;
+const col = [110, 270, 430];
+const ent = {
+  教師: { cx: col[0], cy: 60 },
+  系: { cx: col[2], cy: 60 },
+  學生: { cx: col[2], cy: 220 },
+  課程: { cx: col[0], cy: 220 },
+};
+const rel = {
+  主管: { cx: col[1], cy: 60 },
+  屬於: { cx: col[2], cy: 140 },
+  修課: { cx: col[1], cy: 220 },
+  先修: { cx: col[0], cy: 320 },
+};
+// 每條線：關係 → 實體、靠實體那端的標記、是否完全參與
+const edges = [
+  { r: '主管', e: '教師', mark: '1', total: false },
+  { r: '主管', e: '系', mark: '1', total: true },
+  { r: '屬於', e: '系', mark: '1', total: false },
+  { r: '屬於', e: '學生', mark: 'N', total: true },
+  { r: '修課', e: '學生', mark: 'N', total: false },
+  { r: '修課', e: '課程', mark: 'M', total: false },
+] as const;
+// 標記放在靠實體的線段上：水平線標在上方，垂直線標在右側
+const mark = (r: { cx: number; cy: number }, e: { cx: number; cy: number }, m: string) => {
+  const [x, y] = along(r.cx, r.cy, e.cx, e.cy, 0.62);
+  return r.cy === e.cy ? { x, y: y - 8, m } : { x: x + 12, y: y + 4, m };
+};
+// 遞迴關係「先修」：課程的左下、右下各一條線連到菱形的左、右頂點
+const c = ent.課程, p = rel.先修;
+const rec = [
+  { from: [c.cx - 22, c.cy + 15], to: [p.cx - 36, p.cy], mark: 'M', role: '課程', side: -1 },
+  { from: [c.cx + 22, c.cy + 15], to: [p.cx + 36, p.cy], mark: 'N', role: '先修課', side: 1 },
+] as const;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="學校 ER 圖：教師與系之間是 1 對 1 的主管關係，系為完全參與，關係有屬性 since；系與學生之間是 1 對 N 的屬於關係，學生為完全參與；學生與課程之間是 M 對 N 的修課關係，關係有屬性 grade；課程對課程有 M 對 N 的遞迴關係先修，角色是課程與先修課">
+  {
+    edges.map((d) => {
+      const r = rel[d.r], e = ent[d.e];
+      return <path class="ink" d={d.total ? doubleLine(r.cx, r.cy, e.cx, e.cy) : line(r.cx, r.cy, e.cx, e.cy)} />;
+    })
+  }
+  <path class="ink" d={line(rel.主管.cx, rel.主管.cy, rel.主管.cx, 18)} />
+  <path class="ink" d={line(rel.修課.cx, rel.修課.cy, rel.修課.cx, 280)} />
+  {rec.map((d) => <path class="ink" d={line(d.from[0], d.from[1], d.to[0], d.to[1])} />)}
+
+  {Object.entries(rel).map(([k, v]) => <Relationship cx={v.cx} cy={v.cy} w={76} label={k} />)}
+  {Object.entries(ent).map(([k, v]) => <Entity cx={v.cx} cy={v.cy} label={k} />)}
+  <Attribute cx={rel.主管.cx} cy={18} label="since" />
+  <Attribute cx={rel.修課.cx} cy={282} label="grade" />
+
+  {
+    edges.map((d) => {
+      const t = mark(rel[d.r], ent[d.e], d.mark);
+      return <text class="mono" x={t.x} y={t.y} text-anchor="middle">{t.m}</text>;
+    })
+  }
+  {
+    rec.map((d) => (
+      <>
+        <text class="mono" x={(d.from[0] + d.to[0]) / 2 + d.side * 12} y={(d.from[1] + d.to[1]) / 2 - 14} text-anchor="middle">{d.mark}</text>
+        <text x={(d.from[0] + d.to[0]) / 2 + d.side * 30} y={(d.from[1] + d.to[1]) / 2 + 8} text-anchor={d.side < 0 ? 'end' : 'start'}>{d.role}</text>
+      </>
+    ))
+  }
+</svg>

@@ -1,0 +1,39 @@
+---
+subject: databases
+chapter: er
+order: 11
+kind: calc
+difficulty: 3
+---
+
+圖書館的 ER 圖如下，把它轉成關聯綱要：寫出每個表的欄位，標出主鍵與外鍵，並說明表的數量。
+
+- 讀者 Reader：rid（鍵）、name、phone（多值）。
+- 書 Book：isbn（鍵）、title。
+- 複本 Copy：弱實體，識別擁有者是 Book，部分鍵是 copy_no，另有屬性 shelf（書架位置）。
+- 借閱 Borrows：讀者與複本之間的 1:N 關係（一個複本同時最多借給一位讀者，一位讀者可以借多個複本），關係有屬性 due_date，兩端都是部分參與。
+- 預約 Reserves：讀者與書之間的 M:N 關係，關係有屬性 reserve_date。
+
+<Solution>
+
+**共 5 個表：**
+
+- Reader(<u>rid</u>, name)
+- ReaderPhone(<u>rid, phone</u>)，rid → Reader
+- Book(<u>isbn</u>, title)
+- Copy(<u>isbn, copy_no</u>, shelf, rid, due_date)，isbn → Book，rid → Reader
+- Reserves(<u>rid, isbn</u>, reserve_date)，rid → Reader，isbn → Book
+
+**怎麼得到**：
+
+1. **強實體**：Reader、Book 各一個表。Reader 的 phone 是多值屬性，先不放。
+2. **弱實體**：Copy 一個表，放擁有者的主鍵 isbn 當外鍵，主鍵是 (isbn, copy_no)。同一本書的第 1、2 個複本靠 copy_no 區分；不同書的第 1 個複本靠 isbn 區分。
+3. **1:N 的借閱**：外鍵放在 N 的那一邊，也就是 Copy：加上 rid → Reader。關係的屬性 due_date 也放在 Copy。沒有借出的複本，rid 與 due_date 是 NULL（複本是部分參與，這是允許的）。
+4. **M:N 的預約**：開新表 Reserves，主鍵是 (rid, isbn)，屬性 reserve_date 放在這裡。
+5. **多值屬性**：ReaderPhone，主鍵是 (rid, phone)。
+
+表的數量：2 個強實體 ＋ 1 個弱實體 ＋ 1 個 M:N 關係 ＋ 1 個多值屬性 ＝ 5。1:N 的借閱沒有產生新表。
+
+注意 Copy 的外鍵 rid 參照的是 Reader，而它的主鍵 (isbn, copy_no) 中的 isbn 參照的是 Book，兩個外鍵的意義不同：一個表示「是哪本書的複本」，一個表示「目前借給誰」。
+
+</Solution>

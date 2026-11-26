@@ -1,0 +1,27 @@
+---
+subject: databases
+chapter: er
+order: 8
+kind: calc
+difficulty: 2
+---
+
+某公司有 200 位員工、10 個部門。「管理」是員工與部門之間的 1:1 關係：每個部門恰好由一位員工管理，大多數員工不是經理。轉成關聯綱要時：
+
+(a) 表示「管理」的外鍵應該放在 Employee 還是 Department？
+
+(b) 如果放在另一邊，這個外鍵欄位會有幾個 NULL？
+
+(c) 依 (a) 的放法，要怎麼在表的定義中表達「每個部門都一定有經理」？
+
+<Solution>
+
+**(a) Department。(b) 190 個。(c) 把外鍵欄位設為 NOT NULL。**
+
+**(a)** 1:1 關係的外鍵優先放在**完全參與**的那一邊。部門在「管理」中是完全參與（每個部門都有經理），員工是部分參與，所以在 Department 加 mgr_id → Employee。
+
+**(b)** 如果放在 Employee，每位員工都要有一個「管理哪個部門」的欄位。200 位員工中只有 10 位是經理，其餘 <M t="200 - 10 = 190" /> 列的這個欄位都是 NULL。放在 Department 則 10 個部門都有值，沒有 NULL。
+
+**(c)** 在 Department 中把 mgr_id 宣告為 `NOT NULL`，DBMS 就會拒絕沒有經理的部門。這正是把外鍵放在完全參與那一邊的另一個好處：完全參與可以直接用 `NOT NULL` 表達。
+
+</Solution>

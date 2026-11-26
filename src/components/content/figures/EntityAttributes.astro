@@ -1,0 +1,31 @@
+---
+// 圖：學生實體與各種屬性（Chen 表示法）。
+import Entity from './er/Entity.astro';
+import Attribute from './er/Attribute.astro';
+import { line } from './shapes';
+
+const W = 540, H = 250;
+const E = { cx: 270, cy: 140 };
+const attrs = [
+  { label: 'sid', kind: 'key', cx: 100, cy: 80, note: '鍵屬性' },
+  { label: 'name', kind: 'plain', cx: 270, cy: 72, note: '' },
+  { label: 'phone', kind: 'multi', cx: 440, cy: 80, note: '多值' },
+  { label: 'birthday', kind: 'plain', cx: 120, cy: 205, note: '' },
+  { label: 'age', kind: 'derived', cx: 420, cy: 205, note: '衍生' },
+] as const;
+const parts = [
+  { label: 'first', cx: 190, cy: 22 },
+  { label: 'last', cx: 350, cy: 22 },
+];
+const name = attrs[1];
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="學生實體連著五個屬性：sid 有底線是鍵屬性；name 是複合屬性，再分成 first 與 last；phone 是雙橢圓的多值屬性；birthday 是一般屬性；age 是虛線橢圓的衍生屬性">
+  {attrs.map((a) => <path class="ink" d={line(E.cx, E.cy, a.cx, a.cy)} />)}
+  {parts.map((p) => <path class="ink" d={line(name.cx, name.cy, p.cx, p.cy)} />)}
+  {attrs.map((a) => <Attribute cx={a.cx} cy={a.cy} label={a.label} kind={a.kind} />)}
+  {parts.map((p) => <Attribute cx={p.cx} cy={p.cy} label={p.label} />)}
+  {attrs.filter((a) => a.note).map((a) => <text x={a.cx} y={a.cy + 34} text-anchor="middle">{a.note}</text>)}
+  <text x={name.cx + 50} y={name.cy + 5}>複合</text>
+  <Entity cx={E.cx} cy={E.cy} w={80} label="學生" />
+</svg>

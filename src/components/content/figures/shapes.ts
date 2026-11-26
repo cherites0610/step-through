@@ -23,3 +23,25 @@ export function spread(n: number, w: number, x0: number, span: number): number[]
 }
 
 export const round = (v: number) => Math.round(v * 10) / 10;
+
+/** 菱形（ER 圖的關係） */
+export function diamond(cx: number, cy: number, w: number, h: number): string {
+  return `M${round(cx)} ${round(cy - h / 2)} L${round(cx + w / 2)} ${round(cy)} L${round(cx)} ${round(cy + h / 2)} L${round(cx - w / 2)} ${round(cy)} Z`;
+}
+
+/** 平行的兩條線（ER 圖的完全參與），兩條線相距 2 × off */
+export function doubleLine(x1: number, y1: number, x2: number, y2: number, off = 2): string {
+  const len = Math.hypot(x2 - x1, y2 - y1) || 1;
+  const nx = (-(y2 - y1) / len) * off;
+  const ny = ((x2 - x1) / len) * off;
+  return `${line(x1 + nx, y1 + ny, x2 + nx, y2 + ny)} ${line(x1 - nx, y1 - ny, x2 - nx, y2 - ny)}`;
+}
+
+/** 線段上從 (x1, y1) 走到比例 t 的點，再往法線方向偏移 perp（標基數比用） */
+export function along(x1: number, y1: number, x2: number, y2: number, t: number, perp = 0): [number, number] {
+  const len = Math.hypot(x2 - x1, y2 - y1) || 1;
+  return [round(x1 + (x2 - x1) * t - ((y2 - y1) / len) * perp), round(y1 + (y2 - y1) * t + ((x2 - x1) / len) * perp)];
+}
+
+/** 等寬字（11px，JetBrains Mono 每字約 0.6em）的寬度，用來畫鍵屬性的底線 */
+export const monoWidth = (s: string) => s.length * 6.6;

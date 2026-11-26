@@ -1,0 +1,37 @@
+---
+// 圖：特殊化。左：人員 → 學生、員工（重疊、部分）；右：學生 → 大學部、研究生（不相交、完全）。
+import Entity from './er/Entity.astro';
+import Attribute from './er/Attribute.astro';
+import { doubleLine, line } from './shapes';
+
+const PW = 260, GAP = 20, W = PW * 2 + GAP, H = 230;
+const panels = [
+  { top: '人員', subs: ['學生', '員工'], mark: 'o', total: false, note: '重疊、部分' },
+  { top: '學生', subs: ['大學部', '研究生'], mark: 'd', total: true, note: '不相交、完全' },
+];
+const TOP_Y = 34, CIRCLE_Y = 100, SUB_Y = 166, R = 13;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="左：人員經過寫著 o 的圓圈連到學生與員工，父類別到圓圈是單線，表示重疊且部分特殊化。右：學生經過寫著 d 的圓圈連到大學部與研究生，父類別到圓圈是雙線，表示不相交且完全特殊化；研究生有專屬屬性 advisor">
+  <path class="axis" d={`M${PW + GAP / 2} 0 L${PW + GAP / 2} ${H}`} />
+  {
+    panels.map((p, k) => {
+      const x0 = k * (PW + GAP);
+      const cx = x0 + PW / 2;
+      const subX = [x0 + PW * 0.25, x0 + PW * 0.75];
+      return (
+        <g>
+          <path class="ink" d={p.total ? doubleLine(cx, TOP_Y, cx, CIRCLE_Y) : line(cx, TOP_Y, cx, CIRCLE_Y)} />
+          {subX.map((sx) => <path class="ink" d={line(cx, CIRCLE_Y, sx, SUB_Y)} />)}
+          {k === 1 && <path class="ink" d={line(subX[1], SUB_Y, subX[1], SUB_Y + 40)} />}
+          <Entity cx={cx} cy={TOP_Y} w={80} label={p.top} />
+          <circle class="ink" cx={cx} cy={CIRCLE_Y} r={R} style="fill: var(--color-paper)" />
+          <text class="mono" x={cx} y={CIRCLE_Y + 4} text-anchor="middle">{p.mark}</text>
+          {p.subs.map((s, i) => <Entity cx={subX[i]} cy={SUB_Y} w={80} label={s} />)}
+          {k === 1 && <Attribute cx={subX[1]} cy={SUB_Y + 44} label="advisor" />}
+          <text x={x0 + 4} y={CIRCLE_Y + 5}>{p.note}</text>
+        </g>
+      );
+    })
+  }
+</svg>

@@ -11,5 +11,28 @@ import ThreeSchema from './figures/ThreeSchema.astro';
 import Independence from './figures/Independence.astro';
 import DataModels from './figures/DataModels.astro';
 import DbmsComponents from './figures/DbmsComponents.astro';
+import EntityAttributes from './figures/EntityAttributes.astro';
+import SchoolER from './figures/SchoolER.astro';
+import MinMaxNotation from './figures/MinMaxNotation.astro';
+import WeakEntity from './figures/WeakEntity.astro';
+import Specialization from './figures/Specialization.astro';
 
-export const mdxComponents = { M, Figure, LoopTriangle, BigODefinition, GrowthChart, RecursionTree, MasterCases, FileVsDbms, ThreeSchema, Independence, DataModels, DbmsComponents };
+export const mdxComponents = {
+  M,
+  Figure,
+  LoopTriangle,
+  BigODefinition,
+  GrowthChart,
+  RecursionTree,
+  MasterCases,
+  FileVsDbms,
+  ThreeSchema,
+  Independence,
+  DataModels,
+  DbmsComponents,
+  EntityAttributes,
+  SchoolER,
+  MinMaxNotation,
+  WeakEntity,
+  Specialization,
+};
