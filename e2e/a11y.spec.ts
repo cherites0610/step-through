@@ -35,7 +35,8 @@ for (const id of ['data-structures', 'algorithms']) {
   });
 }
 
-for (const url of ['/zh-TW/data-structures/basics/', '/zh-TW/data-structures/sorting/']) {
+// 寫好觀念說明的章節由 e2e/content.spec.ts 自動掃描；這裡掃還沒有觀念說明、但有考題的章節
+for (const url of ['/zh-TW/data-structures/sorting/']) {
   test(`章節頁 ${url} 沒有無障礙違規（含公式、圖、展開的詳解）`, async ({ page }) => {
     await page.goto(url);
     await page.locator('details').evaluateAll((ds) => ds.forEach((d) => ((d as HTMLDetailsElement).open = true)));

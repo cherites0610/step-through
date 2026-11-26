@@ -5,7 +5,7 @@ const panels = [
   { title: '2T(n/2) + n', costs: [1, 1, 1, 1, 1], note: '每層一樣多', result: '× 層數 → Θ(n log n)' },
   { title: '2T(n/2) + n²', costs: [16, 8, 4, 2, 1], note: '一層比一層少', result: '根主導 → Θ(n²)' },
 ];
-const PW = 176, GAP = 16, W = panels.length * PW + (panels.length - 1) * GAP, H = 214;
+const PW = 168, GAP = 12, W = panels.length * PW + (panels.length - 1) * GAP, H = 214;
 const BAR_X = 58, BAR_MAX = PW - BAR_X - 8, ROW = 22, TOP = 40;
 const unitOf = (p: (typeof panels)[number]) => Math.max(...p.costs);
 ---
