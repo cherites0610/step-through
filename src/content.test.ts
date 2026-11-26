@@ -35,6 +35,15 @@ function parse(file: string) {
 /** 去掉 ``` 程式碼區塊與行內 `code`，只留正文 */
 const prose = (body: string) => body.replace(/```[\s\S]*?```/g, '').replace(/`[^`\n]*`/g, '');
 
+/** 正文（公式元件、圖的屬性、程式碼以外）沒有跳脫的大括號：MDX 會把 {…} 當成 JavaScript */
+const bareBraces = (body: string) =>
+  prose(body)
+    .replace(/<M [^>]*\/>/g, '')
+    .replace(/<Figure [^>]*>/g, '')
+    .split('\n')
+    .filter((l) => /(?<!\\)[{}]/.test(l))
+    .map((l) => l.trim().slice(0, 30));
+
 /** 相鄰兩行都是 (A)／(a) 這類選項：Markdown 會把它們合併成一段 */
 function mergedOptionLines(body: string) {
   const lines = prose(body).split('\n');
@@ -112,9 +121,10 @@ describe('觀念說明（src/content/chapters）', () => {
         for (const [, tag] of body.matchAll(/<([A-Z]\w+)/g)) expect(registry, `${tag} 沒有在 src/components/content/index.ts 登記`).toContain(tag);
       });
 
-      it('不用 $…$ 寫公式（改用 <M t="..." />）；選項不擠在相鄰兩行', () => {
+      it('不用 $…$ 寫公式（改用 <M t="..." />）；選項不擠在相鄰兩行；大括號有跳脫', () => {
         expect(prose(body).includes('$'), '正文裡有 $').toBe(false);
         expect(mergedOptionLines(body)).toEqual([]);
+        expect(bareBraces(body), '大括號要寫成 \\{ \\}').toEqual([]);
       });
     });
   }
@@ -146,6 +156,7 @@ describe('考題（src/content/questions）', () => {
           expect(body, `${path.basename(f)} 缺少 <Solution>`).toMatch(/<Solution>[\s\S]+<\/Solution>/);
           expect(prose(body).includes('$'), `${path.basename(f)} 正文裡有 $`).toBe(false);
           expect(mergedOptionLines(body), path.basename(f)).toEqual([]);
+          expect(bareBraces(body), `${path.basename(f)}：大括號要寫成 \\{ \\}`).toEqual([]);
         }
       });
 
