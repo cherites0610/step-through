@@ -1,0 +1,34 @@
+---
+subject: databases
+chapter: normalization
+order: 8
+kind: calc
+difficulty: 2
+---
+
+<M t="R(A, B, C, D, E)" />，<M t="F = \{ A \rightarrow B,\ CD \rightarrow E \}" />。判斷下列分解是否無損。
+
+(a) <M t="(A, B, C)" /> 與 <M t="(C, D, E)" />
+
+(b) <M t="(A, B)" /> 與 <M t="(A, C, D, E)" />
+
+(c) <M t="(A, B)" />、<M t="(A, C, D)" /> 與 <M t="(C, D, E)" />
+
+<Solution>
+
+**(a) 有損。(b) 無損。(c) 無損。**
+
+拆成兩個時：共同屬性決定其中一邊（是其中一邊的超鍵），就是無損。
+
+**(a)** 共同屬性是 <M t="C" />。<M t="C^+ = C" />，既不決定 <M t="ABC" /> 也不決定 <M t="CDE" />，有損。
+
+**(b)** 共同屬性是 <M t="A" />。<M t="A^+ = AB" />，決定 <M t="(A, B)" />，無損。
+
+**(c)** 可以看成分兩次拆：
+
+1. 先把 <M t="R" /> 拆成 <M t="(A, B)" /> 與 <M t="(A, C, D, E)" />：同 (b)，無損。
+2. 再把 <M t="(A, C, D, E)" /> 拆成 <M t="(A, C, D)" /> 與 <M t="(C, D, E)" />：共同屬性 <M t="CD" />，<M t="CD \rightarrow E" />，決定 <M t="(C, D, E)" />，無損。
+
+每一步都無損，整個分解就無損。
+
+</Solution>

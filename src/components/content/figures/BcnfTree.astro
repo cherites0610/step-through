@@ -1,0 +1,35 @@
+---
+// 圖：R(A, B, C, D)、F = {A → B, B → C} 的 BCNF 分解樹。每個內部節點標出使用的函數相依。
+import { line } from './shapes';
+
+type Node = { attrs: string; by?: string; x: number; y: number; kids?: Node[] };
+const W = 540, BOX_W = 92, BOX_H = 28, ROW = 84;
+const tree: Node = {
+  attrs: 'A, B, C, D', by: 'A → B 違反；A⁺ = ABC', x: W / 2, y: 0,
+  kids: [
+    { attrs: 'A, B, C', by: 'B → C 違反；B⁺ = BC', x: W * 0.32, y: ROW, kids: [
+      { attrs: 'B, C', x: W * 0.18, y: ROW * 2 },
+      { attrs: 'A, B', x: W * 0.46, y: ROW * 2 },
+    ] },
+    { attrs: 'A, D', x: W * 0.76, y: ROW },
+  ],
+};
+const all: Node[] = [];
+const walk = (n: Node) => { all.push(n); n.kids?.forEach(walk); };
+walk(tree);
+const H = ROW * 2 + BOX_H + 22;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="BCNF 分解樹：(A, B, C, D) 因 A → B 違反，拆成 (A, B, C) 與 (A, D)；(A, B, C) 因 B → C 違反，拆成 (B, C) 與 (A, B)。葉子 (B, C)、(A, B)、(A, D) 都符合 BCNF">
+  {all.flatMap((n) => (n.kids ?? []).map((k) => <path class="ink" d={line(n.x, n.y + BOX_H, k.x, k.y)} />))}
+  {
+    all.map((n) => (
+      <g>
+        <rect class="ink" x={n.x - BOX_W / 2 + 0.5} y={n.y + 0.5} width={BOX_W - 1} height={BOX_H - 1} stroke-width={n.kids ? 1 : 2} style="fill: var(--color-paper)" />
+        <text class="mono" x={n.x} y={n.y + 18} text-anchor="middle">({n.attrs})</text>
+        {n.by && <text x={n.x + BOX_W / 2 + 8} y={n.y + 19}>{n.by}</text>}
+        {!n.kids && <text x={n.x} y={n.y + BOX_H + 16} text-anchor="middle">BCNF</text>}
+      </g>
+    ))
+  }
+</svg>

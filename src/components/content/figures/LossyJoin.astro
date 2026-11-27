@@ -1,0 +1,24 @@
+---
+// 圖：把 Enroll(sid, cid, grade) 拆成 (sid, grade) 與 (cid, grade) 再合併，多出原本沒有的值組。
+import Table from './rel/Table.astro';
+
+const original: [string, string, string][] = [
+  ['S1', 'C1', '85'],
+  ['S1', 'C2', '90'],
+  ['S3', 'C1', '90'],
+];
+const sg = [...new Set(original.map(([s, , g]) => `${s}|${g}`))].map((x) => x.split('|'));
+const cg = [...new Set(original.map(([, c, g]) => `${c}|${g}`))].map((x) => x.split('|'));
+const joined = sg.flatMap(([s, g]) => cg.filter(([, g2]) => g2 === g).map(([c]) => [s, c, g]));
+const isOriginal = (r: string[]) => original.some((o) => o.join() === r.join());
+const extra = joined.flatMap((r, i) => (isOriginal(r) ? [] : [[i, 0], [i, 1], [i, 2]] as [number, number][]));
+const CELL = 20, W = 540;
+const H = 16 + CELL * (joined.length + 1) + 4;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`(sid, grade) 有 ${sg.length} 列、(cid, grade) 有 ${cg.length} 列，用 grade 合併回去得到 ${joined.length} 列，比原本的 ${original.length} 列多出 ${joined.length - original.length} 列：S1 的 C1 90 分與 S3 的 C2 90 分`}>
+  <Table x={0} y={0} name="(sid, grade)" cols={['sid', 'grade']} rows={sg} colW={[44, 52]} cellH={CELL} />
+  <Table x={120} y={0} name="(cid, grade)" cols={['cid', 'grade']} rows={cg} colW={[44, 52]} cellH={CELL} />
+  <text x={240} y={16 + CELL * 2}>⋈ →</text>
+  <Table x={290} y={0} name={`合併回去：${joined.length} 列`} cols={['sid', 'cid', 'grade']} rows={joined} colW={[44, 44, 52]} cellH={CELL} mark={extra} />
+</svg>

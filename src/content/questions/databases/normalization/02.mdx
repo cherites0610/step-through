@@ -1,0 +1,28 @@
+---
+subject: databases
+chapter: normalization
+order: 2
+kind: choice
+difficulty: 1
+---
+
+已知 <M t="AB \rightarrow C" /> 與 <M t="C \rightarrow D" />。下列哪一個**不能**由 Armstrong 公理推出？
+
+(A) <M t="AB \rightarrow D" />
+
+(B) <M t="ABE \rightarrow CE" />
+
+(C) <M t="A \rightarrow C" />
+
+(D) <M t="AB \rightarrow CD" />
+
+<Solution>
+
+**答案：(C)。**
+
+- **(A) 可以。** 遞移律：<M t="AB \rightarrow C" />、<M t="C \rightarrow D" />，得 <M t="AB \rightarrow D" />。
+- **(B) 可以。** 擴增律：<M t="AB \rightarrow C" /> 兩邊加上 <M t="E" />。
+- **(C) 不能。** 函數相依的**左邊不能拆**。<M t="AB" /> 一起才決定 <M t="C" />，不代表只看 <M t="A" /> 就能決定。
+- **(D) 可以。** 由 (A) 的 <M t="AB \rightarrow D" /> 與已知的 <M t="AB \rightarrow C" />，用聯集律得 <M t="AB \rightarrow CD" />。
+
+</Solution>

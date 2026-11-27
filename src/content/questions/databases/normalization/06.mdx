@@ -1,0 +1,31 @@
+---
+subject: databases
+chapter: normalization
+order: 6
+kind: calc
+difficulty: 2
+---
+
+求 <M t="F = \{ A \rightarrow BC,\ B \rightarrow C,\ AB \rightarrow D,\ AC \rightarrow D \}" /> 的最小覆蓋，並寫出每一步。
+
+<Solution>
+
+**<M t="\{ A \rightarrow B,\ B \rightarrow C,\ A \rightarrow D \}" />。**
+
+**步驟 1：右邊拆開。** <M t="A \rightarrow B" />、<M t="A \rightarrow C" />、<M t="B \rightarrow C" />、<M t="AB \rightarrow D" />、<M t="AC \rightarrow D" />。
+
+**步驟 2：去掉左邊多餘的屬性。**
+
+- <M t="AB \rightarrow D" />：只用 <M t="A" />，<M t="A^+" /> 是 <M t="ABCD" />（A 得 B、C，AB 得 D），含 D，所以 B 多餘，改成 <M t="A \rightarrow D" />。
+- <M t="AC \rightarrow D" />：同理改成 <M t="A \rightarrow D" />，與上一條重複，只留一條。
+
+現在是 <M t="A \rightarrow B" />、<M t="A \rightarrow C" />、<M t="B \rightarrow C" />、<M t="A \rightarrow D" />。
+
+**步驟 3：去掉多餘的函數相依。** 逐條暫時拿掉，用其餘的算閉包：
+
+- 拿掉 <M t="A \rightarrow B" />：<M t="A^+ = ACD" />，沒有 B，**不能**拿掉。
+- 拿掉 <M t="A \rightarrow C" />：<M t="A^+ = ABDC" />（A 得 B，B 得 C），有 C，**多餘**，刪掉。
+- 拿掉 <M t="B \rightarrow C" />：<M t="B^+ = B" />，沒有 C，不能拿掉。
+- 拿掉 <M t="A \rightarrow D" />：<M t="A^+ = ABC" />，沒有 D，不能拿掉。
+
+</Solution>

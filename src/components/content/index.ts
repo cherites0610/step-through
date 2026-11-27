@@ -28,6 +28,12 @@ import Division from './figures/Division.astro';
 import SqlOrder from './figures/SqlOrder.astro';
 import OnVsWhere from './figures/OnVsWhere.astro';
 import GroupHaving from './figures/GroupHaving.astro';
+import Anomalies from './figures/Anomalies.astro';
+import FdDiagram from './figures/FdDiagram.astro';
+import NormalForms from './figures/NormalForms.astro';
+import LossyJoin from './figures/LossyJoin.astro';
+import BcnfTree from './figures/BcnfTree.astro';
+import MvdSplit from './figures/MvdSplit.astro';
 
 export const mdxComponents = {
   M,
@@ -59,4 +65,10 @@ export const mdxComponents = {
   SqlOrder,
   OnVsWhere,
   GroupHaving,
+  Anomalies,
+  FdDiagram,
+  NormalForms,
+  LossyJoin,
+  BcnfTree,
+  MvdSplit,
 };

@@ -1,0 +1,33 @@
+---
+subject: databases
+chapter: normalization
+order: 7
+kind: calc
+difficulty: 2
+---
+
+寫出下列各關聯最高符合哪一個正規化形式（1NF、2NF、3NF 或 BCNF），並說明理由。
+
+(a) <M t="R(A, B, C)" />，<M t="F = \{ A \rightarrow B,\ B \rightarrow C \}" />
+
+(b) <M t="R(A, B, C, D)" />，<M t="F = \{ AB \rightarrow C,\ B \rightarrow D \}" />
+
+(c) <M t="R(A, B, C, D)" />，<M t="F = \{ AB \rightarrow CD,\ C \rightarrow A \}" />
+
+(d) <M t="R(A, B, C)" />，<M t="F = \{ A \rightarrow BC,\ BC \rightarrow A \}" />
+
+<Solution>
+
+**(a) 2NF。(b) 1NF。(c) 3NF。(d) BCNF。**
+
+依觀念說明的步驟：先找候選鍵與主要屬性，再逐條檢查函數相依。
+
+**(a)** 候選鍵 <M t="A" />，非主要屬性 B、C。鍵只有一個屬性，不會有部分相依，符合 2NF。<M t="B \rightarrow C" />：B 不是超鍵，C 不是主要屬性，是遞移相依（<M t="A \rightarrow B \rightarrow C" />），不符合 3NF。
+
+**(b)** 候選鍵 <M t="AB" />，非主要屬性 C、D。<M t="B \rightarrow D" />：B 是候選鍵的一部分，D 是非主要屬性，是部分相依，不符合 2NF。
+
+**(c)** 候選鍵：<M t="(AB)^+ = ABCD" />；<M t="(BC)^+" />：C 得 A，AB 得 D，也是全部。候選鍵 <M t="AB" />、<M t="BC" />，主要屬性 A、B、C。<M t="C \rightarrow A" />：C 不是超鍵，但 A 是主要屬性，符合 3NF 的例外；不符合 BCNF。
+
+**(d)** 候選鍵 <M t="A" /> 與 <M t="BC" />。兩條函數相依的左邊 <M t="A" />、<M t="BC" /> 都是超鍵，符合 BCNF。
+
+</Solution>

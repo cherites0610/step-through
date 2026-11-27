@@ -1,0 +1,26 @@
+---
+// 圖：把學生、系、課程、選課塞進一個大表。資管系的電話（黑底）存了 5 次。
+import Table from './rel/Table.astro';
+
+const students: Record<string, [string, string]> = { S1: ['王小明', '資管'], S2: ['李美華', '資工'], S3: ['陳志強', '資管'] };
+const phones: Record<string, string> = { 資管: '03-1234', 資工: '03-5678' };
+const titles: Record<string, string> = { C1: '資料庫', C2: '資料結構', C3: '計算機概論' };
+const enroll: [string, string, string | null][] = [
+  ['S1', 'C1', '85'],
+  ['S1', 'C2', '90'],
+  ['S1', 'C3', '72'],
+  ['S2', 'C1', null],
+  ['S2', 'C2', '78'],
+  ['S3', 'C1', '66'],
+  ['S3', 'C2', '95'],
+];
+const rows = enroll.map(([sid, cid, g]) => [sid, students[sid][0], students[sid][1], phones[students[sid][1]], cid, titles[cid], g]);
+const mis = rows.flatMap((r, i) => (r[2] === '資管' ? [[i, 3] as [number, number]] : []));
+const colW = [36, 60, 48, 72, 36, 84, 52], CELL = 20, W = 540;
+const X = (W - colW.reduce((a, b) => a + b, 0)) / 2;
+const H = 16 + CELL * (rows.length + 1) + 4;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`大表 SC 共 ${rows.length} 列：王小明的姓名與系出現 3 次，資管系的電話 03-1234 出現 ${mis.length} 次，資料庫的課名出現 3 次`}>
+  <Table x={X} y={0} name="SC" cols={['sid', 'name', 'dname', 'dphone', 'cid', 'title', 'grade']} rows={rows} colW={colW} cellH={CELL} mark={mis} />
+</svg>

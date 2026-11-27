@@ -1,0 +1,50 @@
+---
+// 圖：大表的函數相依圖。屬性排成一列，每條函數相依從決定因素（上方的橫線）畫箭頭到被決定的屬性。
+// cid 放最左邊：sid → name, dname 的橫線就不會跨過 cid 的直線
+const attrs = ['cid', 'sid', 'name', 'dname', 'dphone', 'title', 'grade'];
+const fds: { from: string[]; to: string[] }[] = [
+  { from: ['sid'], to: ['name', 'dname'] },
+  { from: ['dname'], to: ['dphone'] },
+  { from: ['cid'], to: ['title'] },
+  { from: ['sid', 'cid'], to: ['grade'] },
+];
+const W = 540, BOX_W = 64, BOX_H = 28, Y = 110;
+const gap = (W - attrs.length * BOX_W) / (attrs.length - 1);
+const cx = (a: string) => attrs.indexOf(a) * (BOX_W + gap) + BOX_W / 2;
+// 每條函數相依一個高度：上方兩條、下方兩條
+const level = [-1, 1, 2, -2];
+const lane = (k: number) => (level[k] < 0 ? Y + level[k] * 26 - 6 : Y + BOX_H + level[k] * 26 + 6);
+const H = lane(2) + 14;
+const arrow = 'fd-arrow';
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="函數相依圖：sid 決定 name 與 dname；dname 決定 dphone；cid 決定 title；sid 與 cid 一起決定 grade">
+  <defs>
+    <marker id={arrow} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8 Z" fill="var(--color-ink)" />
+    </marker>
+  </defs>
+  {
+    fds.map((f, k) => {
+      const y = lane(k);
+      const above = level[k] < 0;
+      const edge = above ? Y : Y + BOX_H;
+      const xs = [...f.from, ...f.to].map(cx);
+      return (
+        <g>
+          <path class="ink" d={`M${Math.min(...xs)} ${y} L${Math.max(...xs)} ${y}`} />
+          {f.from.map((a) => <path class="ink" d={`M${cx(a)} ${edge} L${cx(a)} ${y}`} stroke-width="2" />)}
+          {f.to.map((a) => <path class="ink" d={`M${cx(a)} ${y} L${cx(a)} ${edge + (above ? -1 : 1)}`} marker-end={`url(#${arrow})`} />)}
+        </g>
+      );
+    })
+  }
+  {
+    attrs.map((a) => (
+      <g>
+        <rect class="ink" x={cx(a) - BOX_W / 2 + 0.5} y={Y + 0.5} width={BOX_W - 1} height={BOX_H - 1} style="fill: var(--color-paper)" />
+        <text class="mono" x={cx(a)} y={Y + 18} text-anchor="middle">{a}</text>
+      </g>
+    ))
+  }
+</svg>

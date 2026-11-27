@@ -1,0 +1,19 @@
+---
+// 圖：Course(cid, teacher, textbook) 中 cid ↠ teacher | textbook，拆成兩個表。
+import Table from './rel/Table.astro';
+
+const teachers: Record<string, string[]> = { DB: ['王', '李'], OS: ['陳'] };
+const books: Record<string, string[]> = { DB: ['Elmasri', 'Silberschatz'], OS: ['Dinosaur'] };
+const rows = Object.keys(teachers).flatMap((c) => teachers[c].flatMap((t) => books[c].map((b) => [c, t, b])));
+const ct = Object.keys(teachers).flatMap((c) => teachers[c].map((t) => [c, t]));
+const cb = Object.keys(books).flatMap((c) => books[c].map((b) => [c, b]));
+const CELL = 20, W = 540;
+const H = 16 + CELL * (rows.length + 1) + 4;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`原表 ${rows.length} 列：DB 的 2 位老師與 2 本課本兩兩組合成 4 列，加上 OS 一列。拆成 (cid, teacher) ${ct.length} 列與 (cid, textbook) ${cb.length} 列`}>
+  <Table x={0} y={0} name="Course" cols={['cid', 'teacher', 'textbook']} rows={rows} colW={[36, 60, 96]} cellH={CELL} />
+  <text x={206} y={16 + CELL * 2}>拆開 →</text>
+  <Table x={262} y={0} name="CourseTeacher" cols={['cid', 'teacher']} rows={ct} colW={[36, 60]} cellH={CELL} />
+  <Table x={374} y={0} name="CourseBook" cols={['cid', 'textbook']} rows={cb} colW={[36, 96]} cellH={CELL} />
+</svg>

@@ -1,0 +1,30 @@
+---
+subject: databases
+chapter: normalization
+order: 3
+kind: calc
+difficulty: 1
+---
+
+<M t="R(A, B, C, D, E)" />，<M t="F = \{ A \rightarrow B,\ BC \rightarrow D,\ D \rightarrow E,\ E \rightarrow A \}" />。
+
+(a) 求 <M t="A^+" /> 與 <M t="(AC)^+" />。
+
+(b) <M t="AC" /> 是不是超鍵？<M t="AC \rightarrow E" /> 成立嗎？
+
+<Solution>
+
+**(a) <M t="A^+ = AB" />，<M t="(AC)^+ = ABCDE" />。(b) 是超鍵；成立。**
+
+**(a)** <M t="A^+" />：從 <M t="A" /> 開始，<M t="A \rightarrow B" /> 加入 B。<M t="BC \rightarrow D" /> 需要 C，沒有；其他也用不上，停止。<M t="A^+ = AB" />。
+
+<M t="(AC)^+" />：
+
+1. 從 <M t="AC" /> 開始。
+2. <M t="A \rightarrow B" />：加入 B，得 <M t="ABC" />。
+3. <M t="BC \rightarrow D" />：B、C 都在，加入 D，得 <M t="ABCD" />。
+4. <M t="D \rightarrow E" />：加入 E，得 <M t="ABCDE" />。
+
+**(b)** <M t="(AC)^+" /> 包含全部屬性，所以 <M t="AC" /> 是超鍵。E 在 <M t="(AC)^+" /> 中，所以 <M t="AC \rightarrow E" /> 成立。
+
+</Solution>

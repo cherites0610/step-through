@@ -1,0 +1,28 @@
+---
+// 圖：正規化形式一層包一層。每一層標出它額外排除的問題。
+const layers = [
+  { name: '1NF', rule: '每一格都是原子值' },
+  { name: '2NF', rule: '沒有部分相依' },
+  { name: '3NF', rule: '沒有遞移相依' },
+  { name: 'BCNF', rule: '每個決定因素都是超鍵' },
+  { name: '4NF', rule: '沒有非顯然的多值相依' },
+];
+const W = 540, STEP_X = 26, STEP_Y = 30, TOP = 0, INNER_H = 34;
+// 每往內一層，上下各縮 STEP_Y；最內層留 INNER_H 的高度
+const H = TOP + 2 * STEP_Y * (layers.length - 1) + INNER_H;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="五層由外到內：1NF 每一格是原子值；2NF 沒有部分相依；3NF 沒有遞移相依；BCNF 每個決定因素都是超鍵；4NF 沒有非顯然的多值相依。內層一定符合外層">
+  {
+    layers.map((l, i) => {
+      const x = i * STEP_X, y = TOP + i * STEP_Y;
+      return (
+        <g>
+          <rect class="ink" x={x + 0.5} y={y + 0.5} width={W - 2 * x - 1} height={H - 2 * y - 1} stroke-width={i === layers.length - 1 ? 2 : 1} />
+          <text class="mono" x={x + 8} y={y + 20}>{l.name}</text>
+          <text x={x + 54} y={y + 20}>{l.rule}</text>
+        </g>
+      );
+    })
+  }
+</svg>

@@ -1,0 +1,38 @@
+---
+subject: databases
+chapter: normalization
+order: 12
+kind: calc
+difficulty: 3
+---
+
+<M t="R(A, B, C, D, E)" />，<M t="F = \{ A \rightarrow B,\ A \rightarrow C,\ BC \rightarrow D,\ D \rightarrow E,\ E \rightarrow B \}" />。
+
+(a) 找出候選鍵與最小覆蓋。
+
+(b) 用 3NF 合成演算法分解 <M t="R" />。
+
+(c) 分解出來的每個表都符合 BCNF 嗎？
+
+<Solution>
+
+**(a) 候選鍵 <M t="A" />；最小覆蓋就是 <M t="F" /> 本身。(b) <M t="(A, B, C)" />、<M t="(B, C, D)" />、<M t="(D, E)" />、<M t="(B, E)" />。(c) <M t="(B, C, D)" /> 不符合 BCNF，其餘符合。**
+
+**(a)** <M t="A" /> 只在左邊；<M t="A^+" />：A 得 B、C，BC 得 D，D 得 E，是全部，所以候選鍵是 <M t="A" />。
+
+最小覆蓋：右邊已經都是單一屬性。左邊只有 <M t="BC \rightarrow D" /> 有兩個屬性：<M t="B^+ = B" />、<M t="C^+ = C" />，都推不出 D，沒有多餘。逐條拿掉檢查，每一條都推不出來（例如拿掉 <M t="E \rightarrow B" /> 後 <M t="E^+ = E" />），沒有多餘的函數相依。
+
+**(b)** 依左邊分組，每組一個表：
+
+- <M t="A \rightarrow B, C" />：<M t="(A, B, C)" />
+- <M t="BC \rightarrow D" />：<M t="(B, C, D)" />
+- <M t="D \rightarrow E" />：<M t="(D, E)" />
+- <M t="E \rightarrow B" />：<M t="(B, E)" />
+
+<M t="(A, B, C)" /> 已經包含候選鍵 <M t="A" />，不用另外加表；也沒有哪個表被另一個表包含。這個分解一定無損、保持相依，每個表都符合 3NF。
+
+**(c)** 看 <M t="(B, C, D)" />：在這個表內，除了 <M t="BC \rightarrow D" />，還能推出 <M t="D \rightarrow B" />（<M t="D \rightarrow E \rightarrow B" />）。它的候選鍵是 <M t="BC" /> 與 <M t="CD" />。<M t="D \rightarrow B" /> 的 D 不是超鍵，所以**不符合 BCNF**；但 B 是主要屬性，符合 3NF。其餘三個表都只有一條函數相依、左邊就是鍵，符合 BCNF。
+
+這說明了 3NF 合成的取捨：保證保持相依，但不保證 BCNF。
+
+</Solution>
