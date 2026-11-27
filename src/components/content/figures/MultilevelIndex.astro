@@ -1,0 +1,43 @@
+---
+// 圖：多層索引。r = 30000 筆、扇出 68：第一層 442 個區塊、第二層 7 個、第三層 1 個。
+import { line } from './shapes';
+
+const r = 30000, fo = 68;
+const levels: number[] = [Math.ceil(r / fo)];
+while (levels[levels.length - 1] > 1) levels.push(Math.ceil(levels[levels.length - 1] / fo));
+const top = [...levels].reverse(); // 由上到下：1、7、442
+const W = 540, ROW = 64, BOX_W = 36, BOX_H = 22, LABEL_X = 0, AREA_X = 120, SHOW = 7;
+const H = 10 + (top.length + 1) * ROW;
+const rowY = (i: number) => 10 + i * ROW;
+// 每一層最多畫 SHOW 個區塊，超過的用「…」表示
+const xs = (n: number) => {
+  const shown = Math.min(n, SHOW);
+  const span = W - AREA_X - 10;
+  return Array.from({ length: shown }, (_, k) => AREA_X + (shown === 1 ? span / 2 - BOX_W / 2 : (k * (span - BOX_W)) / (shown - 1)));
+};
+const names = top.map((_, i) => `第 ${top.length - i} 層`);
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`多層索引由上到下：第三層 1 個區塊，第二層 ${top[1]} 個區塊，第一層 ${top[2]} 個區塊，最下面是資料檔。從頂層往下每層讀一個區塊，共 ${top.length} 次，再讀 1 個資料區塊`}>
+  {
+    top.map((n, i) => {
+      const y = rowY(i);
+      const here = xs(n);
+      const below = i + 1 < top.length ? xs(top[i + 1]) : [];
+      return (
+        <g>
+          <text x={LABEL_X} y={y + 15}>{names[i]}：{n} 個</text>
+          {i + 1 < top.length && here.slice(0, 1).flatMap((x) => below.map((bx) => <path class="axis" d={line(x + BOX_W / 2, y + BOX_H, bx + BOX_W / 2, y + ROW)} />))}
+          {here.map((x, k) => (
+            <rect class="ink" x={x + 0.5} y={y + 0.5} width={BOX_W - 1} height={BOX_H - 1} stroke-width={k === 0 ? 2 : 1} style="fill: var(--color-paper)" />
+          ))}
+          {n > SHOW && <text x={(here[here.length - 2] + BOX_W + here[here.length - 1]) / 2} y={y + 15} text-anchor="middle">…</text>}
+        </g>
+      );
+    })
+  }
+  <text x={LABEL_X} y={rowY(top.length) + 15}>資料檔</text>
+  <path class="ink" d={line(xs(top[top.length - 1])[0] + BOX_W / 2, rowY(top.length - 1) + BOX_H, AREA_X + BOX_W / 2, rowY(top.length))} stroke-width="2" />
+  <rect class="ink" x={AREA_X + 0.5} y={rowY(top.length) + 0.5} width={W - AREA_X - 11} height={BOX_H - 1} />
+  <text class="mono" x={AREA_X + 8} y={rowY(top.length) + 15}>{r} 筆紀錄</text>
+</svg>

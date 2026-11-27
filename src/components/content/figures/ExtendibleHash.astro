@@ -1,0 +1,40 @@
+---
+// 圖：可延伸雜湊，全域深度 2。目錄 4 格各指向一個桶子（區域深度 2）。鍵值 = h(K) = K mod 16 的 4 個位元。
+import { line } from './shapes';
+
+const d = 2;
+const keys = [1, 9, 12, 5, 14, 3];
+const bin = (k: number) => (k % 16).toString(2).padStart(4, '0');
+const buckets = Array.from({ length: 2 ** d }, (_, i) => ({
+  prefix: i.toString(2).padStart(d, '0'),
+  keys: keys.filter((k) => bin(k).slice(0, d) === i.toString(2).padStart(d, '0')),
+}));
+const W = 540, CELL_W = 56, CELL_H = 30, DIR_X = 40, B_X = 260, B_W = 200, TOP = 26, ROW = 44;
+const H = TOP + buckets.length * ROW + 4;
+const arrow = 'eh-arrow';
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="全域深度 2 的目錄有 00、01、10、11 四格，分別指向桶子 1 與 3、5、9、12 與 14；每個桶子的區域深度都是 2">
+  <defs>
+    <marker id={arrow} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="7" markerHeight="7" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8 Z" fill="var(--color-ink)" />
+    </marker>
+  </defs>
+  <text x={DIR_X} y="16">目錄（d = {d}）</text>
+  <text x={B_X} y="16">桶子（容量 2）</text>
+  {
+    buckets.map((b, i) => {
+      const y = TOP + i * ROW;
+      return (
+        <g>
+          <rect class="ink" x={DIR_X + 0.5} y={y + 0.5} width={CELL_W - 1} height={CELL_H - 1} />
+          <text class="mono" x={DIR_X + CELL_W / 2} y={y + 19} text-anchor="middle">{b.prefix}</text>
+          <path class="ink" d={line(DIR_X + CELL_W, y + CELL_H / 2, B_X - 2, y + CELL_H / 2)} marker-end={`url(#${arrow})`} />
+          <rect class="ink" x={B_X + 0.5} y={y + 0.5} width={B_W - 1} height={CELL_H - 1} stroke-width="2" />
+          <text class="mono" x={B_X + 10} y={y + 19}>{b.keys.map((k) => `${k}(${bin(k)})`).join('  ')}</text>
+          <text class="mono" x={B_X + B_W + 10} y={y + 19}>d' = {d}</text>
+        </g>
+      );
+    })
+  }
+</svg>

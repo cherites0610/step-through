@@ -34,6 +34,10 @@ import NormalForms from './figures/NormalForms.astro';
 import LossyJoin from './figures/LossyJoin.astro';
 import BcnfTree from './figures/BcnfTree.astro';
 import MvdSplit from './figures/MvdSplit.astro';
+import PrimarySecondary from './figures/PrimarySecondary.astro';
+import MultilevelIndex from './figures/MultilevelIndex.astro';
+import BPlusTree from './figures/BPlusTree.astro';
+import ExtendibleHash from './figures/ExtendibleHash.astro';
 
 export const mdxComponents = {
   M,
@@ -71,4 +75,8 @@ export const mdxComponents = {
   LossyJoin,
   BcnfTree,
   MvdSplit,
+  PrimarySecondary,
+  MultilevelIndex,
+  BPlusTree,
+  ExtendibleHash,
 };
