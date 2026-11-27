@@ -1,0 +1,25 @@
+---
+subject: databases
+chapter: storage
+order: 1
+kind: calc
+difficulty: 1
+---
+
+某檔案有 <M t="r = 50{,}000" /> 筆紀錄，每筆 <M t="R = 200" /> 位元組，區塊大小 <M t="B = 2048" /> 位元組，紀錄不跨區塊存放。
+
+(a) 區塊因子是多少？
+
+(b) 檔案共佔幾個區塊？
+
+(c) 每個區塊浪費幾個位元組？
+
+<Solution>
+
+**(a) 10。(b) 5000。(c) 48。**
+
+- **(a)** <M t="\text{bfr} = \lfloor 2048 / 200 \rfloor = \lfloor 10.24 \rfloor = 10" />。
+- **(b)** <M t="b = \lceil 50000 / 10 \rceil = 5000" />。
+- **(c)** 10 筆用掉 <M t="10 \times 200 = 2000" /> 位元組，剩 <M t="2048 - 2000 = 48" /> 位元組放不下第 11 筆，就浪費了。
+
+</Solution>

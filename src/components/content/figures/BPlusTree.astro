@@ -1,0 +1,63 @@
+---
+// 圖：p = 3、p_leaf = 2，依序插入 8、5、1、7、3、12、9、6 之後的 B+ 樹（結構由插入規則算出，見觀念說明的表）。
+import { line } from './shapes';
+
+type T = { keys: number[]; kids?: T[] };
+const tree: T = {
+  keys: [7],
+  kids: [
+    { keys: [5], kids: [{ keys: [1, 3] }, { keys: [5, 6] }] },
+    { keys: [8, 12], kids: [{ keys: [7] }, { keys: [8, 9] }, { keys: [12] }] },
+  ],
+};
+const W = 540, ROW = 66, KEY_W = 26, BOX_H = 26, TOP = 4;
+const depth = (t: T): number => (t.kids ? 1 + depth(t.kids[0]) : 0);
+const D = depth(tree);
+const leaves: T[] = [];
+const collect = (t: T) => (t.kids ? t.kids.forEach(collect) : leaves.push(t));
+collect(tree);
+const boxW = (t: T) => Math.max(2, t.keys.length) * KEY_W;
+const leafGap = (W - leaves.reduce((a, l) => a + boxW(l), 0)) / (leaves.length + 1);
+const pos = new Map<T, { x: number; y: number }>();
+let cursor = leafGap;
+leaves.forEach((l) => { pos.set(l, { x: cursor + boxW(l) / 2, y: TOP + D * ROW }); cursor += boxW(l) + leafGap; });
+const place = (t: T, d: number): number => {
+  if (!t.kids) return pos.get(t)!.x;
+  const xs = t.kids.map((k) => place(k, d + 1));
+  const x = (xs[0] + xs[xs.length - 1]) / 2;
+  pos.set(t, { x, y: TOP + d * ROW });
+  return x;
+};
+place(tree, 0);
+const all = [...pos.keys()];
+const H = TOP + D * ROW + BOX_H + 6;
+const arrow = 'bp-arrow';
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="B+ 樹：根是 7；第二層是 5 與 8、12；葉子由左到右是 1 3、5 6、7、8 9、12，葉子之間有指向右邊的鏈">
+  <defs>
+    <marker id={arrow} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8 Z" fill="var(--color-ink)" />
+    </marker>
+  </defs>
+  {all.flatMap((t) => (t.kids ?? []).map((k) => <path class="ink" d={line(pos.get(t)!.x, pos.get(t)!.y + BOX_H, pos.get(k)!.x, pos.get(k)!.y)} />))}
+  {
+    leaves.slice(0, -1).map((l, i) => {
+      const a = pos.get(l)!, b = pos.get(leaves[i + 1])!;
+      return <path class="ink" d={line(a.x + boxW(l) / 2, a.y + BOX_H / 2, b.x - boxW(leaves[i + 1]) / 2 - 2, b.y + BOX_H / 2)} marker-end={`url(#${arrow})`} />;
+    })
+  }
+  {
+    all.map((t) => {
+      const { x, y } = pos.get(t)!;
+      const w = boxW(t);
+      return (
+        <g>
+          <rect class="ink" x={x - w / 2 + 0.5} y={y + 0.5} width={w - 1} height={BOX_H - 1} stroke-width={t.kids ? 1 : 2} style="fill: var(--color-paper)" />
+          {t.keys.map((k, i) => <text class="mono" x={x - w / 2 + KEY_W * i + KEY_W / 2} y={y + 17} text-anchor="middle">{k}</text>)}
+          {Array.from({ length: Math.max(2, t.keys.length) - 1 }, (_, i) => <path class="axis" d={`M${x - w / 2 + KEY_W * (i + 1)} ${y + 4} L${x - w / 2 + KEY_W * (i + 1)} ${y + BOX_H - 4}`} />)}
+        </g>
+      );
+    })
+  }
+</svg>

@@ -1,0 +1,66 @@
+---
+// 圖：主要索引（稀疏，每個區塊一個項目）與次要索引（稠密，每筆紀錄一個項目）。
+import { line } from './shapes';
+
+const recs = [
+  ['S01', '507'], ['S02', '128'], ['S03', '913'],
+  ['S04', '346'], ['S05', '782'], ['S06', '215'],
+  ['S07', '664'], ['S08', '431'], ['S09', '890'],
+];
+const PER = 3, CELL = 18, BLOCK_GAP = 10, W = 540, PW = 260, GAP = 20;
+const blocks = Array.from({ length: recs.length / PER }, (_, i) => recs.slice(i * PER, i * PER + PER));
+const TOP = 34;
+const recY = (i: number) => TOP + Math.floor(i / PER) * (PER * CELL + BLOCK_GAP) + (i % PER) * CELL;
+const H = recY(recs.length - 1) + CELL + 6;
+const DATA_W = 84, IDX_W = 56;
+// 左：主要索引在左、資料在右；右：次要索引在左、資料在右
+const L = { idx: 10, data: 160 }, R = { idx: PW + GAP + 10, data: PW + GAP + 160 };
+const primary = blocks.map((b, i) => ({ key: b[0][0], y: recY(i * PER) }));
+const sec = recs.map((r, i) => ({ key: r[1], i })).sort((a, b) => a.key.localeCompare(b.key));
+const secY = (k: number) => TOP + k * CELL + Math.floor(k / PER) * BLOCK_GAP;
+const arrow = 'ps-arrow';
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label="左：資料檔依 sid 排序，3 個區塊；主要索引只有 3 個項目 S01、S04、S07，各指向一個區塊的開頭。右：同一個資料檔，次要索引建在 idno 上，9 個項目依 idno 排序，每個各指向一筆紀錄，箭頭交錯">
+  <defs>
+    <marker id={arrow} viewBox="0 0 8 8" refX="8" refY="4" markerWidth="6" markerHeight="6" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L8 4 L0 8 Z" fill="var(--color-ink)" />
+    </marker>
+  </defs>
+  <text x={L.idx} y="12">主要索引（稀疏）</text>
+  <text class="mono" x={L.idx} y="28">sid</text>
+  <text class="mono" x={L.data} y="28">資料檔（依 sid 排序）</text>
+  <text x={R.idx} y="12">次要索引（稠密）</text>
+  <text class="mono" x={R.idx} y="28">idno</text>
+  <text class="mono" x={R.data} y="28">同一個資料檔</text>
+  <path class="axis" d={`M${PW + GAP / 2} 0 L${PW + GAP / 2} ${H}`} />
+  {
+    [L, R].map((side) =>
+      recs.map((r, i) => (
+        <g>
+          <rect class={i % PER === 0 ? 'ink' : 'axis'} x={side.data + 0.5} y={recY(i) + 0.5} width={DATA_W - 1} height={CELL - 1} />
+          <text class="mono" x={side.data + 6} y={recY(i) + 13}>{r[0]}  {r[1]}</text>
+        </g>
+      )),
+    )
+  }
+  {[L, R].map((side) => blocks.map((_, b) => <rect class="ink" x={side.data - 0.5} y={recY(b * PER) - 0.5} width={DATA_W + 1} height={PER * CELL + 1} />))}
+  {
+    primary.map((e) => (
+      <g>
+        <rect class="ink" x={L.idx + 0.5} y={e.y + 0.5} width={IDX_W - 1} height={CELL - 1} />
+        <text class="mono" x={L.idx + 6} y={e.y + 13}>{e.key}</text>
+        <path class="ink" d={line(L.idx + IDX_W, e.y + CELL / 2, L.data - 2, e.y + CELL / 2)} marker-end={`url(#${arrow})`} />
+      </g>
+    ))
+  }
+  {
+    sec.map((e, k) => (
+      <g>
+        <rect class="axis" x={R.idx + 0.5} y={secY(k) + 0.5} width={IDX_W - 1} height={CELL - 1} />
+        <text class="mono" x={R.idx + 6} y={secY(k) + 13}>{e.key}</text>
+        <path class="ink" d={line(R.idx + IDX_W, secY(k) + CELL / 2, R.data - 2, recY(e.i) + CELL / 2)} marker-end={`url(#${arrow})`} />
+      </g>
+    ))
+  }
+</svg>

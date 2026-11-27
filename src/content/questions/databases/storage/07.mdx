@@ -1,0 +1,31 @@
+---
+subject: databases
+chapter: storage
+order: 7
+kind: calc
+difficulty: 2
+---
+
+區塊大小 <M t="B = 1024" /> 位元組，鍵值 <M t="V = 10" /> 位元組，樹指標 <M t="P = 6" /> 位元組，資料指標 <M t="P_r = 8" /> 位元組。
+
+(a) B+ 樹內部節點的階 <M t="p" /> 最大是多少？
+
+(b) 葉節點最多放幾個鍵值 <M t="p_{\text{leaf}}" />？
+
+<Solution>
+
+**(a) 64。(b) 56。**
+
+**(a)** 內部節點有 <M t="p" /> 個樹指標與 <M t="p - 1" /> 個鍵值：
+
+<M d t="\begin{aligned} 6p + 10(p - 1) &\le 1024 \\ 16p &\le 1034 \\ p &\le 64.6 \end{aligned}" />
+
+取 <M t="p = 64" />。檢查：<M t="64 \times 6 + 63 \times 10 = 1014 \le 1024" />；65 是 <M t="1030 > 1024" />，放不下。
+
+**(b)** 葉節點有 <M t="p_{\text{leaf}}" /> 對（鍵值、資料指標），加一個指向下一個葉子的樹指標：
+
+<M d t="\begin{aligned} (10 + 8)\, p_{\text{leaf}} + 6 &\le 1024 \\ p_{\text{leaf}} &\le \frac{1018}{18} \approx 56.6 \end{aligned}" />
+
+取 56。常見錯誤是忘了扣掉指向下一個葉子的指標，或把資料指標當成樹指標。
+
+</Solution>
