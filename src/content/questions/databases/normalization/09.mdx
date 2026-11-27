@@ -1,0 +1,31 @@
+---
+subject: databases
+chapter: normalization
+order: 9
+kind: calc
+difficulty: 2
+---
+
+<M t="R(A, B, C, D)" />，<M t="F = \{ A \rightarrow B,\ B \rightarrow C,\ C \rightarrow D,\ D \rightarrow A \}" />，分解成 <M t="(A, B)" />、<M t="(B, C)" />、<M t="(C, D)" />。
+
+(a) 哪一條函數相依的屬性不在同一個表中？
+
+(b) 這個分解保持相依嗎？用觀念說明的方法檢查。
+
+<Solution>
+
+**(a) <M t="D \rightarrow A" />。(b) 保持相依。**
+
+**(a)** <M t="A \rightarrow B" /> 在 <M t="(A, B)" />、<M t="B \rightarrow C" /> 在 <M t="(B, C)" />、<M t="C \rightarrow D" /> 在 <M t="(C, D)" />；<M t="D \rightarrow A" /> 的 D、A 不在同一個表。
+
+**(b)** 「不在同一個表」不代表沒有被保持，要用各表內能推出的東西檢查。從 <M t="Z = \{D\}" /> 開始，每個表只用自己的屬性推：
+
+1. 在 <M t="(C, D)" />：<M t="D^+ = ABCD" />，和 <M t="CD" /> 取交集得 <M t="CD" />，<M t="Z" /> 加入 C，變成 <M t="CD" />。
+2. 在 <M t="(B, C)" />：<M t="Z \cap BC = C" />，<M t="C^+ \cap BC = BC" />，加入 B，<M t="Z = BCD" />。
+3. 在 <M t="(A, B)" />：<M t="Z \cap AB = B" />，<M t="B^+ \cap AB = AB" />，加入 A，<M t="Z = ABCD" />。
+
+A 在 <M t="Z" /> 中，<M t="D \rightarrow A" /> 被保持。其他三條本來就在單一表內，所以整個分解保持相依。
+
+直覺：在 <M t="(C, D)" /> 中能推出 <M t="D \rightarrow C" />（因為 <M t="D \rightarrow A \rightarrow B \rightarrow C" />），同理 <M t="(B, C)" /> 中有 <M t="C \rightarrow B" />、<M t="(A, B)" /> 中有 <M t="B \rightarrow A" />，三條串起來就是 <M t="D \rightarrow A" />。
+
+</Solution>

@@ -1,0 +1,27 @@
+---
+subject: databases
+chapter: normalization
+order: 5
+kind: calc
+difficulty: 2
+---
+
+<M t="R(A, B, C, D, E)" />，<M t="F = \{ A \rightarrow B,\ BC \rightarrow D,\ D \rightarrow E,\ E \rightarrow A \}" />。找出 <M t="R" /> 的所有候選鍵。
+
+<Solution>
+
+**<M t="AC" />、<M t="BC" />、<M t="CD" />、<M t="CE" />。**
+
+1. **分類**：<M t="C" /> 只出現在左邊，每個候選鍵都要包含它；<M t="A" />、<M t="B" />、<M t="D" />、<M t="E" /> 兩邊都出現。
+2. **只有 <M t="C" />**：<M t="C^+ = C" />，不是超鍵。
+3. **<M t="C" /> 加一個屬性**：
+   - <M t="(AC)^+" />：A 得 B，BC 得 D，D 得 E，是全部。
+   - <M t="(BC)^+" />：BC 得 D，D 得 E，E 得 A，是全部。
+   - <M t="(CD)^+" />：D 得 E，E 得 A，A 得 B，是全部。
+   - <M t="(CE)^+" />：E 得 A，A 得 B，BC 得 D，是全部。
+4. 四個都是超鍵，拿掉任何一個屬性只剩 <M t="C" /> 或不含 <M t="C" />，都不是超鍵，所以都是候選鍵。
+5. 三個屬性以上的組合都包含上面某一個，不會是最小的。
+
+所有屬性都在某個候選鍵裡，<M t="R" /> 沒有非主要屬性。
+
+</Solution>

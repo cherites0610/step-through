@@ -1,0 +1,35 @@
+---
+subject: databases
+chapter: normalization
+order: 11
+kind: calc
+difficulty: 3
+---
+
+<M t="R(A, B, C, D, E)" />，<M t="F = \{ AB \rightarrow C,\ C \rightarrow D,\ D \rightarrow E \}" />。
+
+(a) 找出候選鍵，判斷 <M t="R" /> 最高符合哪個正規化形式。
+
+(b) 用 BCNF 分解演算法把 <M t="R" /> 分解到 BCNF，寫出每一步。
+
+(c) 你的結果保持相依嗎？
+
+<Solution>
+
+**(a) 候選鍵 <M t="AB" />；2NF。(b) <M t="(D, E)" />、<M t="(C, D)" />、<M t="(A, B, C)" />。(c) 保持。**
+
+**(a)** <M t="A" />、<M t="B" /> 只在左邊，一定在候選鍵裡；<M t="(AB)^+ = ABCDE" />，候選鍵是 <M t="AB" />，非主要屬性是 C、D、E。鍵的任何一部分（A 或 B）都決定不了其他屬性，沒有部分相依，符合 2NF；<M t="C \rightarrow D" /> 的 C 不是超鍵、D 不是主要屬性，是遞移相依，不符合 3NF。
+
+**(b)**
+
+1. 在 <M t="R" /> 中，<M t="C \rightarrow D" /> 違反（C 不是超鍵）。<M t="C^+ = CDE" />，拆成 <M t="R_1(C, D, E)" /> 與 <M t="R_2 = R - (CDE - C) = (A, B, C)" />。
+2. <M t="R_2(A, B, C)" />：只有 <M t="AB \rightarrow C" />，AB 是它的超鍵，符合 BCNF。
+3. <M t="R_1(C, D, E)" />：鍵是 C；<M t="D \rightarrow E" /> 違反。<M t="D^+ \cap R_1 = DE" />，拆成 <M t="(D, E)" /> 與 <M t="(C, D)" />。兩者都只有兩個屬性，符合 BCNF。
+
+結果 <M t="(A, B, C)" />、<M t="(C, D)" />、<M t="(D, E)" />。每一步拆分的共同屬性（C、D）都決定其中一邊，所以無損。
+
+**(c)** <M t="AB \rightarrow C" /> 在 <M t="(A, B, C)" />，<M t="C \rightarrow D" /> 在 <M t="(C, D)" />，<M t="D \rightarrow E" /> 在 <M t="(D, E)" />，每一條都在單一表內，保持相依。
+
+注意：如果第 1 步改用 <M t="D \rightarrow E" /> 先拆，結果相同；但 BCNF 分解一般不保證保持相依，要逐條檢查。
+
+</Solution>

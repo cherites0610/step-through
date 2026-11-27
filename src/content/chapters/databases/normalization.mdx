@@ -1,0 +1,387 @@
+---
+subject: databases
+chapter: normalization
+summary: 從資料重複造成的異常出發：函數相依與 Armstrong 公理、屬性閉包、找候選鍵、最小覆蓋，判斷 1NF 到 BCNF，用 BCNF 分解與 3NF 合成拆表，並檢查無損與保持相依；最後是多值相依與 4NF。資工、資管所都是計算題的大宗。
+---
+
+### 函數相依
+
+#### 為什麼需要正規化
+
+假設學校把所有資料塞進一個大表：
+
+<M d t="\begin{aligned} \text{SC}(&\text{sid}, \text{name}, \text{dname}, \text{dphone}, \\ &\text{cid}, \text{title}, \text{grade}) \end{aligned}" />
+
+每一列是一筆選課，連帶記下學生的姓名、系、系辦電話，以及課名。
+
+<Figure no="6-1" caption="把所有資料放在一個表：王小明的姓名與系存了 3 次，資管系的電話存了 5 次（黑底），資料庫的課名存了 3 次。這些重複正是三種異常的來源。">
+  <Anomalies />
+</Figure>
+
+資料重複，就會出現三種**異常**（anomaly）：
+
+- **更新異常**（update anomaly）：資管系換電話，要改 5 列；漏改一列，同一個系就有兩支電話，資料不一致。
+- **新增異常**（insertion anomaly）：新成立的電機系還沒有學生選課，無法新增它的電話：這個表的主鍵是 (sid, cid)，沒有學生、沒有課就沒有主鍵，違反實體完整性。
+- **刪除異常**（deletion anomaly）：計算機概論（C3）只有王小明修。他退選這門課、刪除這一列，「C3 叫做計算機概論」這件事也跟著消失。
+
+這個表的問題是把好幾件「事實」塞在一起：學生屬於哪一系、系的電話是多少、課名是什麼、誰修了什麼課得幾分。**正規化**（normalization）就是用一套規則判斷表裡混了哪些事實，再把它拆開，讓每個事實只存一次。判斷的工具是函數相依。
+
+#### 函數相依的定義
+
+> **定義**：設 <M t="X" />、<M t="Y" /> 是關聯 <M t="R" /> 的屬性集合。如果 <M t="R" /> 的任何兩個值組，只要在 <M t="X" /> 上的值相同，在 <M t="Y" /> 上的值就一定相同，就說 <M t="X" /> **函數決定** <M t="Y" />，或 <M t="Y" /> **函數相依**（functional dependency，FD）於 <M t="X" />，記作 <M t="X \rightarrow Y" />。<M t="X" /> 稱為決定因素（determinant）。
+
+白話說：知道 <M t="X" /> 的值，就能**唯一**確定 <M t="Y" /> 的值。大表中的函數相依有：
+
+- <M t="\text{sid} \rightarrow \text{name}, \text{dname}" />：學號決定姓名與系。
+- <M t="\text{dname} \rightarrow \text{dphone}" />：系決定系辦電話。
+- <M t="\text{cid} \rightarrow \text{title}" />：課號決定課名。
+- <M t="\text{sid}, \text{cid} \rightarrow \text{grade}" />：學生加課程才決定成績，只看其中一個決定不了。
+
+和第 3 章的鍵一樣，函數相依是**綱要的性質**，由現實的規則決定。看一份資料只能**排除**：找到兩列 <M t="X" /> 相同而 <M t="Y" /> 不同，就證明 <M t="X \rightarrow Y" /> 不成立；資料剛好沒有反例，不能證明它成立。
+
+鍵其實就是一種函數相依：<M t="K" /> 是超鍵，等於 <M t="K" /> 決定所有屬性，<M t="K \rightarrow R" />。
+
+如果 <M t="Y \subseteq X" />，<M t="X \rightarrow Y" /> 永遠成立（例如 <M t="\text{sid}, \text{name} \rightarrow \text{sid}" />），這種沒有提供資訊的稱為**顯然函數相依**（trivial FD）。
+
+<Figure no="6-2" caption="大表的函數相依圖：箭頭從決定因素指向被決定的屬性。name、dname 只靠 sid，title 只靠 cid，dphone 要經過 dname 才連到 sid；只有 grade 需要 sid 與 cid 一起決定。">
+  <FdDiagram />
+</Figure>
+
+#### Armstrong 公理
+
+已知一組函數相依 <M t="F" />，可以推出其他的函數相依。例如有 <M t="\text{sid} \rightarrow \text{dname}" /> 與 <M t="\text{dname} \rightarrow \text{dphone}" />，就能推出 <M t="\text{sid} \rightarrow \text{dphone}" />。推導的規則是 **Armstrong 公理**（Armstrong's axioms），只有三條：
+
+| 規則 | 內容 | 直覺 |
+|---|---|---|
+| 自反律（reflexivity） | 若 <M t="Y \subseteq X" />，則 <M t="X \rightarrow Y" /> | 知道全部，就知道其中一部分 |
+| 擴增律（augmentation） | 若 <M t="X \rightarrow Y" />，則 <M t="XZ \rightarrow YZ" /> | 兩邊同時多知道 Z |
+| 遞移律（transitivity） | 若 <M t="X \rightarrow Y" /> 且 <M t="Y \rightarrow Z" />，則 <M t="X \rightarrow Z" /> | 一路推下去 |
+
+（<M t="XZ" /> 是 <M t="X \cup Z" /> 的簡寫。）這三條是**健全的**（推出來的一定成立）也是**完備的**（所有成立的都推得出來）。由它們可以再推出三條常用的規則：
+
+- **聯集律**：若 <M t="X \rightarrow Y" /> 且 <M t="X \rightarrow Z" />，則 <M t="X \rightarrow YZ" />。
+- **分解律**：若 <M t="X \rightarrow YZ" />，則 <M t="X \rightarrow Y" /> 且 <M t="X \rightarrow Z" />。
+- **虛遞移律**：若 <M t="X \rightarrow Y" /> 且 <M t="WY \rightarrow Z" />，則 <M t="WX \rightarrow Z" />。
+
+以聯集律為例，看它怎麼由公理推出：
+
+1. 由 <M t="X \rightarrow Y" />，兩邊擴增 <M t="X" />：<M t="X \rightarrow XY" />（<M t="XX" /> 就是 <M t="X" />）。
+2. 由 <M t="X \rightarrow Z" />，兩邊擴增 <M t="Y" />：<M t="XY \rightarrow YZ" />。
+3. 由 1、2 遞移：<M t="X \rightarrow YZ" />。
+
+**注意左邊不能拆**：<M t="AB \rightarrow C" /> **不能**推出 <M t="A \rightarrow C" />。sid 加 cid 決定成績，不代表光看 sid 就知道成績。
+
+### 屬性閉包與最小覆蓋
+
+#### 屬性閉包
+
+用公理一條一條推很慢。實際上最常問的是「<M t="X" /> 能決定哪些屬性」，答案稱為 <M t="X" /> 的**屬性閉包**（attribute closure），記作 <M t="X^+" />。
+
+**演算法**：
+
+1. 從 <M t="X^+ = X" /> 開始。
+2. 掃過 <M t="F" /> 的每一條 <M t="L \rightarrow R" />：如果左邊 <M t="L" /> 已經全部在 <M t="X^+" /> 裡，就把右邊 <M t="R" /> 加進去。
+3. 重複第 2 步，直到掃完一輪都沒有加入新的屬性。
+
+每加入一個屬性，都是一次遞移律；加不動時，<M t="X^+" /> 就是 <M t="X" /> 能推出的全部。
+
+**例**：<M t="R(A, B, C, G, H, I)" />，<M t="F = \{ A \rightarrow B,\ A \rightarrow C,\ CG \rightarrow H,\ CG \rightarrow I,\ B \rightarrow H \}" />，求 <M t="(AG)^+" />。
+
+| 步驟 | 用到 | <M t="(AG)^+" /> |
+|---|---|---|
+| 開始 | | <M t="AG" /> |
+| 1 | <M t="A \rightarrow B" />（A 已在裡面） | <M t="ABG" /> |
+| 2 | <M t="A \rightarrow C" /> | <M t="ABCG" /> |
+| 3 | <M t="CG \rightarrow H" />（C、G 都在） | <M t="ABCGH" /> |
+| 4 | <M t="CG \rightarrow I" /> | <M t="ABCGHI" /> |
+
+<M t="(AG)^+" /> 包含全部 6 個屬性，所以 <M t="AG" /> 是超鍵。
+
+#### 閉包的三個用途
+
+1. **判斷 <M t="X \rightarrow Y" /> 是否成立**：算 <M t="X^+" />，看 <M t="Y" /> 在不在裡面。
+2. **判斷超鍵**：<M t="X^+" /> 包含所有屬性，<M t="X" /> 就是超鍵。
+3. **找候選鍵**：找出最小的超鍵。上例中 <M t="A^+ = ABCH" />、<M t="G^+ = G" />，都不是超鍵，所以 <M t="AG" /> 拿掉任何一個都不行，是候選鍵。
+
+#### 找出所有候選鍵
+
+屬性一多，子集合就很多，先用一個觀察縮小範圍：把每個屬性依「出現在函數相依的哪一邊」分類。
+
+- **只出現在左邊**（或兩邊都沒出現）的屬性：沒有任何函數相依能推出它，所以**每一個候選鍵都必須包含它**。
+- **只出現在右邊**的屬性：一定能被別的屬性推出來，所以**不會在任何候選鍵中**。
+- **兩邊都出現**的屬性：要試。
+
+**例**：<M t="R(A, B, C, D, E)" />，<M t="F = \{ AB \rightarrow C,\ C \rightarrow D,\ D \rightarrow B,\ D \rightarrow E \}" />。
+
+1. 分類：<M t="A" /> 只在左邊，一定在每個候選鍵裡；<M t="E" /> 只在右邊，一定不在；<M t="B" />、<M t="C" />、<M t="D" /> 兩邊都有。
+2. 先試 <M t="A" /> 自己：<M t="A^+ = A" />，不是超鍵。
+3. 加一個兩邊都出現的屬性：
+   - <M t="(AB)^+" />：<M t="AB \rightarrow C" /> 得 C，<M t="C \rightarrow D" /> 得 D，<M t="D \rightarrow E" /> 得 E，是 <M t="ABCDE" />。
+   - <M t="(AC)^+" />：C 得 D，D 得 B、E，是 <M t="ABCDE" />。
+   - <M t="(AD)^+" />：D 得 B、E，再 <M t="AB \rightarrow C" />，是 <M t="ABCDE" />。
+4. 三個都是超鍵，而且拿掉任何一個屬性就只剩 <M t="A" /> 或不含 <M t="A" />，都不是超鍵。
+
+候選鍵是 <M t="AB" />、<M t="AC" />、<M t="AD" />。
+
+#### 最小覆蓋
+
+同一組限制可以有很多種寫法：<M t="\{ A \rightarrow B,\ B \rightarrow C,\ A \rightarrow C \}" /> 中的 <M t="A \rightarrow C" /> 可以由前兩條遞移得到，是多餘的。後面的 3NF 合成需要一組「沒有多餘」的函數相依。
+
+> **定義**：<M t="F" /> 的**最小覆蓋**（minimal cover，也叫正則覆蓋 canonical cover）是一組和 <M t="F" /> **等價**（能推出彼此的所有函數相依）的函數相依 <M t="G" />，而且：(1) 每一條的右邊只有一個屬性；(2) 左邊沒有多餘的屬性；(3) 沒有多餘的函數相依。
+
+**求法**：
+
+1. **右邊拆開**：<M t="A \rightarrow BC" /> 改寫成 <M t="A \rightarrow B" /> 與 <M t="A \rightarrow C" />（分解律）。
+2. **去掉左邊多餘的屬性**：對 <M t="XA \rightarrow B" />，如果只用 <M t="X" /> 就推得出 <M t="B" />（在目前的函數相依下算 <M t="X^+" />，看 <M t="B" /> 在不在裡面），<M t="A" /> 就是多餘的，改成 <M t="X \rightarrow B" />。
+3. **去掉多餘的函數相依**：對每一條 <M t="X \rightarrow A" />，暫時拿掉它，用剩下的算 <M t="X^+" />；如果 <M t="A" /> 還在裡面，這一條就是多餘的，刪掉。
+
+**例**：<M t="F = \{ A \rightarrow BC,\ B \rightarrow C,\ A \rightarrow B,\ AB \rightarrow C \}" />。
+
+1. 右邊拆開：<M t="A \rightarrow B" />、<M t="A \rightarrow C" />、<M t="B \rightarrow C" />、<M t="A \rightarrow B" />（重複，只留一條）、<M t="AB \rightarrow C" />。
+2. <M t="AB \rightarrow C" /> 的左邊：只用 <M t="A" />，<M t="A^+ = ABC" /> 含 C，所以 B 多餘，變成 <M t="A \rightarrow C" />，和已有的重複。
+3. 剩 <M t="A \rightarrow B" />、<M t="A \rightarrow C" />、<M t="B \rightarrow C" />。試拿掉 <M t="A \rightarrow C" />：用剩下兩條算 <M t="A^+ = ABC" />，仍含 C，所以它多餘。再試其他兩條都拿不掉。
+
+最小覆蓋是 <M t="\{ A \rightarrow B,\ B \rightarrow C \}" />。最小覆蓋**不一定唯一**，檢查的順序不同，結果可能不同，但都和 <M t="F" /> 等價。
+
+### 1NF 到 BCNF
+
+#### 主要屬性
+
+判斷正規化形式前，先定義一個名詞：屬於**某一個**候選鍵的屬性，稱為**主要屬性**（prime attribute）；不屬於任何候選鍵的，稱為**非主要屬性**（nonprime attribute）。大表的唯一候選鍵是 (sid, cid)，所以 sid、cid 是主要屬性，其餘五個是非主要屬性。
+
+#### 四種正規化形式
+
+**正規化形式**（normal form，NF）是一層一層更嚴格的條件，每一層都要先滿足上一層：
+
+> **第一正規化（1NF）**：每個屬性的值都是不可再分的原子值（第 3 章關聯的定義本身就要求這一點）。
+
+> **第二正規化（2NF）**：符合 1NF，而且每個**非主要屬性**都**完全**相依於每一個候選鍵，不能只相依於候選鍵的一部分（不能有**部分相依** partial dependency）。
+
+> **第三正規化（3NF）**：符合 2NF，而且每一條非顯然的 <M t="X \rightarrow A" /> 都滿足：<M t="X" /> 是超鍵，**或** <M t="A" /> 是主要屬性。
+
+> **Boyce-Codd 正規化（BCNF）**：每一條非顯然的 <M t="X \rightarrow A" /> 都滿足：<M t="X" /> 是超鍵。
+
+3NF 的條件也常說成「非主要屬性不能**遞移相依**（transitive dependency）於候選鍵」：不能有「鍵 → 某個非鍵屬性 → 非主要屬性」這種經過中間人的相依。BCNF 比 3NF 少了「或 <M t="A" /> 是主要屬性」這個例外，所以更嚴格。
+
+<Figure no="6-3" caption="每一層都包含在上一層裡：符合 BCNF 的一定符合 3NF，符合 3NF 的一定符合 2NF。每往內一層，就多排除一種問題。">
+  <NormalForms />
+</Figure>
+
+#### 例：把大表一路正規化到 3NF
+
+**1NF**：每一格都是單一值，大表符合 1NF。
+
+**2NF**：候選鍵是 (sid, cid)。<M t="\text{sid} \rightarrow \text{name}, \text{dname}" /> 中，name、dname 只相依於鍵的一部分 sid；<M t="\text{cid} \rightarrow \text{title}" /> 中，title 只相依於 cid。都是部分相依，**不符合 2NF**。把部分相依拆出去：
+
+- Student(sid, name, dname, dphone)：所有只靠 sid 的屬性（dphone 經由 dname 也只靠 sid）
+- Course(cid, title)
+- Enroll(sid, cid, grade)
+
+**3NF**：Student 的鍵是 sid。<M t="\text{dname} \rightarrow \text{dphone}" /> 中，dname 不是超鍵，dphone 也不是主要屬性：這是 <M t="\text{sid} \rightarrow \text{dname} \rightarrow \text{dphone}" /> 的遞移相依，**Student 不符合 3NF**（它符合 2NF：鍵只有一個屬性，不可能有部分相依）。把遞移相依拆出去：
+
+- Student(sid, name, dname)
+- Dept(dname, dphone)
+
+最後得到 Student、Dept、Course、Enroll 四個表，每一個都符合 BCNF。這正是第 1、2 章學校資料庫的樣子：好的 ER 設計轉出來的表，通常本來就符合 3NF。
+
+#### 3NF 但不是 BCNF
+
+兩者的差別只發生在「被決定的是主要屬性」的時候。
+
+**例**：選課輔導 R(student, course, teacher)，規則是：每位學生的每門課由一位老師輔導，每位老師只教一門課。
+
+- <M t="\text{student}, \text{course} \rightarrow \text{teacher}" />
+- <M t="\text{teacher} \rightarrow \text{course}" />
+
+候選鍵：(student, course)，以及 (student, teacher)（知道 teacher 就知道 course）。三個屬性都在某個候選鍵裡，**全是主要屬性**。
+
+- 3NF：<M t="\text{teacher} \rightarrow \text{course}" /> 的 teacher 不是超鍵，但 course 是主要屬性，符合例外，所以符合 3NF。
+- BCNF：teacher 不是超鍵，**不符合 BCNF**。
+
+它仍然有重複：老師教哪門課，在每一位被他輔導的學生那一列都存一次。
+
+#### 判斷最高正規化形式的步驟
+
+1. 用閉包找出所有候選鍵，標出主要屬性。
+2. 逐條檢查每個非顯然的函數相依 <M t="X \rightarrow A" />（右邊拆成單一屬性）：
+   - <M t="X" /> 是超鍵：沒問題。
+   - <M t="X" /> 不是超鍵、<M t="A" /> 是主要屬性：違反 BCNF，但不違反 3NF。
+   - <M t="X" /> 不是超鍵、<M t="A" /> 不是主要屬性、<M t="X" /> 是某個候選鍵的一部分：部分相依，違反 2NF。
+   - 其他（<M t="X" /> 不是超鍵、<M t="A" /> 不是主要屬性、<M t="X" /> 不是任何候選鍵的一部分）：遞移相依，違反 3NF。
+3. 違反的最嚴重的那一條，決定了最高的正規化形式。
+
+前面「找候選鍵」的例子 <M t="R(A, B, C, D, E)" />，候選鍵 <M t="AB" />、<M t="AC" />、<M t="AD" />，非主要屬性只有 <M t="E" />。<M t="D \rightarrow E" /> 中 <M t="D" /> 不是超鍵、<M t="E" /> 不是主要屬性，而 <M t="D" /> 是候選鍵 <M t="AD" /> 的一部分，是部分相依，所以只符合 **1NF**。
+
+### 無損分解與保持相依
+
+#### 拆表要滿足的兩個性質
+
+正規化就是把表拆開。但不是怎麼拆都可以，拆完要能還原，而且限制不能遺失。
+
+> **定義**：把 <M t="R" /> **分解**（decomposition）成 <M t="R_1, \ldots, R_n" />（每個都是 <M t="R" /> 的屬性子集合，聯集是 <M t="R" />）。如果對任何合法的資料，把各部分自然合併回去都**恰好**得到原本的資料，這個分解就是**無損合併分解**（lossless-join decomposition）。
+
+「有損」並不是資料變少，而是**多出原本沒有的值組**，讓人分不清哪些是真的，所以資訊損失了。
+
+**例**：把 Enroll(sid, cid, grade) 拆成 (sid, grade) 與 (cid, grade)。原本有 (S1, C1, 85)、(S1, C2, 90)、(S3, C1, 90)。
+
+- (sid, grade)：(S1, 85)、(S1, 90)、(S3, 90)
+- (cid, grade)：(C1, 85)、(C2, 90)、(C1, 90)
+
+用 grade 合併回去，除了原本的 3 列，還多出 (S1, C1, 90) 與 (S3, C2, 90)：兩個 90 分無法分辨誰是誰的。
+
+<Figure no="6-4" caption="有損分解：兩部分只靠 grade 連接，grade 不是任何一邊的鍵；合併回去時，兩個 90 分互相配對，多出 2 個原本不存在的值組（黑底）。">
+  <LossyJoin />
+</Figure>
+
+#### 無損的判斷（拆成兩個）
+
+> **定理**：把 <M t="R" /> 分解成 <M t="R_1" /> 與 <M t="R_2" /> 是無損的，若且唯若共同屬性 <M t="R_1 \cap R_2" /> 決定 <M t="R_1" /> 或決定 <M t="R_2" />，也就是 <M t="R_1 \cap R_2" /> 是其中一邊的超鍵。
+
+直覺：用共同屬性合併時，只要共同屬性在其中一邊是鍵，每一列最多只會配到那一邊的一列，就不會亂配。
+
+- 拆成 (sid, name, dname) 與 (dname, dphone)：共同屬性 dname，<M t="\text{dname} \rightarrow \text{dphone}" />，是第二部分的鍵，**無損**。
+- 拆成 (sid, grade) 與 (cid, grade)：共同屬性 grade，什麼都決定不了，**有損**。
+
+拆成三個以上時，可以一次拆兩個、逐步套用這個定理；如果分解不是這樣拆出來的，要用表格法（chase）判斷。
+
+#### 保持相依
+
+> **定義**：分解後，每個 <M t="R_i" /> 只能直接檢查「兩邊屬性都在 <M t="R_i" /> 裡」的函數相依（稱為 <M t="F" /> 在 <M t="R_i" /> 上的投影 <M t="F_i" />）。如果 <M t="F_1 \cup \cdots \cup F_n" /> 能推出 <M t="F" /> 的每一條，這個分解就**保持相依**（dependency preserving）。
+
+保持相依的意義是：每次修改資料，DBMS 只要在**單一表**內檢查限制就好，不必先把表合併回去。
+
+**判斷某一條 <M t="X \rightarrow Y" /> 有沒有被保持**：從 <M t="Z = X" /> 開始，對每個 <M t="R_i" /> 反覆做「<M t="Z" /> 加上 <M t="((Z \cap R_i)^+ \cap R_i)" />」（只在 <M t="R_i" /> 裡面推），直到 <M t="Z" /> 不再變大；最後 <M t="Y \subseteq Z" /> 就是保持了。這個方法不需要真的列出 <M t="F_i" />。
+
+**反例**：上一節的 R(student, course, teacher) 拆成 (teacher, course) 與 (student, teacher)。共同屬性 teacher 決定 course，所以是無損的；但 <M t="\text{student}, \text{course} \rightarrow \text{teacher}" /> 的三個屬性不在同一個表裡。從 <M t="Z = \{\text{student}, \text{course}\}" /> 出發：在 (teacher, course) 中只知道 course，推不出 teacher；在 (student, teacher) 中只知道 student，也推不出。所以這條**沒有被保持**：要檢查「同一位學生的同一門課只能有一位老師」，必須先把兩個表合併。
+
+#### BCNF 分解演算法
+
+1. 如果 <M t="R" /> 符合 BCNF，停止。
+2. 否則找一條違反的 <M t="X \rightarrow Y" />（<M t="X" /> 不是超鍵），把 <M t="R" /> 拆成 <M t="R_1 = X^+ \cap R" /> 與 <M t="R_2 = R - (X^+ - X)" />。
+3. 對 <M t="R_1" />、<M t="R_2" /> 分別重複。
+
+兩邊的共同屬性是 <M t="X" />，而 <M t="X" /> 決定 <M t="R_1" />，所以每一次拆分都是無損的。
+
+**例**：<M t="R(A, B, C, D)" />，<M t="F = \{ A \rightarrow B,\ B \rightarrow C \}" />，候選鍵是 <M t="AD" />。
+
+1. <M t="A \rightarrow B" /> 違反（<M t="A" /> 不是超鍵）。<M t="A^+ = ABC" />，拆成 <M t="R_1(A, B, C)" /> 與 <M t="R_2(A, D)" />。
+2. <M t="R_2(A, D)" /> 沒有非顯然的函數相依，符合 BCNF。
+3. <M t="R_1(A, B, C)" /> 的鍵是 <M t="A" />，<M t="B \rightarrow C" /> 違反。<M t="B^+ \cap R_1 = BC" />，拆成 <M t="(B, C)" /> 與 <M t="(A, B)" />。
+
+<Figure no="6-5" caption="BCNF 分解的過程：每次用一條違反的函數相依 X → Y，拆成 X⁺ 與剩下的部分（加上 X）。葉子 (A, D)、(B, C)、(A, B) 都符合 BCNF。">
+  <BcnfTree />
+</Figure>
+
+結果是 <M t="(A, D)" />、<M t="(B, C)" />、<M t="(A, B)" />。這個例子剛好也保持相依（<M t="A \rightarrow B" /> 在 <M t="(A, B)" />、<M t="B \rightarrow C" /> 在 <M t="(B, C)" />），但如 student-course-teacher 的例子所示，**BCNF 分解一定無損，卻不一定保持相依**。
+
+#### 3NF 合成演算法
+
+3NF 比 BCNF 寬鬆，換來的好處是：**一定可以找到同時無損又保持相依的 3NF 分解**。
+
+1. 求出 <M t="F" /> 的最小覆蓋 <M t="G" />。
+2. 把 <M t="G" /> 中左邊相同的函數相依合併，每一組 <M t="X \rightarrow A_1, \ldots, A_k" /> 建一個表 <M t="(X, A_1, \ldots, A_k)" />。
+3. 如果沒有任何一個表包含 <M t="R" /> 的某個候選鍵，再加一個只有候選鍵的表（這一步保證無損）。
+4. 如果某個表的屬性完全包含在另一個表裡，刪掉它。
+
+大表的函數相依已經是最小覆蓋（右邊拆開後），依左邊分組：
+
+- <M t="\text{sid} \rightarrow \text{name}, \text{dname}" />：(sid, name, dname)
+- <M t="\text{dname} \rightarrow \text{dphone}" />：(dname, dphone)
+- <M t="\text{cid} \rightarrow \text{title}" />：(cid, title)
+- <M t="\text{sid}, \text{cid} \rightarrow \text{grade}" />：(sid, cid, grade)，已經包含候選鍵 (sid, cid)，不用另外加。
+
+得到的正是前面一步一步正規化出來的四個表。
+
+| 方法 | 結果 | 無損 | 保持相依 |
+|---|---|---|---|
+| BCNF 分解 | 每個表都符合 BCNF | 一定 | 不一定 |
+| 3NF 合成 | 每個表都符合 3NF | 一定 | 一定 |
+
+### 多值相依與 4NF
+
+#### 符合 BCNF 還有重複
+
+課程 Course(cid, teacher, textbook) 記錄每門課有哪些老師、指定哪些課本。規則是：同一門課的每位老師都使用該課的所有課本，老師和課本互不相關。DB 有王、李兩位老師、兩本課本，就要存 <M t="2 \times 2 = 4" /> 列：
+
+| cid | teacher | textbook |
+|---|---|---|
+| DB | 王 | Elmasri |
+| DB | 王 | Silberschatz |
+| DB | 李 | Elmasri |
+| DB | 李 | Silberschatz |
+| OS | 陳 | Dinosaur |
+
+這個表沒有任何非顯然的函數相依（cid 決定不了某一位老師），唯一的候選鍵是全部三個屬性，所以**符合 BCNF**。但它明顯有重複：DB 再加一本課本，就要加兩列（每位老師各一列），漏加一列就出現「王老師用新課本、李老師沒用」的錯誤資料。
+
+#### 多值相依
+
+> **定義**：<M t="X \twoheadrightarrow Y" />（<M t="X" /> **多值決定** <M t="Y" />）是指：對於 <M t="X" /> 的每一個值，對應的一**組** <M t="Y" /> 值，和其餘屬性 <M t="Z = R - X - Y" /> 的值**互相獨立**。正式地說：若兩個值組 <M t="t_1" />、<M t="t_2" /> 在 <M t="X" /> 上相同，則一定存在值組 <M t="t_3" />，在 <M t="X" /> 上與它們相同、在 <M t="Y" /> 上與 <M t="t_1" /> 相同、在 <M t="Z" /> 上與 <M t="t_2" /> 相同。這稱為**多值相依**（multivalued dependency，MVD）。
+
+上表中 <M t="\text{cid} \twoheadrightarrow \text{teacher}" />：取 (DB, 李, Elmasri) 與 (DB, 王, Silberschatz)，cid 相同，那麼「李的老師 ＋ 王那一列的課本」的 (DB, 李, Silberschatz) 一定要在表中，確實在。如果把它刪掉，這條多值相依就不成立，表的意思變成「李老師不用 Silberschatz」。
+
+多值相依的幾個性質：
+
+- **每個函數相依都是多值相依**：<M t="X \rightarrow Y" /> 時，每個 <M t="X" /> 只對應一個 <M t="Y" />，一組只有一個值，自然獨立。
+- **互補律**：<M t="X \twoheadrightarrow Y" /> 成立，則 <M t="X \twoheadrightarrow R - X - Y" /> 也成立。所以 <M t="\text{cid} \twoheadrightarrow \text{textbook}" /> 也成立，常寫成 <M t="\text{cid} \twoheadrightarrow \text{teacher} \mid \text{textbook}" />。
+- <M t="Y \subseteq X" /> 或 <M t="X \cup Y = R" /> 時是**顯然的多值相依**。
+
+#### 第四正規化
+
+> **第四正規化（4NF）**：每一個非顯然的多值相依 <M t="X \twoheadrightarrow Y" /> 中，<M t="X" /> 都是超鍵。
+
+函數相依也是多值相依，所以符合 4NF 一定符合 BCNF。上表的 <M t="\text{cid} \twoheadrightarrow \text{teacher}" /> 非顯然，而 cid 不是超鍵，**不符合 4NF**。
+
+拆法和 BCNF 類似：用違反的 <M t="X \twoheadrightarrow Y" /> 把 <M t="R" /> 拆成 <M t="(X, Y)" /> 與 <M t="(X, R - X - Y)" />。分解成 <M t="R_1" />、<M t="R_2" /> 無損，若且唯若 <M t="R_1 \cap R_2 \twoheadrightarrow R_1 - R_2" />，所以這樣拆一定無損：
+
+- CourseTeacher(cid, teacher)：(DB, 王)、(DB, 李)、(OS, 陳)
+- CourseBook(cid, textbook)：(DB, Elmasri)、(DB, Silberschatz)、(OS, Dinosaur)
+
+<Figure no="6-6" caption="多值相依：DB 的 2 位老師與 2 本課本互相獨立，原表要存 2 × 2 = 4 列。拆成老師與課本兩個表後，各存 2 列；用 cid 合併回去恰好得到原本的 5 列。">
+  <MvdSplit />
+</Figure>
+
+再加一本課本只要在 CourseBook 加一列。
+
+#### 限制：還有 5NF
+
+有些表無法無損地拆成**兩個**，卻能無損地拆成**三個**，第 2 章的三元關係就是這種情況的反面例子。描述這種情況的是**合併相依**（join dependency），對應的是第五正規化（5NF）。實務上極少需要，考試通常只問到 4NF。
+
+### 常見陷阱
+
+- **函數相依的左邊不能拆**：<M t="AB \rightarrow C" /> 推不出 <M t="A \rightarrow C" />；右邊可以拆（分解律）。
+- **看一份資料只能否定函數相依**，不能證明它成立。
+- **只出現在右邊的屬性不會在候選鍵裡**，只出現在左邊的一定在每個候選鍵裡。
+- **3NF 與 BCNF 只差一個例外**：被決定的是主要屬性時，3NF 允許、BCNF 不允許。
+- **部分相依看的是「候選鍵的一部分」**，只有一個屬性的鍵不會有部分相依。
+- **BCNF 分解一定無損，但不一定保持相依**；3NF 合成兩者都保證。
+- **有損分解是多出值組**，不是少了值組。
+- **符合 BCNF 不代表沒有重複**：多值相依要用 4NF 處理。
+- **最小覆蓋不一定唯一**。
+
+### 專有名詞
+
+| 名詞 | 英文 | 說明 |
+|---|---|---|
+| 異常 | anomaly | 資料重複造成的更新、新增、刪除問題 |
+| 更新異常 | update anomaly | 同一個事實存多次，漏改就不一致 |
+| 新增異常 | insertion anomaly | 缺少其他資料就無法新增某個事實 |
+| 刪除異常 | deletion anomaly | 刪除一筆資料時連帶失去另一個事實 |
+| 正規化 | normalization | 依函數相依把表拆開，讓每個事實只存一次 |
+| 函數相依 | functional dependency，FD | X → Y：X 相同則 Y 一定相同 |
+| 決定因素 | determinant | 函數相依的左邊 |
+| 顯然函數相依 | trivial FD | 右邊包含在左邊裡，永遠成立 |
+| Armstrong 公理 | Armstrong's axioms | 自反、擴增、遞移三條推導規則 |
+| 屬性閉包 | attribute closure | <M t="X^+" />：X 能決定的所有屬性 |
+| 最小覆蓋 | minimal cover | 等價且沒有多餘的函數相依；又叫正則覆蓋 |
+| 主要屬性 | prime attribute | 屬於某個候選鍵的屬性 |
+| 非主要屬性 | nonprime attribute | 不屬於任何候選鍵的屬性 |
+| 正規化形式 | normal form，NF | 1NF、2NF、3NF、BCNF、4NF 等一層層的條件 |
+| 部分相依 | partial dependency | 非主要屬性只相依於候選鍵的一部分；違反 2NF |
+| 遞移相依 | transitive dependency | 鍵 → 非鍵屬性 → 非主要屬性；違反 3NF |
+| BCNF | Boyce-Codd normal form | 每個非顯然函數相依的左邊都是超鍵 |
+| 分解 | decomposition | 把關聯拆成幾個屬性子集合 |
+| 無損合併分解 | lossless-join decomposition | 合併回去恰好得到原本的資料 |
+| 保持相依 | dependency preserving | 只在各個表內就能檢查所有函數相依 |
+| 多值相依 | multivalued dependency，MVD | <M t="X \twoheadrightarrow Y" />：Y 的一組值與其餘屬性獨立 |
+| 4NF | fourth normal form | 每個非顯然多值相依的左邊都是超鍵 |
+| 合併相依 | join dependency | 能無損拆成多個部分的條件；對應 5NF |

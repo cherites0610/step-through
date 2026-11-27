@@ -1,0 +1,38 @@
+---
+subject: databases
+chapter: normalization
+order: 10
+kind: calc
+difficulty: 2
+---
+
+Club(sid, club, skill) 記錄學生參加的社團與他會的技能，社團與技能互不相關。目前資料：
+
+| sid | club | skill |
+|---|---|---|
+| S1 | 吉他社 | Python |
+| S1 | 吉他社 | 攝影 |
+| S1 | 登山社 | Python |
+
+(a) 如果 <M t="\text{sid} \twoheadrightarrow \text{club}" /> 要成立，表中還缺哪一列？
+
+(b) 補上之後，這個表符合 BCNF 嗎？符合 4NF 嗎？
+
+(c) 把它分解到 4NF。
+
+<Solution>
+
+**(a) (S1, 登山社, 攝影)。(b) 符合 BCNF，不符合 4NF。(c) (sid, club) 與 (sid, skill)。**
+
+**(a)** 多值相依要求：sid 相同的兩列，把其中一列的 club 和另一列的 skill 組合起來，也要在表中。取 (S1, 登山社, Python) 與 (S1, 吉他社, 攝影)，組合出 (S1, 登山社, 攝影)，表中沒有，所以要補上。補上後，S1 的 2 個社團與 2 項技能兩兩組合，共 <M t="2 \times 2 = 4" /> 列。
+
+**(b)** 沒有非顯然的函數相依（sid 決定不了某一個社團或技能），唯一的候選鍵是 (sid, club, skill)，所以符合 BCNF。但 <M t="\text{sid} \twoheadrightarrow \text{club}" /> 非顯然（club 不包含在 sid 裡，sid 加 club 也不是全部屬性），而 sid 不是超鍵，不符合 4NF。
+
+**(c)** 用 <M t="\text{sid} \twoheadrightarrow \text{club}" /> 拆成 (sid, club) 與 (sid, skill)：
+
+- (sid, club)：(S1, 吉他社)、(S1, 登山社)
+- (sid, skill)：(S1, Python)、(S1, 攝影)
+
+共同屬性 sid 多值決定 club，所以這個分解無損；用 sid 合併回去，恰好得到 (a) 補完後的 4 列。
+
+</Solution>
