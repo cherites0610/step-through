@@ -1,0 +1,42 @@
+---
+subject: databases
+chapter: sql
+order: 9
+kind: choice
+difficulty: 2
+---
+
+有下列兩個檢視表：
+
+```
+CREATE VIEW V1 AS
+    SELECT sid, name, dname FROM Student WHERE dname = '資管'
+    WITH CHECK OPTION;
+
+CREATE VIEW V2 AS
+    SELECT dname, COUNT(*) AS n FROM Student GROUP BY dname;
+```
+
+下列敘述哪些正確？（複選）
+
+(A) `UPDATE V2 SET n = 5 WHERE dname = '資管'` 可以執行
+
+(B) `INSERT INTO V1 VALUES ('S5', '張三', '資管')` 可以執行
+
+(C) `INSERT INTO V1 VALUES ('S6', '李四', '資工')` 會被拒絕
+
+(D) 在 Student 新增一位資管系學生後，查詢 V1 會看到他
+
+(E) V1 與 V2 都把查詢結果實際存在資料庫中
+
+<Solution>
+
+**答案：(B)、(C)、(D)。**
+
+- **(A) 錯。** V2 有 `GROUP BY` 與 `COUNT`，「把資管的人數改成 5」無法翻譯成對 Student 的修改（要新增誰？），不能更新。
+- **(B) 對。** V1 只有一個基底表、沒有聚合與 `DISTINCT`、包含主鍵 sid，可以更新；新增的列 dname 是資管，符合條件。
+- **(C) 對。** 新增的列 dname 是資工，不符合 V1 的條件。因為有 `WITH CHECK OPTION`，DBMS 拒絕這種新增後立刻從檢視表消失的修改。
+- **(D) 對。** 檢視表每次查詢時都會展開成對 Student 的查詢，基底表的變動立刻反映。
+- **(E) 錯。** 一般的檢視表只存定義，不存資料；實際存結果的是實體化檢視表。
+
+</Solution>

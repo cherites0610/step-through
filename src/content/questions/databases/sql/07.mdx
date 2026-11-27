@@ -1,0 +1,33 @@
+---
+subject: databases
+chapter: sql
+order: 7
+kind: choice
+difficulty: 2
+---
+
+下列哪些查詢會發生錯誤？（複選）
+
+(A) `SELECT sid, AVG(grade) FROM Enroll GROUP BY sid`
+
+(B) `SELECT sid, cid, AVG(grade) FROM Enroll GROUP BY sid`
+
+(C) `SELECT sid FROM Enroll WHERE AVG(grade) > 80 GROUP BY sid`
+
+(D) `SELECT sid, grade * 1.1 AS adj FROM Enroll WHERE adj > 90`
+
+(E) `SELECT sid, COUNT(*) FROM Enroll GROUP BY sid HAVING COUNT(*) >= 2`
+
+<Solution>
+
+**答案：(B)、(C)、(D)。**
+
+- **(A) 正確。** SELECT 裡只有分組欄位與聚合函數。
+- **(B) 錯誤。** cid 既不在 `GROUP BY`，也不是聚合函數。S1 這一組有 C1、C2、C3，不知道該輸出哪一個。
+- **(C) 錯誤。** 聚合函數不能出現在 `WHERE`：`WHERE` 在分組之前執行，還沒有「組」可以算平均。應改為 `HAVING AVG(grade) > 80`（並放在 `GROUP BY` 之後）。
+- **(D) 錯誤。** `WHERE` 在 `SELECT` 之前執行，那時還沒有 adj 這個別名。應寫成 `WHERE grade * 1.1 > 90`。
+- **(E) 正確。** 對組的條件寫在 `HAVING`。
+
+以上依 SQL 標準判斷。少數 DBMS（例如 SQLite、舊版 MySQL）比較寬鬆，(B)、(D) 不會報錯，但 (B) 輸出的 cid 是組內任意一列的值，沒有意義；考試以標準為準。
+
+</Solution>

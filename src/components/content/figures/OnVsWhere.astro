@@ -1,0 +1,37 @@
+---
+// 圖：外部合併時條件放在 ON（配對條件）與 WHERE（合併後篩選）的差別。
+import Table from './rel/Table.astro';
+
+type Row = (string | null)[];
+const students = ['S1', 'S2', 'S3', 'S4'];
+const enroll = [
+  ['S1', 'C1'],
+  ['S1', 'C2'],
+  ['S1', 'C3'],
+  ['S2', 'C1'],
+  ['S2', 'C2'],
+  ['S3', 'C1'],
+  ['S3', 'C2'],
+];
+const leftJoin = (match: (e: string[]) => boolean): Row[] =>
+  students.flatMap((s) => {
+    const m = enroll.filter((e) => e[0] === s && match(e));
+    return m.length ? m.map((e) => [s, e[1]]) : [[s, null]];
+  });
+const onRows = leftJoin((e) => e[1] === 'C3');
+const whereRows = leftJoin(() => true).filter((r) => r[1] === 'C3');
+const nullCells = (rows: Row[]) => rows.flatMap((r, i) => (r[1] === null ? [[i, 1] as [number, number]] : []));
+const colW = [48, 48], CELL = 20;
+const PW = 260, GAP = 20, W = PW * 2 + GAP, TOP = 40;
+const H = TOP + CELL * (Math.max(onRows.length, whereRows.length) + 1) + 8;
+---
+
+<svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`條件放在 ON：S1 配到 C3，S2、S3、S4 沒配到，以 NULL 保留，共 ${onRows.length} 列。條件放在 WHERE：先合併出 8 列再篩選，NULL 不等於 C3，只剩 S1 一列`}>
+  <text x="0" y="14">ON … AND e.cid = 'C3'</text>
+  <text x="0" y="32">配對條件：{onRows.length} 列</text>
+  <Table x={0} y={TOP} cols={['sid', 'cid']} rows={onRows} colW={colW} cellH={CELL} mark={nullCells(onRows)} />
+  <path class="axis" d={`M${PW + GAP / 2} 0 L${PW + GAP / 2} ${H}`} />
+  <text x={PW + GAP} y="14">WHERE e.cid = 'C3'</text>
+  <text x={PW + GAP} y="32">合併後篩選：{whereRows.length} 列</text>
+  <Table x={PW + GAP} y={TOP} cols={['sid', 'cid']} rows={whereRows} colW={colW} cellH={CELL} />
+</svg>

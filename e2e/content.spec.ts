@@ -52,13 +52,18 @@ for (const url of chapters) {
       expect(summary, JSON.stringify(summary, null, 2)).toEqual([]);
     });
 
-    test('手機：頁面不橫向溢出，圖不超過內容寬', async ({ browser }) => {
+    test('手機：頁面不橫向溢出，表格不超過內容欄', async ({ browser }) => {
       const ctx = await browser.newContext({ ...devices['iPhone 13'] });
       const page = await ctx.newPage();
       await page.goto(url);
       await page.waitForFunction(() => document.documentElement.dataset.scrollGuard !== 'on');
       await openAll(page);
       await noOverflow(page);
+      // 表格超出內容欄時會被裁掉（頁面本身不會溢出），要另外檢查
+      const wide = await page
+        .locator('main table')
+        .evaluateAll((ts) => ts.filter((t) => t.getBoundingClientRect().width > t.parentElement!.clientWidth + 1).map((t) => t.textContent!.trim().slice(0, 30)));
+      expect(wide, '手機上比內容欄寬的表格').toEqual([]);
       await ctx.close();
     });
   });

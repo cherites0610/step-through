@@ -1,0 +1,34 @@
+---
+subject: databases
+chapter: sql
+order: 8
+kind: calc
+difficulty: 2
+---
+
+本題使用觀念說明的資料：Student(sid, name, dname)、Course(cid, title, credits)、Enroll(sid, cid, grade)，其中 Enroll 有 7 列，(S2, C1) 的 grade 是 NULL。
+
+下列兩個查詢各回傳幾列？列出結果並說明差別。
+
+```
+-- 查詢一
+SELECT s.sid, e.grade
+FROM   Student s LEFT JOIN Enroll e ON s.sid = e.sid AND e.grade >= 90;
+
+-- 查詢二
+SELECT s.sid, e.grade
+FROM   Student s LEFT JOIN Enroll e ON s.sid = e.sid
+WHERE  e.grade >= 90;
+```
+
+<Solution>
+
+**查詢一 4 列：(S1, 90)、(S2, NULL)、(S3, 95)、(S4, NULL)。查詢二 2 列：(S1, 90)、(S3, 95)。**
+
+**查詢一**：`e.grade >= 90` 是配對條件。每位學生只和自己 90 分以上的選課配對：S1 配到 C2（90），S3 配到 C2（95）；S2 沒有 90 分以上的選課、S4 沒有選課，因為是左外部合併，仍以 NULL 保留。
+
+**查詢二**：先做完整的左外部合併（8 列），再用 `WHERE` 篩選。S2、S4 那些成績是 NULL 或低於 90 的列都被丟掉（NULL 和 90 比較是 UNKNOWN），只剩 2 列，和內部合併的結果一樣。
+
+想保留所有學生，就要把限制右邊表的條件寫在 `ON`。
+
+</Solution>

@@ -1,0 +1,51 @@
+---
+subject: databases
+chapter: sql
+order: 12
+kind: calc
+difficulty: 3
+---
+
+Student 有 S1～S4 四位學生。Probation(sid) 記錄被留校察看的學生，目前有兩列：('S1') 與 (NULL)（有一筆資料漏填了學號）。
+
+(a) 下列查詢回傳什麼？為什麼？
+
+```
+SELECT name FROM Student
+WHERE  sid NOT IN (SELECT sid FROM Probation);
+```
+
+(b) 改用 `NOT EXISTS` 寫出「沒有被留校察看的學生」，結果是什麼？
+
+(c) 不改用 `NOT EXISTS`，要怎麼修改 (a) 才會得到正確結果？
+
+<Solution>
+
+**(a) 一列都沒有。(b) S2、S3、S4 三位的姓名。(c) 在子查詢加上 `WHERE sid IS NOT NULL`。**
+
+**(a)** `sid NOT IN ('S1', NULL)` 等於 `sid <> 'S1' AND sid <> NULL`。
+
+- 對 S1：`'S1' <> 'S1'` 是 FALSE，整個 AND 是 FALSE。
+- 對 S2：`'S2' <> 'S1'` 是 TRUE，但 `'S2' <> NULL` 是 UNKNOWN，TRUE AND UNKNOWN 是 UNKNOWN。S3、S4 也一樣。
+
+沒有任何一列是 TRUE，`WHERE` 全部丟掉，結果是空的。
+
+**(b)**
+
+```
+SELECT name FROM Student s
+WHERE  NOT EXISTS (SELECT * FROM Probation p WHERE p.sid = s.sid);
+```
+
+對 S2，子查詢裡 `p.sid = 'S2'` 對 ('S1') 是 FALSE、對 (NULL) 是 UNKNOWN，都不是 TRUE，所以子查詢沒有回傳任何列，`NOT EXISTS` 是 TRUE。結果是李美華、陳志強、林大同。`EXISTS` 只問「有沒有列」，不會把 UNKNOWN 傳到外層。
+
+**(c)**
+
+```
+SELECT name FROM Student
+WHERE  sid NOT IN (SELECT sid FROM Probation WHERE sid IS NOT NULL);
+```
+
+子查詢只回傳 S1，`NOT IN ('S1')` 就正常了。
+
+</Solution>
